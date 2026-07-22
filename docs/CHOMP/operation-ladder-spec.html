@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>operation ladder spec — CHOMP</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
+<main><h1 id="operation-ladder-product-spec-roadmap">Operation Ladder — Product Spec &amp; Roadmap</h1>
+<p><em>v1.0 · 2026-07-16 · owner: willhoop</em></p>
+<h2 id="problem">Problem</h2>
+<p>Will plays ranked Pokémon Champions VGC (Reg M-B) and wants to climb. Fifty-four logged games show the two levers that actually move rating: eliminating repeated execution errors (8 of 23 losses are classified preventable), and avoiding bad team-vs-archetype matchups before queueing. Existing tooling (Pikalytics, damage calcs) covers neither.</p>
+<h2 id="product">Product</h2>
+<p>A three-part system, all local and offline-capable:</p>
+<ol>
+<li><strong>Operation Ladder app</strong> (<code>operation-ladder</code> artifact) — matchup engine v6 with a verified 39-form mega database, GIGO-gated paste analysis, hill-climb team optimizer, animated battle theater, threat DB that grows with every game.</li>
+<li><strong>Ladder Analytics dashboard</strong> (<code>ladder-analytics</code> artifact) — the evidence layer: rating curve, per-team records, auto-classified loss causes, rolling win rate.</li>
+<li><strong>VGC Coach plugin</strong> (<code>vgc-coach.plugin</code>) — the protocol layer: live-call format, replay post-mortems, banned-clicks audit, so every session starts warm.</li>
+</ol>
+<h2 id="goals">Goals</h2>
+<ul>
+<li>Cut preventable (execution) losses from ~35% of all losses toward 0 — this is the headline metric.</li>
+<li>Never queue a &lt;10% archetype matchup blind: every LIVE call answered from the cheat card in one line.</li>
+<li>Grow the enemy-team database every session; engine scores stay honest (guidance, not win predictions — game-level validation showed r ≈ 0, and that finding stays published in THE LAB).</li>
+</ul>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li>Simulating true battle outcomes (Champions engine is closed; the model is a coverage linter, not an oracle).</li>
+<li>Win-probability claims before ~190 prospective games.</li>
+<li>Any automation that plays the game for the pilot.</li>
+</ul>
+<h2 id="success-metrics">Success metrics</h2>
+<ul>
+<li>Banned-click recurrences per 10 games (target: 0; current run-rate ~1.5).</li>
+<li>Rating trend over next 50 games (target: net positive; currently 1132, −24 lifetime).</li>
+<li>Team keep/park decisions made on ≥10-game samples only.</li>
+</ul>
+<h2 id="roadmap">Roadmap</h2>
+<p><strong>Now</strong>
+- Log every game through replay-review; dashboard refresh per session.
+- Retire Pivot Regen (1–4, park per rule); Lure C (3–0) gets the next 10-game block.</p>
+<p><strong>Next</strong>
+- Engine v7: Electric Terrain + Rising Voltage layer; refreshed speed-tier card from verified mega speeds; Sash-vs-spread modeling.
+- Dashboard: enemy-archetype dimension once 20+ games carry archetype tags at log time (stop inferring from notes).</p>
+<p><strong>Later</strong>
+- Prospective validation rerun at n≥100 fresh games (Platt-scaled scores if signal appears).
+- Optimizer outputs auto-queued as 10-game ladder hypotheses with accept/reject tracked in the dashboard.</p>
+<h2 id="build-backlog-added-2026-07-17-ranked-by-expected-rating-gained">Build backlog (added 2026-07-17, ranked by expected rating gained)</h2>
+<ol>
+<li><strong>Turn-one drill trainer</strong> — flash a random enemy six from the 45-team DB, 20s timer to click bring-4 + lead, grade vs the cheat card, track accuracy over time. The only build that trains the <em>pilot</em>, and execution errors are the largest documented loss cause (8+ of 24 losses). Highest priority.</li>
+<li><strong>Replay auto-ingest</strong> — app fetches a pasted replay .log itself, extracts enemy six + result + rating, appends to DB and dashboard in one click. Removes Claude as the data bottleneck; the project grows unattended.</li>
+<li><strong>Real damage math</strong> — wire the @smogon/calc engine (already bundled in HoopaDex) into the matchup scorer so scores use actual damage rolls vs verified Champions SP stats, not type-effectiveness proxies. The upgrade most likely to make game-level scores predictive.</li>
+<li><strong>Verdict tracker</strong> — log engine score vs actual result every new game; the Lab tab shows running correlation. At ~100 fresh games, an evidence-based verdict on whether the engine predicts outcomes.</li>
+</ol>
+<h2 id="risks">Risks</h2>
+<ul>
+<li>Small samples keep lying: 3–0 Lure C is noise until ~10 games. The 30-game rule is the guardrail.</li>
+<li>Note-keyword loss classification is a heuristic; tag causes at log time going forward.</li>
+</ul></main></body></html>
