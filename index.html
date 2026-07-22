@@ -139,6 +139,11 @@
    link switches over, e.g.
    const GITHUB = "https://github.com/willhoop/projects/blob/main/";
    ───────────────────────────────────────────────────────────── */
+/* Left empty on purpose. The `src` paths below assume a single monorepo
+   (Pokemon/CHOMP/docs/...), but each project now lives in its own repository,
+   so no single base URL can resolve them. The `local` paths point at the
+   rendered HTML copies in docs/, which ship with this site and always work.
+   To switch a single project to its source repo, use a full URL in its links. */
 const GITHUB = "";                     // "" = use local rendered docs
 const doc = (p) => GITHUB ? GITHUB + p.src : p.local;
 
