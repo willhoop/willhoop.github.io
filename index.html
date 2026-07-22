@@ -50,7 +50,6 @@
           text-transform:uppercase;color:var(--mute);margin:7px 0 0}
   .status.on{color:var(--accent)}
   .desc{margin:11px 0 0;font-size:14px;color:#b3b0a8;max-width:56ch}
-  .note{margin:9px 0 0;font-size:12.5px;color:var(--mute);max-width:56ch}
 
   /* fixed link column — one per line, so spacing is identical on every row */
   .links{display:flex;flex-direction:column;gap:7px;position:relative;z-index:1}
@@ -163,7 +162,6 @@ const PROJECTS = [
     name: "CHOMP",
     status: "In daily use", live: true,
     desc: "A decision engine for competitive Pokémon. At team preview you have about 30 seconds to choose four of six Pokémon and which two to lead. CHOMP runs the game's real damage mathematics across every matchup and answers in under 50 milliseconds, in the browser.",
-    note: "",
     docs: {
       open:   "apps/chomp-replay-app.html",
       paper:  doc({local:"docs/CHOMP/CHOMP-whitepaper.html", src:"Pokemon/CHOMP/docs/CHOMP-whitepaper.md"}),
@@ -176,7 +174,6 @@ const PROJECTS = [
     name: "Event Desks",
     status: "Live at elitefourcapital.com", live: true,
     desc: "Prices event contracts on Polymarket and Kalshi and shows where the market looks overconfident. It ranks a candidate field by conversion — the presidency price divided by the nomination price — which reads as the market's odds a candidate wins once nominated.",
-    note: "The house pick is computed from live prices, so no candidate name is written into the code.",
     docs: {
       open:   "https://elitefourcapital.com",
       paper:  EVENTDESK + "docs/white-paper.md",
@@ -189,7 +186,6 @@ const PROJECTS = [
     name: "HoopaDex",
     status: "Live — v1.93", live: true,
     desc: "A complete Pokédex in a single HTML file — no build step, no server, no dependencies. It renders the type chart, base stats, typings and evolution lines as they were in the generation you select. Steel resisted Ghost and Dark before generation 6; Fairy did not exist.",
-    note: "Opens in Champions mode on the newest regulation.",
     docs: {
       open:   "https://willhoop.github.io/hoopadex/",
       /* No rendered HTML copy exists for these two, so they link at the source
@@ -208,7 +204,6 @@ document.getElementById('rows').innerHTML = PROJECTS.map(p => `
       <h3 class="name"><a href="${p.docs.open}" target="_blank" rel="noopener">${p.name}</a></h3>
       <p class="status${p.live ? ' on' : ''}">${p.status}</p>
       <p class="desc">${p.desc}</p>
-      ${p.note ? `<p class="note">${p.note}</p>` : ''}
     </div>
     <div class="links">${SLOTS.map(k => p.docs[k]
       ? `<a href="${p.docs[k]}" target="_blank" rel="noopener">${LABEL[k]}</a>`
