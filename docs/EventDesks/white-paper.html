@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>white paper — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="pricing-the-gap-between-two-prediction-markets">Pricing the Gap Between Two Prediction Markets</h1>
+<h3 id="a-technical-description-of-the-event-desks-engine">A technical description of the Event Desks engine</h3>
+<p><strong>Version 1.0.1 · Last updated 2026-07-22</strong>
+<strong>Elite Four Capital · https://elitefourcapital.com</strong></p>
+<blockquote>
+<p>This is a living document. It is updated in the same pass as any change to the code.
+New information is appended. A prior conclusion is not silently rewritten; what changed
+and why is recorded in <a href="../CHANGELOG.md"><code>CHANGELOG.md</code></a>.</p>
+</blockquote>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>Event Desks prices event contracts on Polymarket and Kalshi. This paper describes the
+mathematics the site runs: the venue fee model, the cross-venue arbitrage condition, the
+"wedge" spread, the conversion ratio that ranks a candidate field, and the bet-sizing
+rule. Each formula is stated, derived where non-obvious, and pinned to a unit test. The
+paper also records the model's limits and the failures found during development.</p>
+<hr />
+<h2 id="1-the-instrument">1. The instrument</h2>
+<p>An event contract pays $1 if a stated event occurs, and $0 otherwise. The price is
+therefore an implied probability, subject to fees and to the cost of capital.</p>
+<p>Write <strong>p</strong> for the price of a YES contract, in dollars, <code>0 &lt; p &lt; 1</code>.</p>
+<p>Both venues studied here run binary contracts on a <code>linear_cent</code> tick, so the minimum
+price movement is $0.01.</p>
+<hr />
+<h2 id="2-venue-fees">2. Venue fees</h2>
+<p>Both venues charge the taker. Both use a fee that is proportional to <code>p(1 − p)</code>. The
+function is largest at <code>p = 0.5</code> and vanishes at both boundaries.</p>
+<p>Let <code>k</code> be the venue coefficient.</p>
+<p><strong>Fee per contract:</strong></p>
+<pre><code>f(p) = k · p · (1 − p)
+</code></pre>
+<p><strong>All-in cost of one YES contract:</strong></p>
+<pre><code>C(p) = p + k · p · (1 − p)                                     (1)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Venue</th>
+<th>k</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Polymarket</td>
+<td>0.04</td>
+</tr>
+<tr>
+<td>Kalshi</td>
+<td>0.07</td>
+</tr>
+</tbody>
+</table>
+<p>The coefficients live in <code>VENUE_ECON</code> in <code>engine/config.ts</code>.</p>
+<p><strong>Why the fee vanishes at the boundaries.</strong> A contract at 1c or 99c is nearly settled. The
+venue takes little risk and the spread is tight, so a proportional fee would over-charge
+a near-certain trade. The <code>p(1 − p)</code> form makes the fee track the uncertainty.</p>
+<p><strong>Worked value.</strong> At <code>p = 0.5</code> on Polymarket:</p>
+<pre><code>C(0.5) = 0.5 + 0.04 × 0.5 × 0.5 = 0.51
+</code></pre>
+<p>Kalshi credits interest on posted collateral at an annual rate of 3.25%. Over a hold of
+<code>m</code> months this returns <code>p · 0.0325 · m/12</code> per contract, which offsets part of the fee.
+Polymarket pays no interest and carries an estimated 5% conversion and withdrawal drag.
+Both figures are in <code>VENUE_ECON</code>.</p>
+<p><em>Sources: Kalshi fee schedule and contract terms, series <code>KXPRESNOMD</code> / <code>KXPRESPERSON</code>;
+Polymarket market objects (<code>feeSchedule</code>: <code>rate: 0.05</code>, <code>takerOnly: true</code> on sports
+markets; <code>rate: 0.04</code> on politics markets), read from the Gamma API 2026-07-20.</em></p>
+<hr />
+<h2 id="3-the-cross-venue-lock">3. The cross-venue lock</h2>
+<h3 id="31-the-condition">3.1 The condition</h3>
+<p>The same event trades on both venues. Suppose Polymarket quotes YES at <code>a</code> and Kalshi
+quotes YES at <code>b</code>, both in cents, with <code>a &lt; b</code>.</p>
+<p>Buy YES on the cheaper venue. Buy NO on the dearer venue. NO costs <code>100 − b</code>. Exactly one
+leg settles at 100.</p>
+<p><strong>Cost per matched pair, in cents:</strong></p>
+<pre><code>K = a + (100 − b) + f_yes + f_no                                (2)
+</code></pre>
+<p>where the fee terms are equation (1) applied to each leg on its own venue.</p>
+<p><strong>Locked profit per pair:</strong></p>
+<pre><code>L = 100 − K                                                     (3)
+</code></pre>
+<p>The trade is an arbitrage when <code>L &gt; 0</code>.</p>
+<h3 id="32-why-the-gross-gap-is-not-the-profit">3.2 Why the gross gap is not the profit</h3>
+<p>Both fees are charged on entry. The naive gap <code>b − a</code> overstates the edge by
+<code>f_yes + f_no</code>. Because the fee peaks at 50c, a mid-priced market can consume a gap of
+several cents entirely.</p>
+<h3 id="33-the-time-value">3.3 The time value</h3>
+<p>The capital is locked until settlement. For a stake <code>S</code> held <code>m</code> months at tax rate <code>t</code>:</p>
+<pre><code>pairs      = S / (K/100)
+profit     = pairs · (L/100)
+after-tax  = profit · (1 − t)
+annualised = (1 + after-tax/S)^(12/m) − 1                        (4)
+</code></pre>
+<p><strong>The decision rule.</strong> Compare (4) against the after-tax risk-free rate:</p>
+<pre><code>take the trade  ⟺  annualised &gt; TBILL · (1 − t)                  (5)
+</code></pre>
+<p><code>TBILL = 0.043</code>, in <code>engine/config.ts</code>.</p>
+<p><strong>A worked case, from the live book on 2026-07-20.</strong> Ossoff presidency: Polymarket 8.1c,
+Kalshi 10.0c, stake $1,000, 28 months to settlement, 24% tax.</p>
+<p>The trade locks a real profit, but it annualises to <strong>0.3% a year after tax</strong>, against
+<strong>3.3%</strong> for a Treasury bill on the same money. The gap exists and is not worth taking.
+The site prints this verdict as "Real lock, cash still wins."</p>
+<p>This is the paper's central practical point: <strong>a positive <code>L</code> is not a reason to trade.</strong>
+Most cross-venue gaps on long-dated contracts are a worse use of capital than cash.</p>
+<hr />
+<h2 id="4-the-wedge">4. The wedge</h2>
+<h3 id="41-construction">4.1 Construction</h3>
+<p>For a candidate with a nomination price <code>n</code> and a presidency price <code>s</code>, both in dollars:</p>
+<ul>
+<li>Long one nomination YES contract, cost <code>n</code>.</li>
+<li>Long one presidency NO contract, cost <code>1 − s</code>.</li>
+</ul>
+<p><strong>Cost of the pair:</strong></p>
+<pre><code>W = n + (1 − s)                                                  (6)
+</code></pre>
+<p><strong>Capital at risk:</strong></p>
+<pre><code>R = max(0, W − 1)                                                (7)
+</code></pre>
+<p><strong>Payout multiple on the risked capital:</strong></p>
+<pre><code>M = (1 − R) / R                                                  (8)
+</code></pre>
+<h3 id="42-the-payoff">4.2 The payoff</h3>
+<table>
+<thead>
+<tr>
+<th>World</th>
+<th>Nomination leg</th>
+<th>Presidency NO leg</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not nominated</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Nominated, loses</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Nominated, wins</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>The pair returns 1 in two of three worlds and 2 in the third. Paying <code>W ≈ 1</code> for it means
+the entire cost is a bet on the middle row: <strong>nominated, then beaten.</strong></p>
+<h3 id="43-direction-a-result-that-inverts-naive-intuition">4.3 Direction — a result that inverts naive intuition</h3>
+<p>From (6) and (7):</p>
+<pre><code>∂R/∂s = −1        ∂R/∂n = +1
+</code></pre>
+<p><strong>A higher presidency price makes the wedge cheaper.</strong> The short leg is the presidency NO;
+a dearer YES is a cheaper NO. A higher nomination price makes it dearer.</p>
+<p>This inverts the naive reading and was initially asserted backwards during development.
+The unit test in <code>tests/pricing.test.ts</code> now pins the true direction.</p>
+<p><strong>Worked value.</strong> <code>n = 0.15</code>, <code>s = 0.10</code>:</p>
+<pre><code>W = 0.15 + 0.90 = 1.05
+R = 0.05
+M = 0.95 / 0.05 = 19×
+</code></pre>
+<p>$100 at risk returns about $1,900 in the nominated-but-loses world.</p>
+<hr />
+<h2 id="5-the-conversion-ratio">5. The conversion ratio</h2>
+<h3 id="51-definition">5.1 Definition</h3>
+<pre><code>c = s / n                                                        (9)
+</code></pre>
+<p>Under the market's own measure, <code>s = P(nominated ∧ wins)</code> and <code>n = P(nominated)</code>. Since
+winning without the nomination is impossible, the events nest, and (9) is the conditional
+probability:</p>
+<pre><code>c = P(wins | nominated)                                          (10)
+</code></pre>
+<p>The nomination cancels. What remains is a clean read on the general election alone.</p>
+<h3 id="52-why-a-high-c-is-a-sell">5.2 Why a high <code>c</code> is a sell</h3>
+<p>A high <code>c</code> means the market is confident about a general election more than two years
+away, with no nominee in either party and no meaningful head-to-head polling. That
+confidence is what the wedge sells.</p>
+<p>Ranking the field by <code>c</code> therefore surfaces the most confident claim on the board. The
+site names it the house pick. <strong>No candidate is written into the code</strong>; the pick is
+recomputed from live prices, so it moves when the money moves.</p>
+<h3 id="53-liquidity-floors-a-necessary-correction">5.3 Liquidity floors — a necessary correction</h3>
+<p>Equation (9) amplifies noise when <code>n</code> is small. With a one-cent tick, a runner quoted 4c/3c
+reads <code>c = 0.75</code>, but a single tick on the numerator moves the headline across
+{50%, 75%, 100%}. The ratio measures the tick, not the market.</p>
+<p>A runner must clear both floors to be eligible for the pick or the median:</p>
+<pre><code>n ≥ 0.08        s ≥ 0.04                                        (11)
+</code></pre>
+<p>Runners below the floors are displayed and labelled THIN, greyed rather than hidden.</p>
+<p><strong>Effect on the live board (2026-07-20).</strong> Before the floors, the engine named Beshear
+(4c/3c, <code>c = 0.75</code>) the pick. After, it named Ossoff (15c/10c, <code>c = 0.67</code>). The field
+median moved 62% → 61%.</p>
+<h3 id="54-the-yardstick">5.4 The yardstick</h3>
+<p><code>c</code> alone is not interpretable. The site compares it against the median <code>c</code> of the liquid
+board, recomputed from today's prices. "High" means high against this market, not against
+a chosen constant.</p>
+<p>A ratio above 1.6 is treated as a quoting error, not a signal: winning without the
+nomination is impossible, so <code>c &gt; 1</code> is incoherent.</p>
+<hr />
+<h2 id="6-bet-sizing">6. Bet sizing</h2>
+<p>The Kelly criterion gives the growth-optimal fraction of a bankroll. For a binary contract
+at price <code>q</code> with subjective probability <code>p</code>:</p>
+<pre><code>kelly = (p − q) / (1 − q)                                       (12)
+</code></pre>
+<p>We stake a quarter of it:</p>
+<pre><code>stake fraction = max(0, kelly) × 0.25                            (13)
+</code></pre>
+<p><strong>Why a fraction.</strong> Kelly assumes <code>p</code> is known. Here <code>p</code> is an estimate. The Kelly growth
+curve is asymmetric: overbetting past the optimum destroys capital far faster than
+underbetting forfeits growth, and a Kelly bet on an overestimated <code>p</code> is an overbet.
+Fractional Kelly retains most of the growth at a large reduction in variance and is robust
+to an estimation error.</p>
+<p><em>Sources: Kelly (1956), "A New Interpretation of Information Rate," Bell System Technical
+Journal 35(4), 917–926. Thorp (2006), "The Kelly Criterion in Blackjack, Sports Betting,
+and the Stock Market," Handbook of Asset and Liability Management Vol. 1. MacLean, Thorp
+&amp; Ziemba (2011), The Kelly Capital Growth Investment Criterion.</em></p>
+<hr />
+<h2 id="7-the-electoral-model">7. The electoral model</h2>
+<p>The map is <strong>not a forecast.</strong> The baseline is the 2024 result by state. A single national
+swing parameter shifts every margin:</p>
+<pre><code>margin_i(swing) = margin_i(2024) + swing                        (14)
+</code></pre>
+<p>The simulation draws 20,000 elections. Each state gets an independent normal shock:</p>
+<pre><code>m_i = margin_i(2024) + swing + N(0, σ²)                         (15)
+</code></pre>
+<p>with <code>σ = 4</code> margin points by default. A state is won by the party with <code>m_i &gt; 0</code>;
+electoral votes are summed and compared against 270.</p>
+<p><strong>The limits, stated plainly:</strong></p>
+<ol>
+<li><strong>This is not 2028 polling.</strong> No general-election polling for 2028 exists in the
+   dataset. The poll data on the site is <em>Democratic primary</em> polling — nomination share,
+   not head-to-head.</li>
+<li><strong>The shocks are independent.</strong> Real state errors are strongly correlated; a national
+   polling miss moves every state together. Independent shocks therefore understate the
+   variance of the electoral-vote total. The single <code>swing</code> parameter is a crude proxy for
+   the correlated component.</li>
+<li><strong>At rest the map reproduces 2024.</strong> R 287 + 25 toss-up = 312, which is the 2024
+   result with Wisconsin (−0.9) and Michigan (−1.4) inside the toss-up band.</li>
+</ol>
+<p>The correct reading is: <em>"if 2028 resembles 2024, adjusted by my assumptions."</em></p>
+<p><strong>Interface note (v1.0.1).</strong> The desk previously carried a "2028 · LIVE" label, which
+invited the reader to treat the electoral-vote total as a projection. The label was wrong;
+the model was not. The desk now reads "2024 baseline, your assumptions" and prints the
+caveat directly beneath the electoral-vote bar.</p>
+<hr />
+<h2 id="8-data-sources-and-freshness">8. Data sources and freshness</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Method</th>
+<th>True latency</th>
+<th>Live?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Polymarket prices</td>
+<td>Browser fetch, Gamma API</td>
+<td>Seconds</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Polymarket history</td>
+<td>Browser fetch, CLOB API</td>
+<td>Seconds</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Kalshi board</td>
+<td>GitHub Action → <code>kalshi.json</code></td>
+<td>1–2 hours</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Poll dataset</td>
+<td>GitHub Action → <code>polls.json</code></td>
+<td>Daily</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cap-space figures</td>
+<td>Manual snapshot, <code>data/lebron.ts</code></td>
+<td>Static</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p><strong>On Kalshi latency.</strong> The cron requests 10 minutes. GitHub delays scheduled workflows on
+low-activity repositories; observed run times on 2026-07-20 were 13:04, 15:05, 16:39,
+17:49 — a true interval of 1–2 hours. The site therefore reports the true age and sets its
+"live" threshold at 90 minutes. It does not claim minute-level freshness.</p>
+<p>The fix is a Cloudflare Pages Function at <code>functions/kalshi.json.js</code> that fetches on each
+request. Not yet implemented.</p>
+<p><em>Sources: GitHub Actions documentation, "Events that trigger workflows — schedule."
+Observed run history, <code>willhoop/event-desk</code>, runs 44–47.</em></p>
+<hr />
+<h2 id="9-the-sports-desk">9. The sports desk</h2>
+<p>The LeBron James free-agency board applies the same machinery to a one-dimensional field.
+There is no conversion ratio here — there is only one question — so the desk ranks by
+price and surfaces <strong>movement</strong>, which is where the information sits.</p>
+<p><strong>The overround.</strong> The sum of all outcome prices exceeds 1. On 2026-07-20 the Kalshi board
+summed to 123c across 30 outcomes; Polymarket's was tighter. The excess over 100c is the
+book's edge and must be subtracted before any outcome is called "cheap."</p>
+<p><strong>The cap-space thesis.</strong> Reported first-apron room, not narrative, explains the favourite:</p>
+<table>
+<thead>
+<tr>
+<th>Team</th>
+<th>Can pay</th>
+<th>Market (2026-07-20)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Miami</td>
+<td>~$7.0m</td>
+<td>46–49c</td>
+</tr>
+<tr>
+<td>Cleveland</td>
+<td>$3.9m, or $6.1m conditional</td>
+<td>24–26c</td>
+</tr>
+<tr>
+<td>Philadelphia</td>
+<td>$3.9m</td>
+<td>14c</td>
+</tr>
+<tr>
+<td>Golden State</td>
+<td>$3.9m, or ~$6m conditional</td>
+<td>9.5–12c</td>
+</tr>
+<tr>
+<td>Denver</td>
+<td>$3.9m</td>
+<td>0.8c</td>
+</tr>
+<tr>
+<td>Minnesota</td>
+<td>$3.9m</td>
+<td>1.4c</td>
+</tr>
+</tbody>
+</table>
+<p>Miami is the only finalist able to meaningfully outbid the field. The desk computes
+whether the favourite is also the highest bidder and states the verdict either way.</p>
+<p><strong>A data-integrity note.</strong> An early parse of the Polymarket payload was truncated and
+produced a fabricated 80.5c for the Lakers. The correct value is 0.3c — James informed the
+Lakers on 2026-06-30 that he would play elsewhere, and the Lakers bucket doubles as the
+no-move default, so 0.3c means the market is ~99.7% certain he signs somewhere new. The
+error was caught by re-reading the raw API rather than trusting the truncated file. Note
+also that Polymarket's own AI summary on that event is stale (last regenerated
+2026-06-18) and still asserts a 79.5% Lakers consensus; it is wrong by 79 points.</p>
+<p><em>Sources: Marks, B. &amp; Windhorst, B., "LeBron James' free agency market: What six teams can
+offer him," ESPN, 2026-07-10. ESPN, "LeBron James informs Lakers he plans to play
+elsewhere in 2026-27," 2026-06-30. Kalshi event <code>KXNEXTTEAMNBA-26LJAM</code>. Polymarket event
+<code>nba-lebron-james-next-team</code>.</em></p>
+<hr />
+<h2 id="10-verification">10. Verification</h2>
+<p>42 unit tests cover the engine. Each expected value is derived by hand, not captured from
+current output.</p>
+<table>
+<thead>
+<tr>
+<th>Suite</th>
+<th>Tests</th>
+<th>Covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tests/pricing.test.ts</code></td>
+<td>20</td>
+<td>Fees, wedge, lock, Kelly</td>
+</tr>
+<tr>
+<td><code>tests/field.test.ts</code></td>
+<td>22</td>
+<td>Conversion, thin-market guard, pick, median</td>
+</tr>
+</tbody>
+</table>
+<p>Run them with <code>npm test</code>.</p>
+<p>The thin-market regression (§5.3) and the wedge direction (§4.3) are both pinned, because
+both were wrong at some point in development.</p>
+<hr />
+<h2 id="11-known-limitations">11. Known limitations</h2>
+<ol>
+<li>Independent state shocks understate correlated polling error (§7).</li>
+<li>The electoral baseline is 2024, not 2028 polling (§7).</li>
+<li>Kalshi prices lag 1–2 hours (§8).</li>
+<li>Cap-space figures are a manual snapshot and will go stale (§8).</li>
+<li>Fee models are simplified; real books have depth, and a large order moves the price.</li>
+<li>The lock assumes both legs fill at the quoted price. It does not model slippage.</li>
+<li>Correlation between multiple simultaneous bets is not modelled. A multi-bet correlation
+   sizer is open work.</li>
+</ol>
+<hr />
+<h2 id="12-references">12. References</h2>
+<ol>
+<li>Kelly, J. L. (1956). "A New Interpretation of Information Rate." <em>Bell System Technical
+   Journal</em> 35(4), 917–926.</li>
+<li>Thorp, E. O. (2006). "The Kelly Criterion in Blackjack, Sports Betting, and the Stock
+   Market." <em>Handbook of Asset and Liability Management</em>, Vol. 1.</li>
+<li>MacLean, L. C., Thorp, E. O. &amp; Ziemba, W. T. (2011). <em>The Kelly Capital Growth
+   Investment Criterion</em>. World Scientific.</li>
+<li>Kalshi. Contract terms, series <code>KXPRESNOMD</code>, <code>KXPRESNOMR</code>, <code>KXPRESPERSON</code>,
+   <code>KXNEXTTEAMNBA</code>. https://kalshi.com</li>
+<li>Polymarket Gamma API. Event objects <code>presidential-election-winner-2028</code>,
+   <code>nba-lebron-james-next-team</code>. https://gamma-api.polymarket.com</li>
+<li>Marks, B. &amp; Windhorst, B. (2026-07-10). "LeBron James' free agency market: What six
+   teams can offer him." ESPN.
+   https://www.espn.com/nba/story/_/id/49301354/</li>
+<li>ESPN (2026-06-30). "LeBron James informs Lakers he plans to play elsewhere in 2026-27."
+   https://www.espn.com/nba/story/_/id/49226472/</li>
+<li>GitHub. "Events that trigger workflows — schedule."
+   https://docs.github.com/en/actions/reference/events-that-trigger-workflows</li>
+</ol>
+<hr />
+<p><strong>Companion documents.</strong> <a href="deck.md">Slide deck</a> · <a href="README.md">Technical documentation</a> ·
+<a href="../CHANGELOG.md">Changelog</a></p></main></body></html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>deck — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="event-desks-the-deck">Event Desks — the deck</h1>
+<h3 id="prediction-markets-priced-and-explained">Prediction markets, priced and explained</h3>
+<p><strong>Version 1.0.1 · Last updated 2026-07-22</strong>
+<strong>Elite Four Capital</strong></p>
+<blockquote>
+<p>This is a living document. It is updated in the same pass as any change to the site.
+Plain words only. The math lives in the <a href="white-paper.md">white paper</a>.</p>
+</blockquote>
+<hr />
+<h2 id="slide-1-what-this-is">Slide 1 — What this is</h2>
+<p><strong>A site that reads prediction markets and tells you where they look wrong.</strong></p>
+<p>Prediction markets let people bet on real events: who wins an election, where a player
+signs. The prices are odds.</p>
+<p>Event Desks watches two of these markets — Polymarket and Kalshi — and does three things:</p>
+<ol>
+<li>Shows you the prices, live.</li>
+<li>Works out what a bet actually costs after fees and tax.</li>
+<li>Points at the places where the market looks too confident.</li>
+</ol>
+<p><strong>elitefourcapital.com</strong></p>
+<hr />
+<h2 id="slide-2-the-one-idea">Slide 2 — The one idea</h2>
+<p><strong>Divide one price by another and you learn something neither price tells you.</strong></p>
+<p>Every serious candidate has two markets:</p>
+<ul>
+<li>Will their party pick them? → say <strong>15¢</strong></li>
+<li>Will they win the whole thing? → say <strong>10¢</strong></li>
+</ul>
+<p>Divide: 10 ÷ 15 = <strong>67%</strong>.</p>
+<p>That reads as one sentence:</p>
+<blockquote>
+<p><strong>"If this person gets nominated, the market thinks they win two times out of three."</strong></p>
+</blockquote>
+<p>We call it <strong>conversion</strong>.</p>
+<hr />
+<h2 id="slide-3-why-conversion-matters">Slide 3 — Why conversion matters</h2>
+<p>The election is more than two years away.</p>
+<ul>
+<li>Neither party has a nominee.</li>
+<li>Nobody knows who runs against whom.</li>
+<li>No poll can test a matchup that doesn't exist yet.</li>
+</ul>
+<p>And yet the market says <em>two out of three.</em></p>
+<p><strong>That is a very confident claim about something nobody can see.</strong></p>
+<p>Confidence like that is what you sell.</p>
+<hr />
+<h2 id="slide-4-the-bet-the-wedge">Slide 4 — The bet: "The Wedge"</h2>
+<p>One trade captures it. Two tickets:</p>
+<table>
+<thead>
+<tr>
+<th>Ticket</th>
+<th>What it says</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Buy</td>
+<td>"They get nominated."</td>
+</tr>
+<tr>
+<td>Buy</td>
+<td>"They do <strong>not</strong> win the election."</td>
+</tr>
+</tbody>
+</table>
+<p>Three things can happen:</p>
+<table>
+<thead>
+<tr>
+<th>What happens</th>
+<th>You get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not nominated</td>
+<td>Your money back</td>
+</tr>
+<tr>
+<td>Nominated, then loses</td>
+<td><strong>A big win</strong></td>
+</tr>
+<tr>
+<td>Nominated, and wins</td>
+<td>Your money back</td>
+</tr>
+</tbody>
+</table>
+<p>You only lose a little, and only in one narrow case. You win big in the middle row.</p>
+<p><strong>Live example:</strong> risk about <strong>$100</strong> to win about <strong>$1,900</strong>.</p>
+<hr />
+<h2 id="slide-5-the-site-picks-the-candidate-not-us">Slide 5 — The site picks the candidate, not us</h2>
+<p>The site ranks everyone the market quotes and picks the highest conversion.</p>
+<p><strong>No name is written into the code.</strong></p>
+<p>If the money moves to someone else tomorrow, the pick changes tomorrow. The site can't go
+stale, and it can't disagree with itself.</p>
+<p>Today it picks <strong>Ossoff at 67%</strong>, against a field median of 61%.</p>
+<hr />
+<h2 id="slide-6-a-mistake-we-caught">Slide 6 — A mistake we caught</h2>
+<p>The very first time the board went live, it picked <strong>Beshear at 75%</strong> — the highest number
+on the screen.</p>
+<p>It was junk.</p>
+<p>Beshear was quoted at <strong>4¢ and 3¢</strong>. The smallest move the exchange allows is 1¢. So:</p>
+<table>
+<thead>
+<tr>
+<th>If the price ticks to</th>
+<th>The "75%" becomes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2¢</td>
+<td>50%</td>
+</tr>
+<tr>
+<td>3¢</td>
+<td><strong>75%</strong></td>
+</tr>
+<tr>
+<td>4¢</td>
+<td>100%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>One tick swings the headline 25 points.</strong> The number was measuring the tick, not the
+market.</p>
+<p><strong>The fix:</strong> a runner needs real money on both sides to be picked. Thin markets still
+appear — labelled THIN and greyed out — because hiding a number is its own kind of lying.</p>
+<hr />
+<h2 id="slide-7-free-money-usually-isnt">Slide 7 — "Free money" usually isn't</h2>
+<p>Sometimes the same bet is cheaper on one site than the other. Buy low on one, sell high on
+the other, and you can lock a profit before you know the result.</p>
+<p>The site checks this live. Today's answer:</p>
+<blockquote>
+<p><strong>+$7.86 locked</strong> on $1,000.
+That's <strong>0.3% a year</strong> over 28 months.
+A Treasury bill pays <strong>3.3%</strong>.
+<strong>Skip it.</strong></p>
+</blockquote>
+<p><strong>The lesson:</strong> a guaranteed profit can still be a bad trade. Your money is stuck for
+two and a half years. The site always compares against just leaving it in cash.</p>
+<hr />
+<h2 id="slide-8-fees-eat-the-gap">Slide 8 — Fees eat the gap</h2>
+<p>Both sites charge a fee, and the fee is <strong>biggest on a coin-flip bet</strong>.</p>
+<ul>
+<li>A bet at 50¢ carries the most fee.</li>
+<li>A bet at 5¢ or 95¢ carries almost none.</li>
+</ul>
+<p>That's why a "3¢ gap" between two sites often isn't a gap at all — the fees ate it.</p>
+<p>The site does this arithmetic for you before it says the word "profit."</p>
+<hr />
+<h2 id="slide-9-how-much-to-bet">Slide 9 — How much to bet</h2>
+<p>There's a formula for the biggest bet the math justifies. It's called Kelly.</p>
+<p><strong>We use a quarter of it.</strong></p>
+<p>Why: Kelly assumes you <em>know</em> the odds. You don't — you estimated them. And betting too
+much loses money much faster than betting too little forfeits it.</p>
+<p>A quarter keeps most of the upside and takes out most of the risk of being wrong.</p>
+<hr />
+<h2 id="slide-10-the-sports-desk">Slide 10 — The sports desk</h2>
+<p>Same machinery, different question: <strong>where does LeBron sign?</strong></p>
+<table>
+<thead>
+<tr>
+<th>Team</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Miami</td>
+<td><strong>49¢</strong></td>
+</tr>
+<tr>
+<td>Cleveland</td>
+<td>26¢</td>
+</tr>
+<tr>
+<td>Philadelphia</td>
+<td>14¢</td>
+</tr>
+<tr>
+<td>Golden State</td>
+<td>9.5¢</td>
+</tr>
+</tbody>
+</table>
+<p>The story everyone tells is about legacy and homecoming.</p>
+<p><strong>The actual answer is the salary cap:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Team</th>
+<th>Most they can pay</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Miami</strong></td>
+<td><strong>~$7.0m</strong></td>
+</tr>
+<tr>
+<td>Cleveland</td>
+<td>$3.9m (maybe $6.1m)</td>
+</tr>
+<tr>
+<td>Everyone else</td>
+<td>$3.9m — the league minimum</td>
+</tr>
+</tbody>
+</table>
+<p>Miami is the only team that can meaningfully outbid the field. That's the 49¢.</p>
+<p><strong>Betting against Miami is betting that a few million dollars doesn't matter to a
+41-year-old chasing a fifth ring.</strong> That's a real argument — it's just the argument you're
+actually making.</p>
+<hr />
+<h2 id="slide-11-the-map">Slide 11 — The map</h2>
+<p>Click any state to flip it. The count updates instantly. 20,000 elections are simulated
+every time you move a slider.</p>
+<p><strong>Be careful what it means.</strong></p>
+<p>It starts from the <strong>2024 result</strong>, not from 2028 polling — because 2028 general-election
+polling doesn't exist yet.</p>
+<p>So "Republicans 287" means:</p>
+<blockquote>
+<p><em>"If 2028 looks like 2024, adjusted by whatever assumptions you dial in."</em></p>
+</blockquote>
+<p>It is <strong>not</strong> a forecast. The site says so on the page.</p>
+<hr />
+<h2 id="slide-12-what-we-promise">Slide 12 — What we promise</h2>
+<p><strong>Every number is live or computed.</strong> Nothing is typed in and left to rot.</p>
+<p><strong>Snapshots are labelled.</strong> The only fixed numbers on the site are the NBA cap figures, and
+they carry a source and a date.</p>
+<p><strong>We report the true age of the data.</strong> The Kalshi feed actually lags 1–2 hours, so the
+site says so instead of claiming "live."</p>
+<p><strong>We publish our mistakes.</strong> The Beshear pick and a bad Lakers price are both written up
+in the white paper.</p>
+<hr />
+<h2 id="slide-13-read-more">Slide 13 — Read more</h2>
+<p><strong>The white paper</strong> — every formula, every derivation, every source:</p>
+<p><strong><a href="white-paper.md">docs/white-paper.md</a></strong></p>
+<p>Covers: the fee model, the arbitrage condition, the wedge algebra, the conversion proof,
+Kelly sizing, the electoral simulation, all known limitations, and the full reference list.</p>
+<p><strong>The technical documentation</strong> — how to run, deploy, and extend the site:</p>
+<p><strong><a href="README.md">docs/README.md</a></strong></p>
+<p><strong>The changelog</strong> — what changed, when, and why:</p>
+<p><strong><a href="../CHANGELOG.md">CHANGELOG.md</a></strong></p>
+<hr />
+<p><em>Educational, not investment advice. Elite Four Capital · elitefourcapital.com</em></p></main></body></html>

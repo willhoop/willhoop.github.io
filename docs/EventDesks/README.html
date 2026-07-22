@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>README — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="event-desks-documentation">Event Desks — Documentation</h1>
+<p><strong>Version 1.0.1 · Last updated 2026-07-22</strong></p>
+<p><em>This documentation uses ASD-STE100 Simplified Technical English. Sentences are short.
+The voice is active. The tense is present. Each sentence gives one instruction.</em></p>
+<p>This folder holds the technical documentation. The documentation uses the Diátaxis
+system. Diátaxis puts each document into one of four groups. Each group answers a
+different question.</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>It answers</th>
+<th>Start here if you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="tutorial/">Tutorial</a></td>
+<td>"Teach me."</td>
+<td>Are new. You want to run the site.</td>
+</tr>
+<tr>
+<td><a href="how-to/">How-to</a></td>
+<td>"How do I do X?"</td>
+<td>Have a task. You know the system.</td>
+</tr>
+<tr>
+<td><a href="reference/">Reference</a></td>
+<td>"What is X?"</td>
+<td>Want a fact. You want an exact value.</td>
+</tr>
+<tr>
+<td><a href="explanation/">Explanation</a></td>
+<td>"Why is it like this?"</td>
+<td>Want to understand a decision.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-other-two-deliverables">The other two deliverables</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>It contains</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>White paper</td>
+<td>The technical detail and the math. Each source has a citation.</td>
+<td><a href="white-paper.md"><code>../docs/white-paper.md</code></a></td>
+</tr>
+<tr>
+<td>Slide deck</td>
+<td>The same content in plain words.</td>
+<td><a href="deck.md"><code>../docs/deck.md</code></a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="rule-these-documents-are-living">Rule: these documents are living</h2>
+<p>You must update this documentation in the same pass as a code change. Do not let the
+documentation fall behind the build.</p>
+<p>Obey these rules for each change:
+1. Change the code.
+2. Change the white paper, the deck, and these documents.
+3. Add a line to <a href="../CHANGELOG.md"><code>../CHANGELOG.md</code></a>.
+4. Increase the version. Change the "last updated" date.</p>
+<p>Do not delete a prior conclusion. Add the new information. Write what changed. Write why
+it changed.</p>
+<h2 id="contents">Contents</h2>
+<h3 id="tutorial">Tutorial</h3>
+<ul>
+<li><a href="tutorial/get-started.md">Run the site on your computer</a></li>
+</ul>
+<h3 id="how-to">How-to</h3>
+<ul>
+<li><a href="how-to/deploy.md">Deploy a change</a></li>
+<li><a href="how-to/add-a-desk.md">Add a new desk</a></li>
+<li><a href="how-to/refresh-data.md">Refresh the data feeds</a></li>
+<li><a href="how-to/measure-traffic.md">Measure the site traffic</a></li>
+</ul>
+<h3 id="reference">Reference</h3>
+<ul>
+<li><a href="reference/structure.md">Folder structure</a></li>
+<li><a href="reference/pricing-api.md">The pricing functions</a></li>
+<li><a href="reference/field-api.md">The field engine</a></li>
+<li><a href="reference/config.md">The configuration block</a></li>
+<li><a href="reference/design-rules.md">The design rules</a></li>
+</ul>
+<h3 id="explanation">Explanation</h3>
+<ul>
+<li><a href="explanation/conversion.md">Why conversion is the key number</a></li>
+<li><a href="explanation/thin-markets.md">Why we exclude thin markets</a></li>
+<li><a href="explanation/single-file.md">Why the build is one file</a></li>
+<li><a href="explanation/kalshi-delay.md">Why the Kalshi prices are not live to the minute</a></li>
+</ul></main></body></html>
