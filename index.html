@@ -146,10 +146,10 @@
 const GITHUB = "";                     // "" = use local rendered docs
 const doc = (p) => GITHUB ? GITHUB + p.src : p.local;
 
-/* Event Desks keeps its source in its own repository, like every other project.
-   willhoop/event-desk is the DEPLOY target for elitefourcapital.com and holds only
-   the built file — never push source there. */
-const EVENTDESK = "https://github.com/willhoop/elitefourcapital/blob/main/";
+/* Every document opens as a rendered page on this site, so nothing detours to
+   GitHub. Regenerate them with build/build_docs.py after editing any source .md.
+   Source repos: willhoop/elitefourcapital is Event Desks' source; the deploy
+   target willhoop/event-desk holds only the built site and must not take source. */
 
 /* Every project shows the SAME five rows in the SAME order, so the columns line
    up across the whole page. A document that does not exist yet is shown dimmed
@@ -177,9 +177,9 @@ const PROJECTS = [
     desc: "Prices event contracts on Polymarket and Kalshi and shows where the market looks overconfident. It ranks a candidate field by conversion — the presidency price divided by the nomination price — which reads as the market's odds a candidate wins once nominated.",
     docs: {
       open:   "https://elitefourcapital.com",
-      paper:  EVENTDESK + "docs/white-paper.md",
-      deck:   EVENTDESK + "docs/deck.md",
-      docs:   EVENTDESK + "docs/README.md",
+      paper:  "docs/EventDesks/white-paper.html",
+      deck:   "docs/EventDesks/deck.html",
+      docs:   "docs/EventDesks/README.html",
       source: "https://github.com/willhoop/elitefourcapital"
     }
   },
@@ -191,8 +191,8 @@ const PROJECTS = [
       open:   "https://willhoop.github.io/hoopadex/",
       /* No rendered HTML copy exists for these two, so they link at the source
          in the HoopaDex repository, where GitHub renders the markdown. */
-      paper:  "https://github.com/willhoop/hoopadex/blob/main/docs/HOOPADEX-whitepaper.md",
-      deck:   "https://github.com/willhoop/hoopadex/blob/main/docs/HOOPADEX-deck-plain-english.md",
+      paper:  "docs/HoopaDex/HOOPADEX-whitepaper.html",
+      deck:   "docs/HoopaDex/HOOPADEX-deck-plain-english.html",
       docs:   doc({local:"docs/HoopaDex/HOOPADEX-technical-docs.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-technical-docs.md"}),
       source: "https://github.com/willhoop/hoopadex"
     }
