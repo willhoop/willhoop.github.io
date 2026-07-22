@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HOOPADEX deck plain english — HoopaDex</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>HoopaDex</span></div></div>
+<main><h1 id="hoopadex-the-deck">HoopaDex — the deck</h1>
+<h3 id="a-pokedex-that-knows-what-year-it-is">A Pokédex that knows what year it is</h3>
+<p><strong>Version 1.0 · Last updated 2026-07-22</strong>
+<strong>Will Hooper</strong></p>
+<blockquote>
+<p>Plain words only. The math and the citations live in the
+<a href="HOOPADEX-whitepaper.md">white paper</a>.</p>
+</blockquote>
+<hr />
+<h2 id="slide-1-what-this-is">Slide 1 — What this is</h2>
+<p><strong>A complete Pokémon reference in one file that you can open from your desktop.</strong></p>
+<p>No install. No server. No account. One HTML file, about half a megabyte, that works offline
+once it has loaded.</p>
+<hr />
+<h2 id="slide-2-the-problem-it-solves">Slide 2 — The problem it solves</h2>
+<p>Every other dex assumes you are playing the newest game.</p>
+<p>You are often not. And the rules have changed a lot.</p>
+<hr />
+<h2 id="slide-3-what-actually-changed">Slide 3 — What actually changed</h2>
+<p>Three examples, all real:</p>
+<table>
+<thead>
+<tr>
+<th>Then</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dark attacks were <strong>weak</strong> against Steel</td>
+<td>They do normal damage</td>
+</tr>
+<tr>
+<td>Ghost attacks were <strong>weak</strong> against Steel</td>
+<td>They do normal damage</td>
+</tr>
+<tr>
+<td>Fairy <strong>did not exist</strong></td>
+<td>Fairy exists</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="slide-4-why-that-matters">Slide 4 — Why that matters</h2>
+<p>You are playing an old game. You look up "is my Dark move good against this Steel type?"</p>
+<p>A normal dex says <strong>yes</strong>.</p>
+<p>In the game in front of you, the answer is <strong>no</strong>.</p>
+<p><strong>You were not given a slightly old answer. You were given a wrong one — and nothing told you
+to doubt it.</strong></p>
+<hr />
+<h2 id="slide-5-the-fix">Slide 5 — The fix</h2>
+<p>You pick the generation. Everything on the screen re-answers itself for that generation.</p>
+<p>Type chart, stats, abilities, evolutions. All of it.</p>
+<p>And the generation you picked stays visible on screen, so you always know which set of rules
+you are being shown.</p>
+<hr />
+<h2 id="slide-6-champions-mode">Slide 6 — Champions mode</h2>
+<p>Pokémon Champions plays by different rules, so it gets its own mode.</p>
+<p><strong>Stats work differently.</strong> Instead of the old system, every Pokémon gets 66 points to spread
+across its stats, up to 32 in any one. Level is always 50.</p>
+<p><strong>Moves work differently.</strong> There is no learning by level and there are no TMs. A Pokémon can
+learn a move or it can't. If it can, you just teach it.</p>
+<hr />
+<h2 id="slide-7-a-surprise-worth-knowing">Slide 7 — A surprise worth knowing</h2>
+<p>The Champions move list is <strong>not</strong> the Scarlet and Violet list.</p>
+<p>Real example: <strong>Garchomp learns Surf in Champions. It does not learn Waterfall.</strong></p>
+<p>If you assume the lists match, you will build illegal sets. The dex checks the real list.</p>
+<hr />
+<h2 id="slide-8-the-damage-calculator">Slide 8 — The damage calculator</h2>
+<p>Champions mode has a built-in damage calculator.</p>
+<p>It runs on the same engine the competitive community already uses, so the numbers are the
+numbers everyone else gets. The only new part is the Champions stat system layered on top.</p>
+<hr />
+<h2 id="slide-9-a-bug-we-found-and-fixed">Slide 9 — A bug we found and fixed</h2>
+<p>The dex opens in Champions mode on the newest regulation. It always did.</p>
+<p>But every link it <em>generated</em> was broken. Sharing or bookmarking a page quietly kicked you
+back into the wrong mode.</p>
+<p>Cause: the link recorded "generation 9", and the reader treated "generation 9" as <em>leave
+Champions mode</em>. Fixed in v1.93, and old broken links now work correctly.</p>
+<hr />
+<h2 id="slide-10-what-we-dont-claim">Slide 10 — What we don't claim</h2>
+<p>The whole point of this project is historical accuracy. So this matters:</p>
+<p><strong>The historical tables have not been automatically tested.</strong> They were typed in and checked
+by eye. Nine tests exist, but they only cover links and defaults, not whether the generation 2
+type chart is right.</p>
+<p>That is the biggest gap in the project, it is written down in the white paper, and it is the
+next thing to fix.</p>
+<hr />
+<h2 id="slide-11-read-more">Slide 11 — Read more</h2>
+<p><strong>The white paper</strong> — the data model, the stat formulas, every source:</p>
+<p><strong><a href="HOOPADEX-whitepaper.md">HOOPADEX-whitepaper.md</a></strong></p>
+<p><strong>The technical documentation</strong> — how to run it, change it, and add a regulation:</p>
+<p><strong><a href="HOOPADEX-technical-docs.md">HOOPADEX-technical-docs.md</a></strong></p>
+<p><strong>The changelog</strong> — what changed, when, and why:</p>
+<p><strong><a href="../CHANGELOG.md">CHANGELOG.md</a></strong></p></main></body></html>

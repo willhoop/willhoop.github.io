@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HOOPADEX whitepaper — HoopaDex</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>HoopaDex</span></div></div>
+<main><h1 id="historical-correctness-in-a-pokemon-reference-tool">Historical Correctness in a Pokémon Reference Tool</h1>
+<h3 id="why-a-dex-that-ignores-time-gives-wrong-answers-and-how-hoopadex-fixes-it">Why a dex that ignores time gives wrong answers, and how HoopaDex fixes it</h3>
+<p><strong>Version 1.0 · Last updated 2026-07-22</strong>
+<strong>Will Hooper · HoopaDex v1.93</strong></p>
+<blockquote>
+<p>This is a living document. It is updated in the same pass as any change to the code.
+New information is appended. A prior conclusion is not silently rewritten; what changed
+and why is recorded in <a href="../CHANGELOG.md"><code>CHANGELOG.md</code></a>.</p>
+</blockquote>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>Almost every Pokémon reference tool answers questions as though the current generation were
+the only one. That is wrong for anyone playing an older game, and it is wrong in ways that
+change decisions rather than merely annoying the reader. This paper states the problem
+precisely, describes the data model HoopaDex uses to resolve a query against a chosen point
+in the series' history, documents the Champions stat system and its move-legality export,
+and records the limits of the approach. Every claim about a rule change is cited.</p>
+<hr />
+<h2 id="1-the-problem">1. The problem</h2>
+<p>A type chart is not a constant. It is a function of the generation.</p>
+<table>
+<thead>
+<tr>
+<th>Interaction</th>
+<th>Generations 2 to 5</th>
+<th>Generation 6 onward</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ghost attacking Steel</td>
+<td>0.5×</td>
+<td>1×</td>
+</tr>
+<tr>
+<td>Dark attacking Steel</td>
+<td>0.5×</td>
+<td>1×</td>
+</tr>
+<tr>
+<td>Steel defending against Ghost and Dark</td>
+<td>resists both</td>
+<td>neutral to both</td>
+</tr>
+</tbody>
+</table>
+<p>The Fairy type did not exist before generation 6. Before generation 4, whether a move used
+the physical or the special attack stat was decided by the move's <strong>type</strong>, not by the move
+itself: every Fire move was special and every Rock move was physical, regardless of whether
+that made sense.</p>
+<p>The consequence is concrete. A player working through Pokémon Crystal who consults a modern
+dex is told that a Dark move hits a Steel type neutrally. In the game in front of them it is
+resisted. The reader does not get a slightly stale answer. They get a wrong one, and they
+have no signal that anything is wrong, because the tool renders the incorrect number with
+exactly the same confidence as a correct one.</p>
+<p><strong>This is the failure mode the project exists to remove:</strong> a reference that is silently wrong
+is worse than one that declines to answer, because it removes the reader's opportunity to
+doubt it.</p>
+<p><em>Sources: Bulbapedia, "Type chart" and "Damage category", revision histories for generation
+transitions II→III, III→IV, and V→VI. Game Freak, Pokémon X and Y (2013), which introduced
+the Fairy type and removed the Steel resistances to Ghost and Dark.</em></p>
+<hr />
+<h2 id="2-the-data-model">2. The data model</h2>
+<h3 id="21-generation-as-a-query-parameter">2.1 Generation as a query parameter</h3>
+<p>The central design decision is that <strong>the generation is an input to every lookup, not a
+display setting.</strong> The application holds one selected generation, <code>selectedGenNum</code>, and every
+resolver reads it.</p>
+<p>A query is therefore a pair, not a single value:</p>
+<pre><code>answer = resolve(subject, generation)
+</code></pre>
+<p>rather than the more common, and incorrect:</p>
+<pre><code>answer = resolve(subject)
+</code></pre>
+<p>Type effectiveness resolves through a generation-indexed chart. Base stats resolve through a
+table of historical revisions, because several species were rebalanced between generations —
+for example, many stats were raised in generation 6. Abilities resolve against the generation
+that introduced them, so a species does not display an ability it could not have had.</p>
+<h3 id="22-why-the-era-is-shown-not-assumed">2.2 Why the era is shown, not assumed</h3>
+<p>The selected generation is displayed at all times. This is a deliberate cost: it takes screen
+space that a modern-only dex would not spend. The justification is section 1. A tool whose
+answers depend on a hidden parameter must show that parameter, or the reader cannot tell a
+correct answer from a stale one.</p>
+<h3 id="23-data-sources">2.3 Data sources</h3>
+<p>Species, move and ability data come from PokéAPI at run time. The generation-dependent tables
+— type charts, the physical/special split, the Champions rosters — are held in the file
+itself, because they are small, they are historical, and they must not depend on a network
+call succeeding.</p>
+<p><em>Source: PokéAPI v2, <a href="https://pokeapi.co/">https://pokeapi.co/</a>.</em></p>
+<hr />
+<h2 id="3-champions-mode">3. Champions mode</h2>
+<p>Pokémon Champions uses a stat system unlike the main series, and HoopaDex models it directly
+rather than approximating it with EVs.</p>
+<h3 id="31-the-sp-system">3.1 The SP system</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Main series</th>
+<th>Champions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Investment unit</td>
+<td>EVs, 0 to 252 per stat</td>
+<td>SP, 0 to 32 per stat</td>
+</tr>
+<tr>
+<td>Total budget</td>
+<td>510 EVs</td>
+<td>66 SP</td>
+</tr>
+<tr>
+<td>IVs</td>
+<td>0 to 31, variable</td>
+<td>fixed at 31</td>
+</tr>
+<tr>
+<td>Level</td>
+<td>variable</td>
+<td>fixed at 50</td>
+</tr>
+</tbody>
+</table>
+<p>The stat formulas the calculator uses, for level 50:</p>
+<pre><code>stat(base, sp, nature) = floor( ( floor((2·base + 31)·50/100) + 5 + sp ) · nature )
+hp(base, sp)           = floor( (2·base + 31)·50/100 ) + 60 + sp
+</code></pre>
+<p>The nature multiplier is applied <strong>after</strong> the SP addition, not before. This ordering is not
+cosmetic: applying the nature first and then adding SP produces a different integer after the
+floor operation, and the error compounds through the damage calculation. The ordering above
+is pinned by the golden tests in the CHOMP project, which shares these formulas.</p>
+<h3 id="32-movesets-are-a-flat-list">3.2 Movesets are a flat list</h3>
+<p>Champions has <strong>no level-up movesets and no TM items</strong>. A species can learn a move or it
+cannot. Any learnable move is taught directly for 100 VP. There is no level gate, no order,
+and no item to find.</p>
+<p>This is a genuine structural difference from every previous generation, and it simplifies the
+model considerably: a moveset is a set-membership question, not a path through a learn table.</p>
+<p>The export <code>champions-learnsets.json</code> records the result. It retains a <code>methods</code> field for
+compatibility, but that field carries no information in this format: all 14,192
+species-and-move pairs hold the single value <code>["TM"]</code>. The field has zero variance.</p>
+<p><strong>A moveset from Scarlet and Violet is not a guide to Champions legality.</strong> The lists differ.
+Garchomp learns Surf in Champions; it does not learn Waterfall.</p>
+<h3 id="33-the-export-as-a-shared-asset">3.3 The export as a shared asset</h3>
+<p>The learnset export is a separate file rather than inline data, for two reasons. It is
+approximately 1.4 MB, which would roughly triple the size of the application file. And it is
+consumed by a second project: CHOMP uses it to check that a synthesized opponent moveset is
+legal.</p>
+<p>That second use exposed a subtlety worth recording. The export covers 208 of 208 legal
+species, but only 496 of the 500 moves in the legal pool. Five moves — <code>spore</code>, <code>softboiled</code>,
+<code>milkdrink</code>, <code>powershift</code>, <code>struggle</code> — are absent from it.</p>
+<p>A consumer must therefore treat the export as an oracle that answers <strong>"is this pair recorded
+as legal"</strong>, not <strong>"is this pair illegal"</strong>. Anything absent must be treated as unknown and
+allowed. Treating absence as prohibition would silently delete five legal moves from
+consideration. This rule is stated here because it is not obvious from the file, and a future
+consumer will otherwise get it wrong.</p>
+<hr />
+<h2 id="4-architecture">4. Architecture</h2>
+<h3 id="41-one-file">4.1 One file</h3>
+<p>The application is a single HTML file with no build step, no dependency tree, and no server.
+It can be emailed, opened from a disk, or hosted anywhere static.</p>
+<p>The trade is real and worth stating. A single file has no module boundaries, so discipline
+about structure has to be maintained by convention rather than enforced by tooling, and the
+file is large enough that editing it requires searching rather than navigating. For a
+reference tool maintained by one person, the removal of build and deployment cost outweighs
+this. For a tool maintained by a team, it would not.</p>
+<h3 id="42-the-damage-calculator">4.2 The damage calculator</h3>
+<p>Champions mode includes a damage calculator built on <code>@smogon/calc</code>, the same engine that
+underlies the widely used Smogon calculator. Using the established engine rather than a
+reimplementation means the damage arithmetic is community-verified; the project's own work is
+the Champions stat system layered on top of it.</p>
+<h3 id="43-state-in-the-url">4.3 State in the URL</h3>
+<p>The visible view is encoded in the URL hash, so any view can be linked or bookmarked:</p>
+<pre><code>#pokedex/gchampions/gm:reg-mb
+</code></pre>
+<p><code>gchampions</code> selects Champions mode; <code>g1</code> to <code>g9</code> select a classic generation; <code>gm:</code> carries
+the regulation or the specific game.</p>
+<p><strong>A defect in this mechanism, and its correction.</strong> Before v1.93 the hash writer emitted the
+generation number <code>g9</code> even while Champions mode was active, and the hash reader interpreted
+<code>g9</code> as an instruction to leave Champions mode. Every link the application produced therefore
+opened a different view than the one it was generated from. The published link
+<code>#pokedex/g9/gm:reg-mb</code> had this defect.</p>
+<p>Version 1.93 corrects it in two parts: the writer emits <code>gchampions</code>, and the reader ignores a
+generation number when the same hash also carries a <code>gm:reg-*</code> token, so previously shared
+links now resolve correctly. Nine tests pin this behaviour, and they slice the parser out of
+the shipped file rather than copying it, so they cannot drift from the code they describe.</p>
+<h3 id="44-regulations-are-a-single-edit">4.4 Regulations are a single edit</h3>
+<p>Champions regulations change on a schedule. The application holds them in one array, ordered
+newest first, and defaults to the head of that array. Adding a regulation is one row: the
+default, the dropdown, the URL, and the legality note in the move list all read from it.</p>
+<p>This follows the project standard that anything which changes over time lives in exactly one
+configuration block.</p>
+<hr />
+<h2 id="5-verification">5. Verification</h2>
+<p>Nine tests cover URL routing and the regulation default. They assert that a bare address opens
+Champions mode on the newest regulation, that a legacy <code>g9</code> link no longer leaves Champions
+mode, that a real generation link still does, and that an unknown regulation key degrades to
+the newest rather than to an empty dex.</p>
+<p><strong>What is not covered, stated plainly.</strong> There is no automated test of the historical type
+charts, the base-stat revisions, or the ability introduction data against an authoritative
+source. Those tables were entered by hand and checked by inspection. Given that historical
+correctness is the entire premise of the project, this is the most significant gap in its
+verification, and it is the first thing that should be addressed. The nine tests should not be
+read as evidence that the historical data is right; they are evidence that the routing is.</p>
+<hr />
+<h2 id="6-known-limitations">6. Known limitations</h2>
+<ol>
+<li>The historical data tables are unverified by automated test (section 5).</li>
+<li>Run-time data depends on PokéAPI. If it is unavailable, species data degrades to
+   placeholders while the local generation tables continue to work.</li>
+<li>Location and encounter data exists only for the generations PokéAPI covers well.</li>
+<li>The single-file architecture has no module boundaries (section 4.1).</li>
+<li>The learnset export omits five moves in the legal pool (section 3.3).</li>
+</ol>
+<hr />
+<h2 id="7-references">7. References</h2>
+<ol>
+<li>PokéAPI v2. <a href="https://pokeapi.co/">https://pokeapi.co/</a></li>
+<li>Smogon University. <code>@smogon/calc</code> damage engine.
+   <a href="https://github.com/smogon/damage-calc">https://github.com/smogon/damage-calc</a></li>
+<li>Bulbapedia. "Type chart." Generation-by-generation effectiveness tables.</li>
+<li>Bulbapedia. "Physical/special split." Generation IV change.</li>
+<li>Game Freak. Pokémon X and Y (2013). Introduction of the Fairy type.</li>
+<li>Serebii.net. Pokémon Champions regulation rosters, Regulation M-A and M-B.</li>
+</ol>
+<hr />
+<p><strong>Companion documents.</strong> <a href="HOOPADEX-deck-plain-english.md">Slide deck</a> ·
+<a href="HOOPADEX-technical-docs.md">Technical documentation</a> · <a href="../CHANGELOG.md">Changelog</a></p></main></body></html>
