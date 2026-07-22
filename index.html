@@ -165,11 +165,11 @@ const PROJECTS = [
     desc: "A decision engine for competitive Pokémon. At team preview you have about 30 seconds to choose four of six Pokémon and which two to lead. CHOMP runs the game's real damage mathematics across every matchup and answers in under 50 milliseconds, in the browser.",
     note: "Damage formulas and move legality are pinned to the authoritative source by tests with hand-derived values.",
     docs: {
-      open:   "../Pokemon/CHOMP/app/chomp-replay-app.html",
+      open:   "apps/chomp-replay-app.html",
       paper:  doc({local:"docs/CHOMP/CHOMP-whitepaper.html", src:"Pokemon/CHOMP/docs/CHOMP-whitepaper.md"}),
       deck:   doc({local:"docs/CHOMP/CHOMP-deck-plain-english.pdf", src:"Pokemon/CHOMP/docs/CHOMP-deck-plain-english.pptx"}),
       docs:   doc({local:"docs/CHOMP/CHOMP-technical-docs.html", src:"Pokemon/CHOMP/docs/CHOMP-technical-docs.md"}),
-      source: ""
+      source: "https://github.com/willhoop/chomp"
     }
   },
   {
@@ -192,8 +192,10 @@ const PROJECTS = [
     note: "Opens in Champions mode on the newest regulation.",
     docs: {
       open:   "https://willhoop.github.io/hoopadex/",
-      paper:  doc({local:"docs/HoopaDex/HOOPADEX-whitepaper.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-whitepaper.md"}),
-      deck:   doc({local:"docs/HoopaDex/HOOPADEX-deck-plain-english.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-deck-plain-english.md"}),
+      /* No rendered HTML copy exists for these two, so they link at the source
+         in the HoopaDex repository, where GitHub renders the markdown. */
+      paper:  "https://github.com/willhoop/hoopadex/blob/main/docs/HOOPADEX-whitepaper.md",
+      deck:   "https://github.com/willhoop/hoopadex/blob/main/docs/HOOPADEX-deck-plain-english.md",
       docs:   doc({local:"docs/HoopaDex/HOOPADEX-technical-docs.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-technical-docs.md"}),
       source: "https://github.com/willhoop/hoopadex"
     }
