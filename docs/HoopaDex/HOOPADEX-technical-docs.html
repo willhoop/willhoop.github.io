@@ -1,0 +1,566 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HOOPADEX technical docs — HoopaDex</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>HoopaDex</span></div></div>
+<main><h1 id="hoopadex-technical-documentation">HoopaDex — Technical Documentation</h1>
+<p><strong>Version 1.1 · Last updated 2026-07-22</strong>
+Documents the published application and the local file <code>app/HoopaDex_1_92.html</code>.
+Written in ASD-STE100 Simplified Technical English. Organised with the Diataxis model.</p>
+<hr />
+<h2 id="0-about-this-document">0. About this document</h2>
+<h3 id="01-purpose">0.1 Purpose</h3>
+<p>This document tells you how to use, host, and change HoopaDex. A new engineer can use this
+document to start work without help.</p>
+<h3 id="02-what-hoopadex-is">0.2 What HoopaDex is</h3>
+<p>HoopaDex is a Pokedex web application. It is <strong>one HTML file</strong>. It has no build step, no server,
+and no dependencies to install. You open the file and it runs.</p>
+<p>The application covers <strong>all nine generations</strong> of the games. It is <em>generation-aware</em>. It shows
+the type chart, the base stats, the types, the abilities, and the items <strong>as they were in the
+generation that you select</strong>. It does not show only the current values.</p>
+<h3 id="03-terms">0.3 Terms</h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>generation</td>
+<td>A numbered era of the games, from 1 to 9.</td>
+</tr>
+<tr>
+<td>version group</td>
+<td>A specific game release, for example <code>sword-shield</code>.</td>
+</tr>
+<tr>
+<td>species id</td>
+<td>The National Dex number of a Pokemon.</td>
+</tr>
+<tr>
+<td>form</td>
+<td>An alternative appearance of a species, for example a regional form.</td>
+</tr>
+<tr>
+<td>pin</td>
+<td>A Pokemon, ability, item, or location that you keep on screen for comparison.</td>
+</tr>
+<tr>
+<td>set</td>
+<td>A competitive build: an item, an ability, a nature, stat spreads, and moves.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="part-1-tutorial">PART 1 - TUTORIAL</h1>
+<p><em>Learn HoopaDex.</em></p>
+<h2 id="11-open-the-application">1.1 Open the application</h2>
+<ol>
+<li>Double-click <code>app/HoopaDex_1_92.html</code>.</li>
+<li>The application opens in your browser.</li>
+</ol>
+<p>Installation is not necessary. An internet connection is necessary. See Part 3.4.</p>
+<h2 id="12-find-a-pokemon">1.2 Find a Pokemon</h2>
+<ol>
+<li>Type a name in the search bar at the top.</li>
+<li>Select a result. The application shows the detail view.</li>
+</ol>
+<p>The search is fuzzy. It finds a Pokemon if you spell the name incorrectly.</p>
+<h2 id="13-compare-two-pokemon">1.3 Compare two Pokemon</h2>
+<ol>
+<li>Find the first Pokemon. Add it to the compare list.</li>
+<li>Find the second Pokemon. Add it to the compare list.</li>
+<li>Open the <strong>Other</strong> tab. Select <strong>Compare Pokemon</strong>.</li>
+</ol>
+<h2 id="14-build-a-team">1.4 Build a team</h2>
+<ol>
+<li>Open the <strong>Team Builder</strong> tab.</li>
+<li>Add a maximum of six Pokemon.</li>
+<li>Apply a competitive set to a team member. See Part 2.3.</li>
+</ol>
+<hr />
+<h1 id="part-2-how-to-guides">PART 2 - HOW-TO GUIDES</h1>
+<p><em>Do one task.</em></p>
+<h2 id="21-how-to-see-historical-data-for-one-generation">2.1 How to see historical data for one generation</h2>
+<ol>
+<li>Select the generation or the game in the filter.</li>
+<li>The application changes what it shows.</li>
+</ol>
+<p>The application changes these items when you change the generation:
+- The <strong>type chart</strong>. For example, Steel resisted Ghost and Dark before generation 6.
+- The <strong>types of a Pokemon</strong>. Some Pokemon changed type. Fairy did not exist before generation 6.
+- The <strong>base stats</strong>. Some Pokemon received stat changes.
+- The <strong>abilities</strong>. The application hides an ability that did not exist in that generation.
+- The <strong>items</strong>. The application hides an item that did not exist in that generation.
+- The <strong>evolution chain</strong>. The application removes an evolution that did not exist.</p>
+<h2 id="22-how-to-find-where-a-pokemon-appears-in-a-game">2.2 How to find where a Pokemon appears in a game</h2>
+<ol>
+<li>Open the detail view of the Pokemon.</li>
+<li>Open the <strong>Locations</strong> tab.</li>
+<li>Select the game.</li>
+</ol>
+<p>The application groups the locations by type of encounter.</p>
+<h2 id="23-how-to-apply-a-competitive-set">2.3 How to apply a competitive set</h2>
+<ol>
+<li>Open the <strong>Team Builder</strong> tab.</li>
+<li>Select a team member.</li>
+<li>Select a competitive set from the list.</li>
+</ol>
+<p>The sets come from public Smogon set data. See Part 3.4.</p>
+<h2 id="24-how-to-change-the-theme">2.4 How to change the theme</h2>
+<ol>
+<li>Click the theme control.</li>
+<li>The application saves your choice in browser local storage. The key is <code>hoopa-theme</code>.</li>
+</ol>
+<h2 id="25-how-to-release-a-new-version">2.5 How to release a new version</h2>
+<p>This rule is written on line 2 of the HTML file. Obey it.</p>
+<ol>
+<li>Edit the file.</li>
+<li>Increase the version number in the comment on line 2.</li>
+<li>Rename the file to agree with the comment. For example, change <code>HoopaDex_1_92.html</code> to
+   <code>HoopaDex_1_93.html</code>.</li>
+<li>Record the change in <code>CHANGELOG.md</code>.</li>
+</ol>
+<p><strong>Caution:</strong> The version in the comment and the version in the file name must always agree.</p>
+<h2 id="26-how-to-host-the-application">2.6 How to host the application</h2>
+<ol>
+<li>Copy the HTML file to a static web host.</li>
+<li>Do not use a build step. A build step is not necessary.</li>
+</ol>
+<p>The application reads public APIs from the browser. Those APIs permit cross-origin requests.</p>
+<hr />
+<h1 id="part-3-reference">PART 3 - REFERENCE</h1>
+<p><em>Facts.</em></p>
+<h2 id="31-file">3.1 File</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File</td>
+<td><code>app/HoopaDex_1_92.html</code></td>
+</tr>
+<tr>
+<td>Version</td>
+<td>1.92</td>
+</tr>
+<tr>
+<td>Size</td>
+<td>Approximately 449 KB</td>
+</tr>
+<tr>
+<td>Lines</td>
+<td>Approximately 6,800</td>
+</tr>
+<tr>
+<td>Dependencies</td>
+<td>None to install. Two web fonts load from Google Fonts.</td>
+</tr>
+<tr>
+<td>Browser storage</td>
+<td><code>localStorage</code> key <code>hoopa-theme</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="32-tabs">3.2 Tabs</h2>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pokedex</td>
+<td>Browse and filter the species list. Open a detail view.</td>
+</tr>
+<tr>
+<td>Moves</td>
+<td>Browse moves. Includes the TM list for each game.</td>
+</tr>
+<tr>
+<td>Abilities</td>
+<td>Browse abilities. Shows the generation that introduced each one.</td>
+</tr>
+<tr>
+<td>Items</td>
+<td>Browse items by category. Shows the generation that introduced each one.</td>
+</tr>
+<tr>
+<td>Locations</td>
+<td>Find where a Pokemon appears, by game.</td>
+</tr>
+<tr>
+<td>Type Chart</td>
+<td>Show the type effectiveness chart for the selected generation.</td>
+</tr>
+<tr>
+<td>Natures</td>
+<td>Show the stat that each nature raises and lowers.</td>
+</tr>
+<tr>
+<td>Team Builder</td>
+<td>Build a team of six. Apply competitive sets.</td>
+</tr>
+<tr>
+<td>EV Training</td>
+<td>Show EV yields and training locations.</td>
+</tr>
+<tr>
+<td>Other</td>
+<td>Move priority, the physical/special split, compare, EV yields, training spots.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="33-generation-aware-data-tables">3.3 Generation-aware data tables</h2>
+<p>The application holds these tables. They let it show historical data correctly.</p>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GEN_GAMES</code>, <code>VG_GEN</code></td>
+<td>Map a game or a version group to a generation number.</td>
+</tr>
+<tr>
+<td><code>pastTypes</code></td>
+<td>The types that a Pokemon had in earlier generations.</td>
+</tr>
+<tr>
+<td><code>PAST_STATS</code></td>
+<td>The base stats that a Pokemon had in earlier generations.</td>
+</tr>
+<tr>
+<td><code>ITEM_INTRO_GEN</code></td>
+<td>The generation that introduced each item.</td>
+</tr>
+<tr>
+<td><code>EVO_OVERRIDES</code></td>
+<td>Corrections to evolution chains.</td>
+</tr>
+<tr>
+<td><code>REGIONAL</code></td>
+<td>Regional forms and the generation that introduced them.</td>
+</tr>
+<tr>
+<td><code>CM</code></td>
+<td>The type effectiveness chart for each generation.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="34-external-data-sources">3.4 External data sources</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Used for</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pokeapi.co/api/v2/</code></td>
+<td>Species, Pokemon, moves, abilities, items, item categories, regions</td>
+<td>The primary source.</td>
+</tr>
+<tr>
+<td><code>raw.githubusercontent.com/PokeAPI/sprites</code></td>
+<td>Pokemon sprites and item sprites</td>
+<td>Images only.</td>
+</tr>
+<tr>
+<td><code>data.pkmn.cc/sets/</code></td>
+<td>Competitive sets for the Team Builder</td>
+<td>Public Smogon set data.</td>
+</tr>
+<tr>
+<td><code>raw.githubusercontent.com/msikma/pokesprite</code></td>
+<td>Mint item sprites</td>
+<td>Images only.</td>
+</tr>
+<tr>
+<td>Google Fonts</td>
+<td>The Nunito and JetBrains Mono fonts</td>
+<td>Cosmetic.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Important:</strong> The application needs an internet connection. It has no offline mode.</p>
+<h2 id="35-caching">3.5 Caching</h2>
+<p>The application caches responses in memory. This reduces the number of requests. The caches are
+<code>evoCache</code>, <code>speciesCache</code>, <code>formSpeciesCache</code>, and a TM move index.</p>
+<p>The cache is not persistent. The cache clears when you reload the page.</p>
+<h2 id="36-champions-learnset-export">3.6 Champions learnset export</h2>
+<p>The published version produces <code>champions-learnsets.json</code>. CHOMP consumes this file to check move
+legality. The file is approximately 1.4 MB.</p>
+<p><strong>Canonical location:</strong>
+<code>https://raw.githubusercontent.com/willhoop/hoopadex/main/champions-learnsets.json</code></p>
+<h3 id="schema">Schema</h3>
+<p>The file is a JSON object. Each key is a move key: the move name in lowercase, with spaces and
+punctuation removed.</p>
+<pre><code class="language-json">{
+  &quot;acidspray&quot;: {
+    &quot;name&quot;: &quot;Acid Spray&quot;,
+    &quot;type&quot;: &quot;Poison&quot;,
+    &quot;category&quot;: &quot;Special&quot;,
+    &quot;learnedBy&quot;: [
+      {
+        &quot;species&quot;: &quot;Venusaur&quot;,
+        &quot;num&quot;: 3,
+        &quot;sid&quot;: &quot;venusaur&quot;,
+        &quot;methods&quot;: [&quot;TM&quot;],
+        &quot;legalIn&quot;: [&quot;reg-ma&quot;, &quot;reg-mb&quot;]
+      }
+    ]
+  }
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(key)</em></td>
+<td>string</td>
+<td>The move key. Lowercase. No spaces or punctuation.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>The display name of the move.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>string</td>
+<td>The move type, for example <code>Poison</code>.</td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td>string</td>
+<td><code>Physical</code>, <code>Special</code>, or <code>Status</code>.</td>
+</tr>
+<tr>
+<td><code>learnedBy</code></td>
+<td>array</td>
+<td>One entry for each species that can learn the move.</td>
+</tr>
+<tr>
+<td><code>learnedBy[].species</code></td>
+<td>string</td>
+<td>The display name, for example <code>Slowbro-Galar</code>.</td>
+</tr>
+<tr>
+<td><code>learnedBy[].num</code></td>
+<td>number</td>
+<td>The National Dex number.</td>
+</tr>
+<tr>
+<td><code>learnedBy[].sid</code></td>
+<td>string</td>
+<td>The species id. Lowercase.</td>
+</tr>
+<tr>
+<td><code>learnedBy[].methods</code></td>
+<td>array of string</td>
+<td>How the species learns the move, for example <code>TM</code>.</td>
+</tr>
+<tr>
+<td><code>learnedBy[].legalIn</code></td>
+<td>array of string</td>
+<td>The regulations that allow it, for example <code>reg-ma</code>, <code>reg-mb</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Multiple regulations.</strong> The export holds more than one regulation. A species can be legal in one
+regulation and not legal in another. Always check <code>legalIn</code> for the regulation that you use.</p>
+<p><strong>Compatibility rule.</strong> This shape is a public contract. CHOMP depends on it. A change to the shape
+is a breaking change. Increase the version when you change it.</p>
+<h2 id="37-published-version-github-pages">3.7 Published version (GitHub Pages)</h2>
+<p>The published version is newer than the local file <code>app/HoopaDex_1_92.html</code>. It adds three things.</p>
+<p><strong>Live site:</strong> <code>https://willhoop.github.io/hoopadex/</code>
+<strong>Repository:</strong> <code>https://github.com/willhoop/hoopadex</code></p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Size</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>index.html</code></td>
+<td>~494 KB</td>
+<td>The application.</td>
+</tr>
+<tr>
+<td><code>calc-engine.js</code></td>
+<td>~481 KB</td>
+<td>The <code>@smogon/calc</code> damage engine.</td>
+</tr>
+<tr>
+<td><code>champions-learnsets.json</code></td>
+<td>~1.4 MB</td>
+<td>The legality export. See Part 3.6.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="additions-over-version-192">Additions over version 1.92</h3>
+<ol>
+<li><strong>Champions mode.</strong> A <code>Champions</code> option in the generation selector. In this mode the
+   application limits the Pokémon and the moves to the Champions roster.</li>
+<li><strong>Damage calculator tab.</strong> It uses the official Smogon calculation engine (<code>@smogon/calc</code>). It
+   supports abilities, items, weather, terrain, stat stages, burn, critical hits, spread damage, and
+   screens.</li>
+<li><strong>Stat Point (SP) system.</strong> In Champions mode the calculator uses the SP system: 0 to 32 SP for
+   each stat, a 66-point total budget, fixed 31 IVs, and level 50. Other generations use the
+   classic EV and IV system.</li>
+</ol>
+<h4 id="how-champions-movesets-differ-from-the-main-games">How Champions movesets differ from the main games</h4>
+<p>Pokémon Champions has <strong>no level-up movesets and no TM items</strong>. A species can learn a move, or it
+cannot. Any move it can learn is taught directly, at a cost of 100 VP. There is no order, no level
+gate, and no item to find.</p>
+<p>The export keeps a <code>methods</code> field, but in this format the field carries no information: all 14,192
+species-and-move pairs hold the single value <code>["TM"]</code>. Read the export as a flat legality list for
+each regulation. Do not read <code>methods</code> as a learn path.</p>
+<p>This also means a moveset from Scarlet and Violet is not a guide to Champions legality. The lists
+differ. For example, Garchomp can learn Surf in Champions.</p>
+<h3 id="url-format">URL format</h3>
+<p>The application reads the URL hash to open a specific view. Example:
+<code>https://willhoop.github.io/hoopadex/#pokedex/gchampions/gm:reg-mb</code></p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pokedex</code></td>
+<td>The tab to open.</td>
+</tr>
+<tr>
+<td><code>gchampions</code></td>
+<td>Champions mode. For a classic generation, use <code>g1</code> to <code>g9</code>.</td>
+</tr>
+<tr>
+<td><code>gm:reg-mb</code></td>
+<td>The regulation in Champions mode, or the game in a classic generation.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>You do not need a hash to open Champions mode.</strong> The application starts in Champions mode on the
+newest regulation. Use the plain address <code>https://willhoop.github.io/hoopadex/</code>.</p>
+<h4 id="legacy-links">Legacy links</h4>
+<p>Versions before 1.93 wrote <code>g9</code> into the hash while the application was in Champions mode. The
+reader then used <code>g9</code> to leave Champions mode. This made a saved or shared link open the wrong
+mode. Version 1.93 corrects this in two ways:</p>
+<ol>
+<li><code>saveHash()</code> writes <code>gchampions</code> when Champions mode is active.</li>
+<li>The reader ignores a generation number if the same hash also holds a <code>gm:reg-*</code> token. Therefore
+   old links such as <code>#pokedex/g9/gm:reg-mb</code> now open Champions mode correctly.</li>
+</ol>
+<p><code>tests/test-hash-routing.js</code> holds these rules. The test file reads the parser out of
+<code>app/index.html</code>, so the test cannot become different from the shipped code.</p>
+<h3 id="how-to-add-a-new-champions-regulation">How to add a new Champions regulation</h3>
+<p>Do these steps when a new regulation starts.</p>
+<ol>
+<li>Open <code>app/index.html</code>.</li>
+<li>Find <code>CHAMPIONS_IDS_MA</code> and <code>REG_MB_NEW</code>. Add a constant for the new species list, for example
+   <code>const REG_MC_NEW=[...]</code> and <code>const CHAMPIONS_IDS_MC=new Set([...CHAMPIONS_IDS_MB,...REG_MC_NEW]);</code></li>
+<li>Find the block <code>CHAMPIONS REGULATIONS - newest FIRST</code>. Add one row to the <strong>top</strong> of the array:</li>
+</ol>
+<p><code>js
+   {key:'reg-mc', short:'m-c', label:'Regulation M-C', ids:()=&gt;CHAMPIONS_IDS_MC},</code></p>
+<ol start="4">
+<li>Increment the version number in the comment on line 2.</li>
+<li>Run <code>node tests/test-hash-routing.js</code>. All tests must pass.</li>
+</ol>
+<p>Step 3 is the only change that controls behaviour. The default regulation, the dropdown contents,
+the URL hash, and the legality note in the move list all read from this array. Do not change them
+one at a time.</p>
+<hr />
+<h1 id="part-4-explanation">PART 4 - EXPLANATION</h1>
+<p><em>Why the design is like this.</em></p>
+<h2 id="41-why-the-application-is-one-file">4.1 Why the application is one file</h2>
+<p>One HTML file has no build step, no dependency tree, and no version conflicts. You can email it,
+open it from a disk, or host it anywhere. For a reference tool that one person maintains, this
+removes almost all maintenance cost.</p>
+<p>The cost is that the file is large. A small change means that you edit a large file. The version
+rule in Part 2.5 controls that cost.</p>
+<h2 id="42-why-the-application-is-generation-aware">4.2 Why the application is generation-aware</h2>
+<p>A Pokedex that shows only current data gives incorrect answers about older games. Steel resisted
+Ghost and Dark until generation 6. Fairy did not exist until generation 6. Some Pokemon changed
+type or base stats. A player who uses current data to plan an older game will make mistakes.</p>
+<p>Therefore the application stores the historical values. It selects the correct values for the
+generation that you choose.</p>
+<h2 id="43-why-the-application-reads-live-apis">4.3 Why the application reads live APIs</h2>
+<p>The full Pokedex is large. Embedded data would make the file very large, and the data would become
+old. PokeAPI supplies the bulk data and stays current. The application embeds only the data that
+PokeAPI does not supply well: historical types, historical stats, item introduction generations,
+and evolution corrections.</p>
+<p>The cost is the internet requirement. This cost is accepted.</p>
+<h2 id="44-why-the-champions-export-is-a-separate-file">4.4 Why the Champions export is a separate file</h2>
+<p>The Champions export is a separate JSON file, not embedded in the HTML. Two reasons:</p>
+<ol>
+<li><strong>Size.</strong> The export is approximately 1.4 MB. Embedding it would make the application slow to
+   load for every user, including users who never open Champions mode.</li>
+<li><strong>Reuse.</strong> CHOMP reads the same file. A separate file gives one source of truth for legality.
+   If the data were embedded in the HTML, CHOMP would need its own copy, and the two copies would
+   become different over time.</li>
+</ol>
+<p><strong>Note on version 1.92.</strong> The local file <code>app/HoopaDex_1_92.html</code> does not contain Champions mode
+and does not produce this export. Champions mode, the damage calculator, and the export are in the
+published version. See Part 3.7.</p>
+<hr />
+<h2 id="references">References</h2>
+<ol>
+<li>PokeAPI. https://pokeapi.co/</li>
+<li>PokeAPI sprite repository. https://github.com/PokeAPI/sprites</li>
+<li>Smogon set data. https://data.pkmn.cc/</li>
+<li>pokesprite. https://github.com/msikma/pokesprite</li>
+<li>ASD-STE100 Simplified Technical English. https://www.asd-ste100.org/</li>
+<li>Procida, D. Diataxis. https://diataxis.fr/</li>
+</ol></main></body></html>
