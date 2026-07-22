@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Will Hooper — Projects</title>
+<meta name="description" content="Applied modelling and tooling projects. Measured, documented, and open.">
+<style>
+  :root{
+    --bg:#0e0e0e; --ink:#e8e6e1; --mute:#7d7a73; --rule:#2a2926;
+    --rule-strong:#4a4842; --accent:#d9a441;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.6;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding:0 32px}
+
+  /* masthead */
+  header{padding:88px 0 0}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:2.4px;
+           text-transform:uppercase;color:var(--mute);margin-bottom:22px}
+  h1{margin:0;font-size:44px;font-weight:500;letter-spacing:-.6px;color:#fff}
+  header p{margin:20px 0 0;font-size:16.5px;color:var(--ink);max-width:60ch}
+  header p.sub{margin-top:10px;font-size:14px;color:var(--mute);max-width:64ch}
+
+  /* section heads */
+  section{padding:46px 0}
+  h2{margin:0;font-size:12px;font-weight:500;font-family:var(--mono);
+     letter-spacing:2.4px;text-transform:uppercase;color:var(--mute)}
+  .lead{margin:14px 0 0;font-size:14px;color:var(--mute);max-width:62ch}
+
+  /* the grid: figure | body | links */
+  .rows{margin-top:20px;border-top:2px solid var(--rule-strong)}
+  .row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 168px;
+       gap:36px;align-items:start;padding:26px 0;border-bottom:1px solid var(--rule);
+       transition:background .12s ease}
+  .row:hover{background:#141412}
+  .row:hover .name{color:var(--accent)}
+
+
+  .name{margin:0;font-size:20px;font-weight:500;color:#fff;letter-spacing:-.2px;
+        transition:color .12s ease}
+  .name a{color:inherit;text-decoration:none}
+  .name a::after{content:"";position:absolute;inset:0}
+  .name a:focus-visible::after{outline:2px solid var(--accent);outline-offset:-2px}
+  .status{font-family:var(--mono);font-size:10px;letter-spacing:1.3px;
+          text-transform:uppercase;color:var(--mute);margin:7px 0 0}
+  .status.on{color:var(--accent)}
+  .desc{margin:11px 0 0;font-size:14px;color:#b3b0a8;max-width:56ch}
+  .note{margin:9px 0 0;font-size:12.5px;color:var(--mute);max-width:56ch}
+
+  /* fixed link column — one per line, so spacing is identical on every row */
+  .links{display:flex;flex-direction:column;gap:7px;position:relative;z-index:1}
+  .links a{font-size:12.5px;color:var(--mute);text-decoration:none;
+           border-bottom:1px solid transparent;width:fit-content}
+  .links a:first-child{color:var(--ink)}
+  .links a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  .links span{font-size:12.5px;color:#3f3e3a;cursor:default}
+
+  /* method: rules, not boxes */
+  .std{margin-top:30px;border-top:1px solid var(--rule)}
+  .std div{display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;
+           padding:16px 0;border-bottom:1px solid var(--rule)}
+  .std b{font-weight:500;font-size:14px;color:var(--ink)}
+  .std p{margin:0;font-size:13.5px;color:var(--mute);max-width:62ch}
+
+  footer{padding:44px 0 72px;border-top:1px solid var(--rule);
+         font-family:var(--mono);font-size:11.5px;color:var(--mute);letter-spacing:.3px}
+  footer a{color:var(--mute)}
+
+  @media(max-width:720px){
+    header{padding:56px 0 28px} h1{font-size:32px}
+    .wrap{padding:0 20px}
+    .row{grid-template-columns:1fr;gap:0;padding:24px 0}
+    .links{flex-flow:row wrap;gap:14px;margin-top:16px}
+    .std div{grid-template-columns:1fr;gap:5px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Applied modelling and tooling</div>
+    <h1>Will Hooper</h1>
+    <p>I build decision tools that replace guesswork with measured mathematics — and I
+       publish the numbers, including the ones that aren't flattering.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Projects</h2>
+    <div class="rows" id="rows"></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Method</h2>
+    <p class="lead">Applied to every project, so any of them can be handed to another engineer
+       without a conversation.</p>
+    <div class="std">
+      <div><b>Measured, not asserted</b><p>Every performance claim has a validation report with
+        the method, the sample size, and a statement of what the numbers don't prove.</p></div>
+      <div><b>Documented for handoff</b><p>Technical documentation in ASD-STE100 Simplified
+        Technical English, organised by the Diátaxis model.</p></div>
+      <div><b>Decisions recorded</b><p>Significant technical choices are written as ADRs:
+        context, decision, and the negative consequences as well as the positive.</p></div>
+      <div><b>Tested at the formula level</b><p>Golden tests pin the mathematics against the
+        authoritative source, so a model cannot silently drift.</p></div>
+      <div><b>Risks stated openly</b><p>A risk register with likelihood, impact, and mitigation
+        — including the risks that are simply accepted.</p></div>
+      <div><b>Built to be updated</b><p>Anything that changes over time lives in one
+        configuration block, so a new version is a single edit.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span id="year"></span> · Built and documented by Will Hooper ·
+    <a href="mailto:willjhooper@msn.com">willjhooper@msn.com</a>
+  </div>
+</footer>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   ADD A PROJECT: append one object to PROJECTS. Nothing else.
+
+   docs.open is the primary destination; the whole row links there.
+   Leave a document as "" and it renders dimmed instead of missing,
+   which keeps every column identical down the page.
+
+   PUBLISHING: set GITHUB to the repo base URL and every local doc
+   link switches over, e.g.
+   const GITHUB = "https://github.com/willhoop/projects/blob/main/";
+   ───────────────────────────────────────────────────────────── */
+const GITHUB = "";                     // "" = use local rendered docs
+const doc = (p) => GITHUB ? GITHUB + p.src : p.local;
+
+/* Event Desks lives in its own repository, so its documents are linked at the
+   source rather than copied here. Copies drift. See docs/DEPLOYMENT.md section 5. */
+const EVENTDESK = "https://github.com/willhoop/event-desk/blob/main/prediction-market/";
+
+/* Every project shows the SAME five rows in the SAME order, so the columns line
+   up across the whole page. A document that does not exist yet is shown dimmed
+   rather than hidden — a gap you can see is better than a gap you cannot. */
+const SLOTS = ["open","paper","deck","docs","source"];
+const LABEL = { open:"Open", paper:"White paper", deck:"Slide deck",
+                docs:"Technical docs", source:"Source" };
+
+const PROJECTS = [
+  {
+    name: "CHOMP",
+    status: "In daily use", live: true,
+    desc: "A decision engine for competitive Pokémon. At team preview you have about 30 seconds to choose four of six Pokémon and which two to lead. CHOMP runs the game's real damage mathematics across every matchup and answers in under 50 milliseconds, in the browser.",
+    note: "Damage formulas and move legality are pinned to the authoritative source by tests with hand-derived values.",
+    docs: {
+      open:   "../Pokemon/CHOMP/app/chomp-replay-app.html",
+      paper:  doc({local:"docs/CHOMP/CHOMP-whitepaper.html", src:"Pokemon/CHOMP/docs/CHOMP-whitepaper.md"}),
+      deck:   doc({local:"docs/CHOMP/CHOMP-deck-plain-english.pdf", src:"Pokemon/CHOMP/docs/CHOMP-deck-plain-english.pptx"}),
+      docs:   doc({local:"docs/CHOMP/CHOMP-technical-docs.html", src:"Pokemon/CHOMP/docs/CHOMP-technical-docs.md"}),
+      source: ""
+    }
+  },
+  {
+    name: "Event Desks",
+    status: "Live at elitefourcapital.com", live: true,
+    desc: "Prices event contracts on Polymarket and Kalshi and shows where the market looks overconfident. It ranks a candidate field by conversion — the presidency price divided by the nomination price — which reads as the market's odds a candidate wins once nominated.",
+    note: "The house pick is computed from live prices, so no candidate name is written into the code.",
+    docs: {
+      open:   "https://elitefourcapital.com",
+      paper:  EVENTDESK + "docs/white-paper.md",
+      deck:   EVENTDESK + "docs/deck.md",
+      docs:   EVENTDESK + "docs/README.md",
+      source: "https://github.com/willhoop/event-desk/tree/main/prediction-market"
+    }
+  },
+  {
+    name: "HoopaDex",
+    status: "Live — v1.93", live: true,
+    desc: "A complete Pokédex in a single HTML file — no build step, no server, no dependencies. It renders the type chart, base stats, typings and evolution lines as they were in the generation you select. Steel resisted Ghost and Dark before generation 6; Fairy did not exist.",
+    note: "Opens in Champions mode on the newest regulation.",
+    docs: {
+      open:   "https://willhoop.github.io/hoopadex/",
+      paper:  doc({local:"docs/HoopaDex/HOOPADEX-whitepaper.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-whitepaper.md"}),
+      deck:   doc({local:"docs/HoopaDex/HOOPADEX-deck-plain-english.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-deck-plain-english.md"}),
+      docs:   doc({local:"docs/HoopaDex/HOOPADEX-technical-docs.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-technical-docs.md"}),
+      source: "https://github.com/willhoop/hoopadex"
+    }
+  }
+];
+
+document.getElementById('rows').innerHTML = PROJECTS.map(p => `
+  <article class="row">
+    <div>
+      <h3 class="name"><a href="${p.docs.open}">${p.name}</a></h3>
+      <p class="status${p.live ? ' on' : ''}">${p.status}</p>
+      <p class="desc">${p.desc}</p>
+      <p class="note">${p.note}</p>
+    </div>
+    <div class="links">${SLOTS.map(k => p.docs[k]
+      ? `<a href="${p.docs[k]}">${LABEL[k]}</a>`
+      : `<span title="not written yet">${LABEL[k]}</span>`).join('')}</div>
+  </article>`).join('');
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
