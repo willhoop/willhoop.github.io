@@ -146,9 +146,10 @@
 const GITHUB = "";                     // "" = use local rendered docs
 const doc = (p) => GITHUB ? GITHUB + p.src : p.local;
 
-/* Event Desks lives in its own repository, so its documents are linked at the
-   source rather than copied here. Copies drift. See docs/DEPLOYMENT.md section 5. */
-const EVENTDESK = "https://github.com/willhoop/event-desk/blob/main/prediction-market/";
+/* Event Desks keeps its source in its own repository, like every other project.
+   willhoop/event-desk is the DEPLOY target for elitefourcapital.com and holds only
+   the built file — never push source there. */
+const EVENTDESK = "https://github.com/willhoop/elitefourcapital/blob/main/";
 
 /* Every project shows the SAME five rows in the SAME order, so the columns line
    up across the whole page. A document that does not exist yet is shown dimmed
@@ -179,7 +180,7 @@ const PROJECTS = [
       paper:  EVENTDESK + "docs/white-paper.md",
       deck:   EVENTDESK + "docs/deck.md",
       docs:   EVENTDESK + "docs/README.md",
-      source: "https://github.com/willhoop/event-desk/tree/main/prediction-market"
+      source: "https://github.com/willhoop/elitefourcapital"
     }
   },
   {
@@ -194,6 +195,18 @@ const PROJECTS = [
       deck:   "https://github.com/willhoop/hoopadex/blob/main/docs/HOOPADEX-deck-plain-english.md",
       docs:   doc({local:"docs/HoopaDex/HOOPADEX-technical-docs.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-technical-docs.md"}),
       source: "https://github.com/willhoop/hoopadex"
+    }
+  },
+  {
+    name: "Kaizo Dex",
+    status: "Live", live: true,
+    desc: "A companion for an Emerald Kaizo nuzlocke. It carries the romhack's real trainer rosters and encounter tables, an embedded damage calculator, and a run tracker whose species field only offers the encounters a route can actually give you.",
+    docs: {
+      open:   "https://willhoop.github.io/kaizodex/",
+      paper:  "",
+      deck:   "",
+      docs:   "",
+      source: "https://github.com/willhoop/kaizodex"
     }
   }
 ];
