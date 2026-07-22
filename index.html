@@ -163,7 +163,7 @@ const PROJECTS = [
     name: "CHOMP",
     status: "In daily use", live: true,
     desc: "A decision engine for competitive Pokémon. At team preview you have about 30 seconds to choose four of six Pokémon and which two to lead. CHOMP runs the game's real damage mathematics across every matchup and answers in under 50 milliseconds, in the browser.",
-    note: "Damage formulas and move legality are pinned to the authoritative source by tests with hand-derived values.",
+    note: "",
     docs: {
       open:   "apps/chomp-replay-app.html",
       paper:  doc({local:"docs/CHOMP/CHOMP-whitepaper.html", src:"Pokemon/CHOMP/docs/CHOMP-whitepaper.md"}),
@@ -208,7 +208,7 @@ document.getElementById('rows').innerHTML = PROJECTS.map(p => `
       <h3 class="name"><a href="${p.docs.open}">${p.name}</a></h3>
       <p class="status${p.live ? ' on' : ''}">${p.status}</p>
       <p class="desc">${p.desc}</p>
-      <p class="note">${p.note}</p>
+      ${p.note ? `<p class="note">${p.note}</p>` : ''}
     </div>
     <div class="links">${SLOTS.map(k => p.docs[k]
       ? `<a href="${p.docs[k]}">${LABEL[k]}</a>`
