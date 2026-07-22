@@ -205,13 +205,13 @@ const PROJECTS = [
 document.getElementById('rows').innerHTML = PROJECTS.map(p => `
   <article class="row">
     <div>
-      <h3 class="name"><a href="${p.docs.open}">${p.name}</a></h3>
+      <h3 class="name"><a href="${p.docs.open}" target="_blank" rel="noopener">${p.name}</a></h3>
       <p class="status${p.live ? ' on' : ''}">${p.status}</p>
       <p class="desc">${p.desc}</p>
       ${p.note ? `<p class="note">${p.note}</p>` : ''}
     </div>
     <div class="links">${SLOTS.map(k => p.docs[k]
-      ? `<a href="${p.docs[k]}">${LABEL[k]}</a>`
+      ? `<a href="${p.docs[k]}" target="_blank" rel="noopener">${LABEL[k]}</a>`
       : `<span title="not written yet">${LABEL[k]}</span>`).join('')}</div>
   </article>`).join('');
 document.getElementById('year').textContent = new Date().getFullYear();
