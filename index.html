@@ -5,117 +5,160 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Will Hooper — Projects</title>
 <meta name="description" content="Applied modelling and tooling projects. Measured, documented, and open.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0e0e0e; --ink:#e8e6e1; --mute:#7d7a73; --rule:#2a2926;
-    --rule-strong:#4a4842; --accent:#d9a441;
-    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --bg:#f2efe8; --panel:#f8f6f0;
+    --ink:#211e18; --ink2:#433d33; --mute:#726c60; --faint:#9a9283;
+    --rule:#ddd6c8; --rule2:#c6bdaa;
+    --accent:#9c3d2b; --live:#40734f;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,"Cascadia Code",Consolas,monospace;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.6;
-       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-       -webkit-font-smoothing:antialiased}
-  .wrap{max-width:940px;margin:0 auto;padding:0 32px}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.65;
+       font-family:var(--sans);font-size:16px;
+       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{color:var(--accent)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 40px}
+
+  /* running head — a letterhead rule */
+  .runhead{border-bottom:1px solid var(--rule)}
+  .runhead .wrap{display:flex;justify-content:space-between;align-items:center;
+       height:48px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+       text-transform:uppercase;color:var(--faint)}
+  .runhead b{color:var(--ink);font-weight:500;letter-spacing:.18em}
 
   /* masthead */
-  header{padding:88px 0 0}
-  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:2.4px;
-           text-transform:uppercase;color:var(--mute);margin-bottom:22px}
-  h1{margin:0;font-size:44px;font-weight:500;letter-spacing:-.6px;color:#fff}
-  header p{margin:20px 0 0;font-size:16.5px;color:var(--ink);max-width:60ch}
-  header p.sub{margin-top:10px;font-size:14px;color:var(--mute);max-width:64ch}
+  header{padding:40px 0 30px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.34em;
+           text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+  h1{margin:0;font-family:var(--serif);font-size:clamp(44px,6.2vw,72px);
+     font-weight:500;line-height:.96;letter-spacing:-.015em;color:var(--ink)}
+  .intro{margin:20px 0 0;font-family:var(--serif);font-size:clamp(18px,2vw,22px);
+         font-weight:400;line-height:1.5;color:var(--ink2);max-width:40ch;
+         text-wrap:pretty}
+  .meta{margin-top:24px;display:flex;flex-wrap:wrap;font-family:var(--mono);
+        font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+  .meta span{padding-right:20px;margin-right:20px;border-right:1px solid var(--rule)}
+  .meta span:last-child{border-right:none;margin-right:0;padding-right:0}
+  .meta b{color:var(--ink);font-weight:500}
 
-  /* section heads */
-  section{padding:46px 0}
-  h2{margin:0;font-size:12px;font-weight:500;font-family:var(--mono);
-     letter-spacing:2.4px;text-transform:uppercase;color:var(--mute)}
-  .lead{margin:14px 0 0;font-size:14px;color:var(--mute);max-width:62ch}
+  /* section labels — leader rule */
+  section{padding:14px 0 8px}
+  .seclabel{display:flex;align-items:baseline;gap:22px;margin:0;
+            font-family:var(--mono);font-size:12px;font-weight:500;
+            letter-spacing:.3em;text-transform:uppercase;color:var(--mute)}
+  .seclabel::after{content:"";flex:1;height:1px;background:var(--rule);
+                   position:relative;top:-3px}
+  .lead{margin:16px 0 0;font-size:14.5px;color:var(--mute);max-width:62ch;
+        text-wrap:pretty}
 
-  /* the grid: figure | body | links */
-  .rows{margin-top:20px;border-top:2px solid var(--rule-strong)}
-  .row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 168px;
-       gap:36px;align-items:start;padding:26px 0;border-bottom:1px solid var(--rule);
-       transition:background .12s ease}
-  .row:hover{background:#141412}
-  .row:hover .name{color:var(--accent)}
+  /* the register of works */
+  .rows{margin-top:22px;border-top:2px solid var(--ink)}
+  .row{position:relative;display:grid;
+       grid-template-columns:52px minmax(0,1fr) 224px;gap:44px;align-items:start;
+       padding:36px 0;border-bottom:1px solid var(--rule);
+       transition:background .14s ease}
+  .row:hover{background:var(--panel)}
 
+  .idx{font-family:var(--mono);font-size:12.5px;color:var(--faint);
+       padding-top:11px;letter-spacing:.04em;transition:color .14s ease}
+  .row:hover .idx{color:var(--accent)}
 
-  .name{margin:0;font-size:20px;font-weight:500;color:#fff;letter-spacing:-.2px;
-        transition:color .12s ease}
-  .name a{color:inherit;text-decoration:none}
+  .head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+  .name{margin:0;font-family:var(--serif);font-size:31px;font-weight:500;
+        letter-spacing:-.01em;color:var(--ink);transition:color .14s ease;line-height:1.1}
+  .name a{color:inherit}
   .name a::after{content:"";position:absolute;inset:0}
-  .name a:focus-visible::after{outline:2px solid var(--accent);outline-offset:-2px}
-  .status{font-family:var(--mono);font-size:10px;letter-spacing:1.3px;
-          text-transform:uppercase;color:var(--mute);margin:7px 0 0}
-  .status.on{color:var(--accent)}
-  .desc{margin:11px 0 0;font-size:14px;color:#b3b0a8;max-width:56ch}
+  .name a:focus-visible::after{outline:2px solid var(--accent);outline-offset:2px}
+  .row:hover .name{color:var(--accent)}
+  .status{display:inline-flex;align-items:center;gap:8px;margin:0;
+          font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+          text-transform:uppercase;color:var(--mute)}
+  .status .dot{width:6px;height:6px;border-radius:50%;background:var(--rule2);flex:none}
+  .status.on{color:var(--ink)}
+  .status.on .dot{background:var(--ink);box-shadow:0 0 0 3px rgba(33,30,24,.12)}
+  .desc{margin:15px 0 0;font-size:14.5px;line-height:1.6;color:var(--ink2);
+        max-width:58ch;text-wrap:pretty}
+  .blurb{margin:11px 0 0;font-size:14.5px;line-height:1.5;color:var(--mute);
+         max-width:52ch;text-wrap:pretty}
 
-  /* fixed link column — one per line, so spacing is identical on every row */
-  .links{display:flex;flex-direction:column;gap:7px;position:relative;z-index:1}
-  .links a{font-size:12.5px;color:var(--mute);text-decoration:none;
-           border-bottom:1px solid transparent;width:fit-content}
+  /* documents ledger — one label per line, identical spacing every row */
+  .links{display:flex;flex-direction:column;position:relative;z-index:1;padding-top:5px}
+  .links a,.links span{display:flex;align-items:baseline;justify-content:space-between;
+       gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+       text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--rule)}
+  .links a{color:var(--ink2)}
   .links a:first-child{color:var(--ink)}
-  .links a:hover{color:var(--accent);border-bottom-color:var(--accent)}
-  .links span{font-size:12.5px;color:#3f3e3a;cursor:default}
+  .links a::after{content:"↗";color:var(--faint);font-size:10px}
+  .links a:hover{color:var(--accent);border-bottom-color:var(--rule2)}
+  .links a:hover::after{color:var(--accent)}
+  .links span{color:var(--faint);cursor:default}
+  .links span::after{content:"—";color:var(--rule2)}
 
-  /* method: rules, not boxes */
-  .std{margin-top:30px;border-top:1px solid var(--rule)}
-  .std div{display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;
-           padding:16px 0;border-bottom:1px solid var(--rule)}
-  .std b{font-weight:500;font-size:14px;color:var(--ink)}
-  .std p{margin:0;font-size:13.5px;color:var(--mute);max-width:62ch}
+  /* method — a spec table, principle by principle */
+  .std{margin-top:22px;border-top:2px solid var(--ink);
+       display:grid;grid-template-columns:repeat(3,1fr);counter-reset:m}
+  .std div{counter-increment:m;padding:28px 28px 32px;
+           border-bottom:1px solid var(--rule);border-right:1px solid var(--rule)}
+  .std div:nth-child(3n){border-right:none;padding-right:0}
+  .std div:nth-child(3n+1){padding-left:0}
+  .std div::before{content:counter(m,decimal-leading-zero);display:block;
+       font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+       color:var(--accent);margin-bottom:16px}
+  .std b{display:block;font-family:var(--serif);font-weight:500;font-size:19px;
+         color:var(--ink);margin-bottom:9px;line-height:1.2}
+  .std p{margin:0;font-size:13.5px;line-height:1.55;color:var(--mute);
+         max-width:36ch;text-wrap:pretty}
 
-  footer{padding:44px 0 72px;border-top:1px solid var(--rule);
-         font-family:var(--mono);font-size:11.5px;color:var(--mute);letter-spacing:.3px}
+  footer{margin-top:14px;border-top:1px solid var(--rule);padding:34px 0 84px;
+         font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+         text-transform:uppercase;color:var(--faint)}
   footer a{color:var(--mute)}
+  footer a:hover{color:var(--accent)}
 
-  @media(max-width:720px){
-    header{padding:56px 0 28px} h1{font-size:32px}
-    .wrap{padding:0 20px}
-    .row{grid-template-columns:1fr;gap:0;padding:24px 0}
-    .links{flex-flow:row wrap;gap:14px;margin-top:16px}
-    .std div{grid-template-columns:1fr;gap:5px}
+  @media(max-width:820px){
+    .wrap{padding:0 22px}
+    .runhead .wrap span:last-child{display:none}
+    header{padding:32px 0 26px}
+    .intro{max-width:none}
+    .row{grid-template-columns:1fr;gap:0;padding:26px 0}
+    .idx{display:none}
+    .desc{max-width:none}
+    .links{margin-top:16px;padding-top:14px;border-top:1px solid var(--rule)}
+    .links a,.links span{justify-content:flex-start;gap:8px;padding:6px 0;
+         border-bottom:none}
+    .std{grid-template-columns:1fr}
+    .std div{border-right:none!important;padding:22px 0!important}
   }
 </style>
 </head>
 <body>
 
+<div class="runhead">
+  <div class="wrap"><b>Will Hooper</b><span>Selected works</span></div>
+</div>
+
 <header>
   <div class="wrap">
     <div class="eyebrow">Applied modelling and tooling</div>
     <h1>Will Hooper</h1>
-    <p>I build decision tools that replace guesswork with measured mathematics — and I
+    <p class="intro">I build decision tools that replace guesswork with measured mathematics — and I
        publish the numbers, including the ones that aren't flattering.</p>
+    <div class="meta" id="meta"></div>
   </div>
 </header>
 
 <section>
   <div class="wrap">
-    <h2>Projects</h2>
+    <h2 class="seclabel">Projects</h2>
     <div class="rows" id="rows"></div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>Method</h2>
-    <p class="lead">Applied to every project, so any of them can be handed to another engineer
-       without a conversation.</p>
-    <div class="std">
-      <div><b>Measured, not asserted</b><p>Every performance claim has a validation report with
-        the method, the sample size, and a statement of what the numbers don't prove.</p></div>
-      <div><b>Documented for handoff</b><p>Technical documentation in ASD-STE100 Simplified
-        Technical English, organised by the Diátaxis model.</p></div>
-      <div><b>Decisions recorded</b><p>Significant technical choices are written as ADRs:
-        context, decision, and the negative consequences as well as the positive.</p></div>
-      <div><b>Tested at the formula level</b><p>Golden tests pin the mathematics against the
-        authoritative source, so a model cannot silently drift.</p></div>
-      <div><b>Risks stated openly</b><p>A risk register with likelihood, impact, and mitigation
-        — including the risks that are simply accepted.</p></div>
-      <div><b>Built to be updated</b><p>Anything that changes over time lives in one
-        configuration block, so a new version is a single edit.</p></div>
-    </div>
   </div>
 </section>
 
@@ -146,10 +189,9 @@
 const GITHUB = "";                     // "" = use local rendered docs
 const doc = (p) => GITHUB ? GITHUB + p.src : p.local;
 
-/* Every document opens as a rendered page on this site, so nothing detours to
-   GitHub. Regenerate them with build/build_docs.py after editing any source .md.
-   Source repos: willhoop/elitefourcapital is Event Desks' source; the deploy
-   target willhoop/event-desk holds only the built site and must not take source. */
+/* Event Desks keeps its source in its own repository, like every other project.
+   willhoop/event-desk is the DEPLOY target for elitefourcapital.com and holds only
+   the built file — never push source there. */
 
 /* Every project shows the SAME five rows in the SAME order, so the columns line
    up across the whole page. A document that does not exist yet is shown dimmed
@@ -162,6 +204,7 @@ const PROJECTS = [
   {
     name: "CHOMP",
     status: "In daily use", live: true,
+    blurb: "Real-time team-preview engine for competitive Pokémon VGC.",
     desc: "A decision engine for competitive Pokémon. At team preview you have about 30 seconds to choose four of six Pokémon and which two to lead. CHOMP runs the game's real damage mathematics across every matchup and answers in under 50 milliseconds, in the browser.",
     docs: {
       open:   "apps/chomp-replay-app.html",
@@ -174,6 +217,7 @@ const PROJECTS = [
   {
     name: "Event Desks",
     status: "Live at elitefourcapital.com", live: true,
+    blurb: "Prediction-market desk that prices Polymarket and Kalshi contracts.",
     desc: "Prices event contracts on Polymarket and Kalshi and shows where the market looks overconfident. It ranks a candidate field by conversion — the presidency price divided by the nomination price — which reads as the market's odds a candidate wins once nominated.",
     docs: {
       open:   "https://elitefourcapital.com",
@@ -186,11 +230,10 @@ const PROJECTS = [
   {
     name: "HoopaDex",
     status: "Live — v1.93", live: true,
+    blurb: "A generation-aware Pokédex in a single HTML file.",
     desc: "A complete Pokédex in a single HTML file — no build step, no server, no dependencies. It renders the type chart, base stats, typings and evolution lines as they were in the generation you select. Steel resisted Ghost and Dark before generation 6; Fairy did not exist.",
     docs: {
       open:   "https://willhoop.github.io/hoopadex/",
-      /* No rendered HTML copy exists for these two, so they link at the source
-         in the HoopaDex repository, where GitHub renders the markdown. */
       paper:  "docs/HoopaDex/HOOPADEX-whitepaper.html",
       deck:   "docs/HoopaDex/HOOPADEX-deck-plain-english.html",
       docs:   doc({local:"docs/HoopaDex/HOOPADEX-technical-docs.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-technical-docs.md"}),
@@ -200,6 +243,7 @@ const PROJECTS = [
   {
     name: "Kaizo Dex",
     status: "Live", live: true,
+    blurb: "A run companion for the Emerald Kaizo nuzlocke.",
     desc: "A companion for an Emerald Kaizo nuzlocke. It carries the romhack's real trainer rosters and encounter tables, an embedded damage calculator, and a run tracker whose species field only offers the encounters a route can actually give you.",
     docs: {
       open:   "https://willhoop.github.io/kaizodex/",
@@ -211,17 +255,25 @@ const PROJECTS = [
   }
 ];
 
-document.getElementById('rows').innerHTML = PROJECTS.map(p => `
+document.getElementById('rows').innerHTML = PROJECTS.map((p, i) => `
   <article class="row">
+    <div class="idx">${String(i + 1).padStart(2, '0')}</div>
     <div>
-      <h3 class="name"><a href="${p.docs.open}" target="_blank" rel="noopener">${p.name}</a></h3>
-      <p class="status${p.live ? ' on' : ''}">${p.status}</p>
+      <div class="head">
+        <h3 class="name"><a href="${p.docs.open}" target="_blank" rel="noopener">${p.name}</a></h3>
+      </div>
       <p class="desc">${p.desc}</p>
     </div>
     <div class="links">${SLOTS.map(k => p.docs[k]
       ? `<a href="${p.docs[k]}" target="_blank" rel="noopener">${LABEL[k]}</a>`
       : `<span title="not written yet">${LABEL[k]}</span>`).join('')}</div>
   </article>`).join('');
+
+const liveCount = PROJECTS.filter(p => p.live).length;
+document.getElementById('meta').innerHTML =
+  `<span><b>${PROJECTS.length}</b> projects</span>` +
+  `<span><b>${liveCount}</b> live</span>` +
+  `<span>Updated <b>${new Date().getFullYear()}</b></span>`;
 document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 </body>
