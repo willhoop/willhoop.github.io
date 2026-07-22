@@ -1,0 +1,441 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHOMP technical docs — CHOMP</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
+<main><h1 id="chomp-technical-documentation">CHOMP — Technical Documentation</h1>
+<p><strong>Version 1.1 · Last updated 2026-07-22</strong>
+Written in ASD-STE100 Simplified Technical English. Organised with the Diátaxis model.</p>
+<hr />
+<h2 id="0-about-this-document">0. About this document</h2>
+<h3 id="01-purpose">0.1 Purpose</h3>
+<p>This document tells you how to install, operate, and change CHOMP. A new engineer can use this
+document to start work without help.</p>
+<h3 id="02-structure">0.2 Structure</h3>
+<p>This document has four parts:
+- <strong>Part 1 — Tutorial.</strong> Learn CHOMP. Get your first recommendation.
+- <strong>Part 2 — How-to guides.</strong> Do one specific task.
+- <strong>Part 3 — Reference.</strong> Find facts: files, formulas, and settings.
+- <strong>Part 4 — Explanation.</strong> Understand why the design is like this.</p>
+<h3 id="03-terms">0.3 Terms</h3>
+<p>Use these terms with these meanings only.</p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the engine</td>
+<td>The file <code>engine/champ-model.js</code>. It calculates damage and matchups.</td>
+</tr>
+<tr>
+<td>the plugin</td>
+<td>The userscript. It shows the panel in the battle.</td>
+</tr>
+<tr>
+<td>the analyzer</td>
+<td>The file <code>app/chomp-replay-app.html</code>. It reads your replays.</td>
+</tr>
+<tr>
+<td>a set</td>
+<td>The moves, the item, the ability, the nature, and the stat spread of one Pokémon.</td>
+</tr>
+<tr>
+<td>the bring</td>
+<td>The four Pokémon that you take into a game.</td>
+</tr>
+<tr>
+<td>the lead</td>
+<td>The two Pokémon that you send out first.</td>
+</tr>
+<tr>
+<td>pKO</td>
+<td>The probability of a knockout. The engine calculates it from 16 damage rolls.</td>
+</tr>
+<tr>
+<td>SP</td>
+<td>The stat points of the Champions format.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="part-1-tutorial">PART 1 — TUTORIAL</h1>
+<p><em>Learn CHOMP. Do these steps one time.</em></p>
+<h2 id="11-install-the-plugin">1.1 Install the plugin</h2>
+<p>Do these steps:</p>
+<ol>
+<li>Install the Tampermonkey extension in your browser.</li>
+<li>Open the file <code>app/plugin/chomp-plugin-COPY-ME.txt</code>.</li>
+<li>Select all of the text. Copy the text.</li>
+<li>Click the Tampermonkey icon. Click <strong>Dashboard</strong>.</li>
+<li>Click the <strong>+</strong> tab to make a new script.</li>
+<li>Select all of the template text. Delete the text.</li>
+<li>Paste the text that you copied.</li>
+<li>Press <strong>Ctrl+S</strong> to save the script.</li>
+<li>Reload the Pokémon Showdown page.</li>
+</ol>
+<p>The plugin is now active.</p>
+<h2 id="12-get-your-first-recommendation">1.2 Get your first recommendation</h2>
+<p>Do these steps:</p>
+<ol>
+<li>Start a Champions battle.</li>
+<li>Wait for the team preview screen.</li>
+<li>Look at the panel in the top right corner.</li>
+</ol>
+<p>The panel shows the bring, the lead, the weather, and a knockout percentage for each opponent
+Pokémon. If the panel is empty, it shows a diagnostic message. Read Part 2.5 for the messages.</p>
+<h2 id="13-analyse-your-games">1.3 Analyse your games</h2>
+<p>Do these steps:</p>
+<ol>
+<li>Open the file <code>app/chomp-replay-app.html</code> in your browser.</li>
+<li>Type your Showdown username in the <strong>User</strong> box.</li>
+<li>Click <strong>Pull &amp; analyze</strong>.</li>
+</ol>
+<p>The analyzer shows your record. It shows the Pokémon that you play against most. It shows the
+bring that CHOMP recommends for each game.</p>
+<hr />
+<h1 id="part-2-how-to-guides">PART 2 — HOW-TO GUIDES</h1>
+<p><em>Do one task.</em></p>
+<h2 id="21-how-to-update-chomp-for-a-new-regulation">2.1 How to update CHOMP for a new regulation</h2>
+<ol>
+<li>Open the file <code>engine/champ-model.js</code>.</li>
+<li>Find the block <code>FORMAT</code> at the top of the file.</li>
+<li>Change the format name and the Pikalytics slug.</li>
+<li>Change the SP budget, the SP cap, and the level if the format changes them.</li>
+<li>Add the new banned items to <code>bannedItems</code>.</li>
+<li>Add the new banned Pokémon to <code>bannedMons</code>.</li>
+<li>Save the file.</li>
+<li>Do the steps in Part 2.2.</li>
+</ol>
+<h2 id="22-how-to-rebuild-the-plugin-and-the-analyzer">2.2 How to rebuild the plugin and the analyzer</h2>
+<p>The plugin and the analyzer contain a copy of the engine. You must rebuild them after you change
+the engine.</p>
+<ol>
+<li>Open a terminal in the folder <code>build/</code>.</li>
+<li>Run <code>python3 build_v2_userscript.py</code>.</li>
+<li>Run <code>python3 build_replay_app.py</code>.</li>
+<li>Install the new plugin again. Do the steps in Part 1.1.</li>
+</ol>
+<p><strong>Caution:</strong> If you do not rebuild, the plugin keeps the old engine.</p>
+<h2 id="23-how-to-add-a-pokemon-or-a-move">2.3 How to add a Pokémon or a move</h2>
+<p>The engine reads the Pokémon data and the move data from <code>engine/champions-damage-lab.html</code>.</p>
+<ol>
+<li>Open <code>engine/champions-damage-lab.html</code>.</li>
+<li>Find the object <code>MONS</code> for a Pokémon, or the object <code>MOVES</code> for a move.</li>
+<li>Add the new entry. Use the same format as the entries near it.</li>
+<li>Save the file.</li>
+<li>Do the steps in Part 2.2.</li>
+</ol>
+<h2 id="24-how-to-check-that-a-move-is-legal">2.4 How to check that a move is legal</h2>
+<ol>
+<li>Open the Champions learnsets data from HoopaDex.</li>
+<li>Find the Pokémon.</li>
+<li>Make sure that the move is in the list, and that the list includes <code>reg-mb</code>.</li>
+</ol>
+<p>Do not recommend a move that fails this check.</p>
+<h2 id="25-how-to-read-the-plugin-diagnostic-messages">2.5 How to read the plugin diagnostic messages</h2>
+<p>The panel shows a message when it cannot read the teams.</p>
+<table>
+<thead>
+<tr>
+<th>Message</th>
+<th>Meaning</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>no battle open</code></td>
+<td>The plugin cannot find a battle.</td>
+<td>Open a battle. Reload the page.</td>
+</tr>
+<tr>
+<td><code>read 0 mine / 0 foe</code></td>
+<td>The plugin found a battle, but the battle log is empty.</td>
+<td>The page-text fallback runs automatically. If the message stays, report it.</td>
+</tr>
+<tr>
+<td><code>read from page text</code></td>
+<td>The plugin read the teams from the page.</td>
+<td>No action. This is normal on the BETA client.</td>
+</tr>
+<tr>
+<td><code>read 6 mine / 6 foe</code></td>
+<td>The plugin read both teams correctly.</td>
+<td>No action.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="26-how-to-change-the-recommendation-logic">2.6 How to change the recommendation logic</h2>
+<ol>
+<li>Open <code>engine/champ-model.js</code>.</li>
+<li>To change how one Pokémon scores against one opponent, edit the function <code>monVsFoe</code>.</li>
+<li>To change how the engine picks the four, edit the function <code>teamVs</code>.</li>
+<li>To change how the engine picks the two, edit the function <code>bring4</code>.</li>
+<li>Save the file. Do the steps in Part 2.2.</li>
+</ol>
+<hr />
+<h1 id="part-3-reference">PART 3 — REFERENCE</h1>
+<p><em>Facts. Read this when you need a specific detail.</em></p>
+<h2 id="31-folder-structure">3.1 Folder structure</h2>
+<pre><code>CHOMP/
+  README.md            What CHOMP is. Install steps. Quick start.
+  CHANGELOG.md         All changes. Newest first.
+  CLAUDE.md            Project-specific instructions.
+  docs/                White paper, this document, referee report, guides.
+  engine/              champ-model.js, champ-iterate.js, champions-damage-lab.html
+  app/                 chomp-replay-app.html, dashboards
+    plugin/            The userscript.
+    calc/              The damage calculator.
+  build/               The scripts that build the plugin and the analyzer.
+  data/                Game logs, replay index, team pastes.
+  tests/               Test scripts.
+  assets/              Images and exports.
+</code></pre>
+<h2 id="32-architecture">3.2 Architecture</h2>
+<pre><code>champions-damage-lab.html   (Pokémon data, move data, type chart)
+HoopaDex learnsets          (move legality)
+Pikalytics Reg M-B          (opponent set priors)
+            |
+            v
+      engine/champ-model.js
+   (stats -&gt; damage -&gt; pKO -&gt; matchup -&gt; bring and lead)
+            |
+   +--------+--------+----------------+
+   v                 v                v
+plugin           analyzer        champ-iterate.js
+(live panel)     (replays)       (team optimiser)
+</code></pre>
+<p>The plugin and the analyzer contain a copy of the engine. The build scripts make the copy.</p>
+<h2 id="33-stat-formulas">3.3 Stat formulas</h2>
+<p>The Champions format uses the SP system. The engine uses these formulas:</p>
+<pre><code>statL50(base, sp, nature) = floor((floor((2 x base + 31) x 50 / 100) + 5 + sp) x nature)
+hpL50(base, sp)           = floor((2 x base + 31) x 50 / 100) + 60 + sp
+</code></pre>
+<p>The nature multiplier is 1.1, 1.0, or 0.9. Apply the nature multiplier <strong>after</strong> you add the SP.
+The SP budget is 66 points. The maximum for one stat is 32 points. The level is 50. The IVs are 31.</p>
+<h2 id="34-damage-formula">3.4 Damage formula</h2>
+<pre><code>base = floor(floor(22 x power x attack / defence) / 50) + 2
+</code></pre>
+<p>Then apply these steps in this order:
+1. Spread damage: multiply by 0.75.
+2. Weather: multiply by 1.5 or 0.5.
+3. Critical hit: multiply by 1.5.
+4. For each roll from 85 to 100:
+   a. Multiply the base by the roll. Divide by 100. Take the floor.
+   b. Apply STAB. Use <code>pokeRound</code>.
+   c. Apply type effectiveness. Take the floor.
+   d. Apply the item, the abilities, the screens, and the support modifiers. Use <code>pokeRound</code>.</p>
+<p><code>pokeRound(x)</code> gives <code>ceil(x)</code> if the fraction is more than 0.5. If not, it gives <code>floor(x)</code>.</p>
+<p><strong>pKO</strong> is the number of rolls that reach the target HP, divided by 16.</p>
+<h2 id="35-the-format-configuration-block">3.5 The FORMAT configuration block</h2>
+<p>This block is at the top of <code>engine/champ-model.js</code>. It holds all of the values that change
+between regulations.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>The format name.</td>
+</tr>
+<tr>
+<td><code>pikalyticsSlug</code></td>
+<td>The slug for the usage data.</td>
+</tr>
+<tr>
+<td><code>level</code></td>
+<td>The Pokémon level.</td>
+</tr>
+<tr>
+<td><code>sp.budget</code>, <code>sp.cap</code>, <code>sp.autoIV</code></td>
+<td>The SP rules.</td>
+</tr>
+<tr>
+<td><code>megasAllowed</code>, <code>oneMegaPerBattle</code>, <code>teraAllowed</code></td>
+<td>The format switches.</td>
+</tr>
+<tr>
+<td><code>bannedItems</code></td>
+<td>The items that the format does not allow.</td>
+</tr>
+<tr>
+<td><code>legalChoiceItems</code></td>
+<td>The Choice items that the format allows.</td>
+</tr>
+<tr>
+<td><code>bannedMons</code></td>
+<td>The Pokémon that the format does not allow.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="36-engine-functions">3.6 Engine functions</h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>parsePaste(text)</code></td>
+<td>Reads a pokepaste. Gives a list of sets.</td>
+</tr>
+<tr>
+<td><code>buildMon(set)</code></td>
+<td>Makes a battle-ready Pokémon. Calculates the stats. Removes banned items.</td>
+</tr>
+<tr>
+<td><code>moveDamage(att, def, move, ctx)</code></td>
+<td>Gives the damage percentage and the pKO for one move.</td>
+</tr>
+<tr>
+<td><code>bestDamage(att, def, ctx)</code></td>
+<td>Gives the best move by pKO, then by damage.</td>
+</tr>
+<tr>
+<td><code>monVsFoe(me, foe, ctx)</code></td>
+<td>Gives a score for one Pokémon against one opponent.</td>
+</tr>
+<tr>
+<td><code>teamVs(my4, foe6, opts)</code></td>
+<td>Gives a score for one bring against the opponent team.</td>
+</tr>
+<tr>
+<td><code>bring4(my6, foe6, opts)</code></td>
+<td>Gives the best four and the best two.</td>
+</tr>
+<tr>
+<td><code>resolveWeather(my, foe)</code></td>
+<td>Gives the weather and tells you if the weather is contested.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="37-modelled-mechanics">3.7 Modelled mechanics</h2>
+<p>The engine models these mechanics:
+- Weather: rain, sun, sandstorm, snow, heavy rain, harsh sun, strong winds. Sandstorm chip damage.
+- Terrain: Electric, Grassy, Psychic, Misty. Grassy Terrain halves Earthquake. Misty Terrain halves Dragon.
+- Screens: Reflect, Light Screen, Aurora Veil. The engine uses the doubles value.
+- Rooms: Wonder Room.
+- Immunities from abilities: Levitate, Volt Absorb, Water Absorb, Flash Fire, Sap Sipper.
+- Offensive abilities: Adaptability, Mega Launcher, Protean, Technician, Tough Claws, Iron Fist,
+  Sharpness, Water Bubble, Transistor, Tinted Lens, Sand Force, and others.
+- Defensive abilities: Multiscale, Filter, Solid Rock, Thick Fat, Ice Scales, Fur Coat, Fluffy, Heatproof.
+- Intimidate.
+- Items: Life Orb, Expert Belt, type items, Wise Glasses, Muscle Band, Punching Glove.
+- Support abilities for doubles: Helping Hand, Battery, Power Spot, Friend Guard, Flower Gift, Steely Spirit.
+- Burn.
+- Speed changes: Choice Scarf, Tailwind, Swift Swim, Sand Rush, Chlorophyll, Speed Boost.</p>
+<h2 id="38-data-sources">3.8 Data sources</h2>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Use</th>
+<th>Authority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Showdown damage calculator (Champions)</td>
+<td>Stat and damage formulas</td>
+<td>Highest.</td>
+</tr>
+<tr>
+<td>HoopaDex Champions learnsets</td>
+<td>Move legality</td>
+<td>Highest for legality.</td>
+</tr>
+<tr>
+<td>Pikalytics Reg M-B</td>
+<td>Opponent set priors</td>
+<td>A prior. Not certain.</td>
+</tr>
+<tr>
+<td>Showdown replay API</td>
+<td>Game data</td>
+<td>Highest for results.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="part-4-explanation">PART 4 — EXPLANATION</h1>
+<p><em>Why the design is like this.</em></p>
+<h2 id="41-why-the-engine-looks-at-one-turn-only">4.1 Why the engine looks at one turn only</h2>
+<p>The engine calculates the matchup at team preview. It does not simulate the battle. A one-turn
+model is fast and easy to understand. Every recommendation has a number that you can check.</p>
+<p>The cost is real. The engine cannot see multi-turn effects. It does not model recoil, flinch,
+status damage over time, or redirection.</p>
+<h2 id="42-why-the-engine-uses-pko-and-not-a-single-roll">4.2 Why the engine uses pKO and not a single roll</h2>
+<p>Damage has 16 possible rolls. An earlier version used the maximum roll only. That version called a
+hit a "knockout" when only one roll in 16 gave a knockout. The engine now counts the rolls that
+give a knockout. This number is honest.</p>
+<h2 id="43-why-a-contested-weather-war-scores-as-neutral">4.3 Why a contested weather war scores as neutral</h2>
+<p>Both players can set weather. If the engine gives the weather to the opponent, it makes bad
+recommendations. In one game the engine removed a water attacker against a sun team. The player
+won that game because he changed the weather to rain.</p>
+<p>The engine now treats the weather as neutral when both sides can set it. Sandstorm is different.
+Sand Stream sets the sandstorm again after each switch. Therefore the engine keeps a penalty for
+Pokémon that take sandstorm damage.</p>
+<h2 id="44-why-the-lead-uses-knockout-pressure">4.4 Why the lead uses knockout pressure</h2>
+<p>An earlier version chose the lead with the best average matchup. Support Pokémon win that test,
+because they lose no matchups. The lead was too passive. The engine now chooses the two Pokémon
+that threaten the most immediate knockouts.</p>
+<h2 id="45-known-limitations">4.5 Known limitations</h2>
+<ul>
+<li>The engine looks at one turn. It is not a battle AI.</li>
+<li>The engine does not model recoil, flinch, status over time, PP, or redirection.</li>
+<li>The opponent sets are estimates. The engine does not check them against the learnsets.</li>
+<li>The engine gives one answer. It does not use a mixed strategy. A skilled opponent can learn it.</li>
+<li>The score is relative. It is not calibrated against a win rate.</li>
+<li>The engine combines some damage modifiers into one multiplier. The result can differ by 1 HP.</li>
+</ul>
+<h2 id="46-roadmap">4.6 Roadmap</h2>
+<ol>
+<li><strong>Turn simulator.</strong> This gives recoil, flinch, status, redirection, and switch logic.</li>
+<li><strong>Usage-weighted opponent sets.</strong> This uses the full Pikalytics distribution. It also removes
+   illegal moves from the estimated sets.</li>
+<li><strong>Mixed-strategy leads.</strong> This makes the recommendation harder to predict.</li>
+<li><strong>Synergy in the team builder.</strong> This scores cores, not single matchups.</li>
+</ol>
+<hr />
+<h2 id="references">References</h2>
+<ol>
+<li>ASD-STE100 Simplified Technical English. ASD. https://www.asd-ste100.org/</li>
+<li>Procida, D. <em>Diátaxis: A systematic framework for technical documentation.</em> https://diataxis.fr/</li>
+<li>Pokémon Showdown damage calculator (Champions mode). https://calc.pokemonshowdown.com/champions.html</li>
+<li>Pokémon Showdown replay API. https://replay.pokemonshowdown.com/</li>
+</ol></main></body></html>

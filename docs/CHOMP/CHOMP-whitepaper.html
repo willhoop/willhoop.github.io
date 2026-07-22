@@ -1,0 +1,229 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHOMP whitepaper — CHOMP</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
+<main><h1 id="chomp-the-champions-head-to-head-optimizer-for-matchup-prediction">CHOMP: The Champions Head-to-head Optimizer for Matchup Prediction</h1>
+<h3 id="a-fast-interpretable-damage-calculus-algorithm-for-team-preview-decisions-in-pokemon-champions-vgc-reg-m-b">A fast, interpretable damage-calculus algorithm for team-preview decisions in Pokémon Champions VGC (Reg M-B)</h3>
+<p><strong>Author:</strong> Will (willhoop) · Operation Ladder project
+<strong>Version:</strong> 1.0 · July 2026</p>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>Competitive Pokémon Video Game Championships (VGC) is a simultaneous-move, imperfect-information game with an astronomically large strategy space (~10^139 legal team configurations — larger than Chess, Go, Poker, StarCraft, or Dota combined) [2]. Most published work attacks the <em>full-battle policy</em> with heavy machinery: minimax language agents (PokéChamp [1]), root-parallelized Monte-Carlo Tree Search (Foul Play [4]), and multi-agent reinforcement learning with game-theoretic solvers (VGC-Bench [2], Metamon [3]). These systems are powerful but require a battle simulator, training compute, and seconds-to-minutes of search per decision.</p>
+<p>This paper isolates a smaller, higher-leverage sub-problem that a human ladder player actually faces under a clock: <strong>at team preview, given both six-Pokémon rosters, which four do I bring and which two do I lead?</strong> We present <strong>CHOMP</strong>, the Champions Head-to-head Optimizer for Matchup Prediction — a single-ply, fully deterministic algorithm that (1) reads the player's own exact sets from the client and infers the opponent's from usage priors, (2) computes an exact game-accurate damage matrix using the validated Gen-9 Champions damage formula, (3) layers in the mechanics that actually decide games (weather boosts + chip, items, abilities, speed control, priority), (4) selects the best four via exhaustive subset search, and (5) selects the lead pair by turn-one knockout pressure rather than risk-averse averaging. CHOMP runs in milliseconds in the browser, is fully interpretable (every recommendation is backed by a concrete KO percentage), and was tuned and validated against real ranked ladder games.</p>
+<hr />
+<h2 id="1-problem-statement">1. Problem statement</h2>
+<h3 id="11-the-decision">1.1 The decision</h3>
+<p>In VGC doubles, both players build a team of six but bring only four to each game, revealed simultaneously at <em>team preview</em>. The player must choose:
+- a <strong>bring set</strong> B ⊂ Roster, |B| = 4, and
+- a <strong>lead pair</strong> L ⊂ B, |L| = 2 (the two sent out on turn one),</p>
+<p>using only the two rosters of species (moves, items, EVs, and abilities of the opponent are hidden).</p>
+<h3 id="12-why-it-is-hard">1.2 Why it is hard</h3>
+<ul>
+<li><strong>Combinatorics.</strong> For a fixed roster there are C(6,4) = 15 brings and, per bring, C(4,2) = 6 leads — small on its own, but the <em>quality</em> of each depends on a 4×6 (bring × opponent) interaction lattice whose entries are themselves damage computations under contextual modifiers.</li>
+<li><strong>Imperfect information.</strong> The opponent's sets are unknown. VGC-Bench frames team preview as two joint switch-in actions and approaches it with double-oracle / fictitious-play Nash approximations; we instead resolve the uncertainty with a <em>usage prior</em> over sets.</li>
+<li><strong>Simultaneous moves.</strong> There is no "correct" deterministic answer; the true solution is a mixed (Nash) strategy. We adopt a deterministic best-response as a pragmatic, interpretable approximation and document the exploitability trade-off (§6).</li>
+<li><strong>Time budget.</strong> A human has ~30–90 seconds at preview. This rules out deep search and favors a fast evaluator.</li>
+</ul>
+<h3 id="13-design-goals">1.3 Design goals</h3>
+<ol>
+<li><strong>Real-time</strong> (&lt; 50 ms, runs client-side).</li>
+<li><strong>Interpretable</strong> — every call is justified by an explicit KO number a player can verify.</li>
+<li><strong>Game-accurate</strong> — exact damage math, not learned or hand-waved effectiveness.</li>
+<li><strong>Self-improving offline</strong> — able to refine a whole team against the metagame, not just react.</li>
+</ol>
+<hr />
+<h2 id="2-related-work">2. Related work</h2>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Approach</th>
+<th>Scope</th>
+<th>Compute</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PokéChamp</strong> (Karten et al., 2025)</td>
+<td>Minimax with an LLM proposing/pruning moves and modeling the opponent</td>
+<td>Full battle</td>
+<td>LLM inference per node</td>
+</tr>
+<tr>
+<td><strong>Foul Play</strong> (pmariglia)</td>
+<td>Root-parallelized MCTS over a custom engine, guided by a hand-built evaluation</td>
+<td>Full battle</td>
+<td>Many rollouts/turn</td>
+</tr>
+<tr>
+<td><strong>VGC-Bench</strong> (Aristidou et al., 2025)</td>
+<td>Self-play, fictitious play, and double-oracle over PPO actor-critics; 700k-log human dataset</td>
+<td>Full battle + team design</td>
+<td>GPU training</td>
+</tr>
+<tr>
+<td><strong>Metamon</strong> (2025)</td>
+<td>Offline RL with transformers on human replays</td>
+<td>Full battle</td>
+<td>GPU training</td>
+</tr>
+<tr>
+<td><strong>LSA lead prediction</strong> (J. Geek Studies, 2025)</td>
+<td>Latent Semantic Analysis over 5,000 logs to predict lead pairs</td>
+<td>Team preview leads</td>
+<td>Light</td>
+</tr>
+<tr>
+<td><strong>Championship regression</strong> (Dilworth, MSU)</td>
+<td>Multiple linear regression on base-stat totals and coverage</td>
+<td>Team building</td>
+<td>Light</td>
+</tr>
+<tr>
+<td><strong>CHOMP (this work)</strong></td>
+<td>Deterministic damage-calculus matchup evaluator + exhaustive bring search + KO-pressure lead</td>
+<td>Team preview only</td>
+<td>Milliseconds, client-side</td>
+</tr>
+</tbody>
+</table>
+<p>CHOMP's niche is the <strong>light, interpretable, real-time preview solver</strong>. It borrows the <em>evaluation-function</em> idea from Foul Play (but computes exact damage rather than heuristics), the <em>usage-prior</em> idea implicit in human play and in LSA lead work, and the <em>best-response-over-a-team-pool</em> idea from double-oracle (but as an offline hill-climb rather than a full Nash solve).</p>
+<hr />
+<h2 id="3-the-algorithm">3. The algorithm</h2>
+<h3 id="31-notation">3.1 Notation</h3>
+<ul>
+<li>A <strong>set</strong> s = (species, item, ability, nature, SP-spread, moves).</li>
+<li><code>build(s)</code> → a battle mon with computed stats using the validated Champions stat formula:</li>
+<li><code>statL50(base, sp, nat) = ⌊(⌊(2·base+31)·50/100⌋ + 5 + sp)·nat⌋</code></li>
+<li><code>hpL50(base, sp) = ⌊(2·base+31)·50/100⌋ + 60 + sp</code></li>
+<li>nature multiplier ∈ {0.9, 1.0, 1.1} applied <strong>after</strong> the SP addition (validated against in-game screenshots).</li>
+</ul>
+<h3 id="32-damage-model-the-core-primitive">3.2 Damage model (the core primitive)</h3>
+<p>For attacker A, defender D, move m, and context ctx, <code>dmg(A,D,m,ctx)</code> returns the max-roll damage as a percentage of D's HP, using the exact Gen-9 pipeline:</p>
+<pre><code>base = ⌊⌊22·bp·Aeff/Deff⌋/50⌋ + 2
+apply spread (×0.75), weather (×1.5 / ×0.5), then per-roll:
+  x = ⌊base·roll/100⌋ ; ×STAB (pokéRound) ; ×typeEff (floor) ; ×item ; ×choice
+</code></pre>
+<p>with <code>pokéRound(x) = ⌈x⌉ if frac(x) &gt; 0.5 else ⌊x⌋</code>. Modifiers layered in:
+- <strong>STAB</strong> ×1.5, or ×2 with Adaptability; Protean grants STAB on any move.
+- <strong>Weather</strong> — Rain: Water ×1.5, Fire ×0.5. Sun: Fire ×1.5, Water ×0.5.
+- <strong>Abilities</strong> — Mega Launcher (+50% pulse/aura), Technician, Multiscale (½ at full HP), Thick Fat, Intimidate (−1 foe Atk).
+- <strong>Items</strong> — Life Orb (×5324/4096), Expert Belt (×1.2 on super-effective), type gems (×1.2), Wise Glasses / Muscle Band (×1.1), Choice Specs (×1.5).</p>
+<p>This primitive is validated exactly against the community damage calculator.</p>
+<h3 id="33-opponent-inference-handling-imperfect-information">3.3 Opponent inference (handling imperfect information)</h3>
+<ul>
+<li><strong>Own side:</strong> exact. CHOMP reads the player's real saved team from the Showdown client's local storage and matches it to the six at preview — so <em>every</em> team the player owns is scored with its true moves/items/EVs.</li>
+<li><strong>Opponent side:</strong> a <strong>usage prior</strong>. Where a common set is known (Pikalytics Reg M-B usage), it is used; otherwise a <em>generic best-response set</em> is synthesized — the highest-base-power STAB move of each of the mon's types, a coverage move, and the offensively-correct nature/EVs. This is a deliberately pessimistic-but-plausible estimate, not a claim of certainty.</li>
+</ul>
+<h3 id="34-pairwise-matchup-score">3.4 Pairwise matchup score</h3>
+<p>For each of my mons <code>me</code> versus each foe <code>foe</code>:</p>
+<pre><code>s = 0
+myKO  = bestDamage(me → foe)        // % of foe HP, max roll
+foeKO = bestDamage(foe → me)
+if myKO ≥ 100:  s += 3     elif ≥ 50: s += 1.2   elif ≥ 33: s += 0.4   else s −= 0.5
+if foeKO ≥ 100: s −= (fasterThanFoe ? 1.0 : 2.2)  elif ≥ 50: s −= 0.6
+if myKO ≥ 100 and fasterThanFoe: s += 1.0        // clean, faster KO
+</code></pre>
+<p>Speed uses modifiers: Choice Scarf ×1.5, Tailwind ×2, weather-speed abilities (Swift Swim/Sand Rush/Chlorophyll ×2), Speed Boost.</p>
+<h3 id="35-team-bring-objective">3.5 Team (bring) objective</h3>
+<p>For a candidate bring B (|B|=4) versus the opponent six F:</p>
+<pre><code>score(B,F) = Σ_{foe∈F} max_{me∈B} pair(me,foe)      // best answer to each threat
+           − liabilities(B,F)
+</code></pre>
+<p>Liabilities encode the mechanics that lose games:
+- <strong>Weather chip.</strong> If the opponent sets sand and my mon is not Rock/Ground/Steel, penalize per exposed mon. <em>Contested</em> if my bring also has a weather setter (halved, because I can flip it) — but sand is treated as sticky (re-sets on switch), so the penalty remains meaningful and correctly favors sand-immune Steels.
+- <strong>Contested weather war.</strong> If both sides can set weather, damage boosts are neutralized for scoring (you can flip it) rather than handing the opponent their weather unconditionally — this fixed a real mis-call (§5).
+- <strong>Speed control.</strong> Penalize a bring with no Tailwind / Prankster / Trick Room presence.</p>
+<p>The best bring is <code>argmax_B score(B,F)</code> over all 15 subsets — an exhaustive search, tractable because the space is tiny.</p>
+<h3 id="36-lead-selection">3.6 Lead selection</h3>
+<p>The lead is <strong>not</strong> the two safest mons (which biases toward passive support). It is the pair maximizing <strong>turn-one pressure</strong>:</p>
+<pre><code>pressure(me) = Σ_{foe∈F} [ myKO(me,foe) ≥ 100 ? (faster ? 2 : 1.2) : (myKO ≥ 50 ? 0.4 : 0) ]
+lead = top-2 of B by pressure
+</code></pre>
+<p>This is a deterministic proxy for the joint team-preview action that LSA-based lead predictors approximate statistically.</p>
+<h3 id="37-offline-team-optimization-self-iteration">3.7 Offline team optimization (self-iteration)</h3>
+<p>Beyond reacting, CHOMP can <strong>improve a team</strong>. Given a starting six and a candidate set-library, it hill-climbs:</p>
+<pre><code>repeat until no improvement:
+  for each roster slot i, for each candidate c not on the team:
+     if gauntletScore(team with slot i → c) &gt; current + ε:  accept swap
+</code></pre>
+<p>where <code>gauntletScore</code> is the mean bring-score against a fixed gauntlet of representative meta archetypes (Sun, Rain, Sand, Trick Room, Fairy, Goodstuff, Snow, Fast Offense, …). This is a lightweight, greedy analogue of double-oracle best-response.</p>
+<hr />
+<h2 id="4-complexity-and-runtime">4. Complexity and runtime</h2>
+<ul>
+<li>Damage matrix: 4 × 6 × (moves) evaluations, each O(1). </li>
+<li>Bring search: 15 subsets × matrix ≈ a few thousand O(1) ops.</li>
+<li>Total: <strong>sub-millisecond to low-millisecond</strong>, entirely client-side, no network, no training.</li>
+</ul>
+<hr />
+<h2 id="5-iteration-log-empirical-tuning">5. Iteration log (empirical tuning)</h2>
+<p>CHOMP was refined against real ranked games, not in a vacuum:</p>
+<ol>
+<li><strong>v0 — type/flag heuristic.</strong> Scored matchups by type effectiveness, speed tiers, and ~two-dozen ability flags. Fast but blind to real damage, items, and weather chip.</li>
+<li><strong>v1 — damage-calculus core.</strong> Replaced heuristics with the exact damage primitive (§3.2). Recommendations became KO-grounded.</li>
+<li><strong>Weather chip + immunity.</strong> Added after two losses to Tyranitar sand teams in which the frail rain core was chipped to death while two sand-immune Steel mons sat on the bench. CHOMP now flags the chip and recommends the Steels.</li>
+<li><strong>Contested weather war.</strong> Backtesting exposed a mis-call: CHOMP handed the opponent's Charizard-Y sun unconditionally and <em>benched the player's Blastoise</em> (Water halved in sun) — yet that was a game the player <strong>won</strong> by flipping sun→rain with his own Drizzle. Fix: when both sides can set weather, treat boosts as neutral (contestable). Re-validated: CHOMP now correctly keeps the rain setter and values the water attacker.</li>
+<li><strong>Sand-chip calibration.</strong> The contested rule initially over-corrected, letting CHOMP "just contest" Tyranitar sand and re-bench the Steels. Because Sand Stream re-applies on every switch, the sand penalty was re-tuned (0.6 contested / 0.75 uncontested per exposed mon) so the model still prefers Steels against sand — matching the lesson from the actual losses.</li>
+<li><strong>KO-pressure leads.</strong> Replaced risk-averse "safe average" lead selection (which over-picked double-support leads) with turn-one KO pressure.</li>
+</ol>
+<hr />
+<h2 id="6-evaluation">6. Evaluation</h2>
+<p>Backtested on recent ranked ladder games (peak 1323):
+- <strong>Wins reproduced.</strong> On a Charizard-Y sun game, CHOMP's contested-weather logic keeps Pelipper (to flip rain) and values the water core — the line that won.
+- <strong>Losses diagnosed.</strong> On both Tyranitar sand losses, CHOMP recommends the sand-immune Steels (Archaludon + Kingambit) and explicitly flags the frail mons as chipped — the exact correction the player needed.
+- <strong>Interpretability.</strong> Each recommendation ships with concrete numbers (e.g., "Blastoise → Tyranitar 154%", "2 mons chipped by their sand").</p>
+<hr />
+<h2 id="7-limitations-honest">7. Limitations (honest)</h2>
+<ul>
+<li><strong>Single-ply.</strong> CHOMP evaluates the preview matchup, not multi-turn lines. It is not a battle policy; MCTS/RL systems remain superior <em>in-battle</em>.</li>
+<li><strong>Deterministic (exploitable).</strong> A true solution is a mixed strategy; CHOMP's argmax can in principle be exploited by an opponent who knows it. It is a strong human-decision aid, not a Nash agent.</li>
+<li><strong>Opponent inference is a prior.</strong> Hidden sets are estimated, not known; surprise sets (unusual items/abilities) can beat the estimate.</li>
+<li><strong>Ability/item coverage is partial.</strong> High-impact mechanics are modeled; the long tail of ~300 abilities is not yet complete.</li>
+</ul>
+<hr />
+<h2 id="8-future-work">8. Future work</h2>
+<ol>
+<li><strong>Two-ply lead lookahead</strong> (protect/switch/double-target) toward an MCTS-lite.</li>
+<li><strong>Usage-weighted opponent belief</strong> (full Pikalytics set distributions, not just the modal set).</li>
+<li><strong>Mixed-strategy leads</strong> (regret-matching over the top-k brings) to reduce exploitability.</li>
+<li><strong>Synergy-aware team optimizer</strong> (score cores, not just individual matchups) so self-iteration refines a team's identity instead of drifting to generic goodstuff.</li>
+<li><strong>Broaden ability/field coverage</strong> (terrains, hazards, Last Respects scaling, status turns).</li>
+</ol>
+<hr />
+<h2 id="9-references">9. References</h2>
+<ol>
+<li>S. Karten et al. <em>PokéChamp: an Expert-level Minimax Language Agent.</em> arXiv:2503.04094, 2025.</li>
+<li>C. Aristidou et al. <em>VGC-Bench: Towards Mastering Diverse Team Strategies in Competitive Pokémon.</em> arXiv:2506.10326, 2025.</li>
+<li><em>Human-Level Competitive Pokémon via Scalable Offline Reinforcement Learning with Transformers</em> (Metamon). arXiv:2504.04395, 2025.</li>
+<li>pmariglia. <em>Foul Play: A Competitive Pokémon Showdown Battle Bot.</em> pmariglia.github.io.</li>
+<li><em>Predicting competitive Pokémon VGC leads using Latent Semantic Analysis.</em> Journal of Geek Studies, 2025.</li>
+<li>R. Dilworth. <em>Competitive Conquest: Charting the Climb to Pokémon Supremacy.</em> Mississippi State University.</li>
+<li><em>Nash equilibrium estimation in competitive Pokémon.</em> Radboud University thesis.</li>
+<li><em>Implementing Monte Carlo Tree Search in a Pokémon battle based environment.</em> Tilburg University.</li>
+</ol></main></body></html>

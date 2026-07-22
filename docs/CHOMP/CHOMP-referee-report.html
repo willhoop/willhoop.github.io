@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHOMP referee report — CHOMP</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
+<main><h1 id="referee-report-doctoral-thesis-review">Referee Report — Doctoral Thesis Review</h1>
+<h2 id="chomp-a-damage-calculus-engine-for-team-preview-decisions-in-competitive-pokemon">"CHOMP: A Damage-Calculus Engine for Team-Preview Decisions in Competitive Pokémon"</h2>
+<p><strong>Reviewer:</strong> [Committee member — modeling of competitive Pokémon; computational methods]
+<strong>Recommendation:</strong> <em>Major revisions.</em> The thesis makes a sound and useful contribution (a fast, interpretable preview solver) and the candidate is commendably honest about scope. However, several modeling claims are stronger than the mathematics supports, and — critically — I found <strong>implementation defects where the code does not compute the mathematics the thesis claims.</strong> These must be corrected before the work can be defended as a <em>model</em>, as opposed to a well-engineered heuristic.</p>
+<p>I organize comments as: (A) foundational modeling concerns, (B) damage-mathematics concerns, (C) software-implementation audit (does the code implement the stated math?), and (D) required corrections.</p>
+<hr />
+<h2 id="a-foundational-modeling-concerns">A. Foundational modeling concerns</h2>
+<p><strong>A1. The objective is a static heuristic, not an expected value.</strong>
+The thesis repeatedly calls CHOMP a "model" of the bring/lead decision, but the scoring function is a hand-weighted sum of features evaluated at a <em>single</em> time slice. A battle is a finite-horizon stochastic game; the quantity a decision-theoretic model should estimate is <em>E[win | bring, lead, policies]</em>. CHOMP estimates a proxy with no stated relationship to win probability. <strong>The candidate should either (i) reframe the contribution as a heuristic evaluation function (honest, and still valuable), or (ii) calibrate the score against realized win rates</strong> (logistic regression of outcome on score) so the units mean something. As written, "score 17.8" is uninterpretable.</p>
+<p><strong>A2. Deterministic best-response is the wrong solution concept for a simultaneous-move game.</strong>
+Team preview is a one-shot simultaneous game; its solution is a <em>mixed</em> (Nash) strategy. CHOMP returns <code>argmax</code>. The thesis acknowledges exploitability in a sentence but does not quantify it. A referee expects at least a worst-case analysis: against an opponent who knows the policy, how much value is lost? The roadmap item "mixed-strategy leads" is not optional polish — it is the difference between a game-theoretic model and a lookup table.</p>
+<p><strong>A3. Single-ply evaluation cannot see the object it is scoring.</strong>
+Setup, momentum (pivoting), positional trades, and weather/terrain <em>cycles</em> are multi-turn phenomena. A one-ply damage sum is structurally blind to them. The candidate's own Blaziken example (Speed Boost + Swords Dance) is a counterexample the model failed until a <em>patch</em> multiplier was bolted on (see B6). Bolting linear multipliers onto a static score is not a substitute for lookahead; it is curve-fitting to known failures.</p>
+<p><strong>A4. Weights are unprincipled and probably double-count.</strong>
+The bring objective mixes terms of different provenance: <code>+3</code> for a KO, <code>−1.0</code> for "no speed control," <code>−0.6</code> per negative pairing, <code>−0.7×exposed</code> for sand. These magnitudes are asserted, not fit. Worse, there is plausible <strong>double-counting</strong>: a Tailwind user both raises per-pair speed scores <em>and</em> removes the "no speed control" penalty, so speed control is rewarded twice. A referee wants the weights either (i) fit by regression to game outcomes, or (ii) justified by a stated utility model.</p>
+<hr />
+<h2 id="b-damage-mathematics-concerns">B. Damage-mathematics concerns</h2>
+<p><strong>B1. Use of extreme rolls instead of the roll distribution — KO probability is never computed.</strong>
+Gen-9 damage is uniform over 16 integer multipliers (85–100). CHOMP computes only the 85 and 100 rolls and declares "≥100% ⇒ KO." This conflates <em>possible</em> KO with <em>guaranteed</em> KO. The correct quantity is <strong>P(KO) = |{r ∈ 85..100 : dmg(r) ≥ HP}| / 16</strong>, further composed with move accuracy and crit probability (1/24). Reporting a single "KO %" that is actually the <em>max-roll fraction of HP</em> is a category error the thesis should fix: a "154%" and a "101%" are treated identically as "KO," but the latter is often a 10/16 roll.</p>
+<p><strong>B2. Modifier chain ordering and rounding deviate from the cartridge formula.</strong>
+The reference damage pipeline applies weather, crit, STAB, type, burn, and the "final" modifiers (item, ability, screens, Tinted Lens, etc.) as an ordered sequence of 4096-denominator fixed-point multiplications, each with its own round-half-down. CHOMP collapses the ability/item/screen/support terms into a single float <code>M</code> applied with one <code>pokéRound</code> at the end. Because rounding does not commute with multiplication, <strong>this can be off by 1 HP at exactly the thresholds that matter</strong> (the KO boundary). For a thesis whose selling point is "exact damage," this is the most important technical correction: implement the chained-4096 rounding, or drop the word "exact."</p>
+<p><strong>B3. Ability-based type immunities are specified but not enforced (see C1) — and several are missing.</strong>
+Levitate/Volt Absorb/Water Absorb/Flash Fire/Sap Sipper are named, but Wonder Guard, Bulletproof, Soundproof, Overcoat, Sap Sipper's stat effect, and Prankster-vs-Dark (a <em>move-legality</em> immunity, not damage) are absent. The strong-winds handling is a local hack that only neutralizes Flying's <em>weaknesses</em> and does not handle the interaction with Delta Stream ending.</p>
+<p><strong>B4. Turn order is modeled as a total order with ties resolved in the actor's favor.</strong>
+<code>myFast = speed_me ≥ speed_foe</code> treats a speed <em>tie</em> (a genuine 50/50 in-game) as a win. Priority brackets, Trick Room inversion (in the pair scorer, not just as a flag), and in-battle paralysis (−50% speed) are not represented. Speed ties should contribute 0.5, and priority should be bracketed before base speed.</p>
+<p><strong>B5. Opponent-set inference is a biased point estimate with no variance.</strong>
+Two defects: (i) the synthesizer picks the highest-base-power STAB move <em>per type from the global move list without a learnset filter</em>, so it assigns moves the species cannot learn (observed: Eruption/Water Spout on Charizard); (ii) even corrected, a BP-greedy point estimate is a biased estimator of what opponents actually run and carries no uncertainty. The statistically correct object is a <strong>posterior distribution over sets given the species and usage prior</strong>, propagated into the score as an expectation. The thesis's own roadmap item #2 (usage-weighted belief) is the fix and should be promoted from "future work" to "method."</p>
+<p><strong>B6. Setup valuation approximates a nonlinear, sequential quantity with a linear factor.</strong>
+<code>boosted ≈ turn1_pct × mult</code> assumes damage is linear in the attacking stat. It is not — the base-damage step floors <code>⌊⌊22·bp·A/D⌋/50⌋</code>, so scaling A does not scale output exactly, and the error is largest near KO thresholds. It also ignores (a) the turn spent setting up (opportunity cost), (b) the probability of surviving to swing, modeled as a boolean, and (c) that the <em>opponent moves too</em>. This term will systematically overrate frail setup sweepers.</p>
+<p><strong>B7. Weather war as a coin flip.</strong>
+"Both sides can set weather ⇒ neutral" is a binary collapse of a temporal contest that depends on speed, switch initiative, and mega timing. The sand-chip constant (0.6 contested vs 0.75) was tuned to <strong>n = 2 games</strong> (the two Tyranitar losses) — textbook overfitting. At minimum, report this as a tuned hyperparameter with the sample size, and prefer a mechanism (expected turns of your weather up) over a fitted constant.</p>
+<p><strong>B8. Survivability ignores chip economies.</strong>
+Life Orb recoil, sandstorm/【weather】chip, hazards, and consumable items (Sitrus, Focus Sash) change who wins a 2–3 turn exchange. CHOMP's pair score is HP-full, single-hit. The sand <em>bring</em> penalty is a partial, ad-hoc acknowledgment of exactly this gap.</p>
+<hr />
+<h2 id="c-software-implementation-audit-does-the-code-compute-the-stated-math">C. Software-implementation audit (does the code compute the stated math?)</h2>
+<p>This is where the thesis is weakest, and where a software-methods committee member must insist on corrections. Several stated mechanics are <strong>present in the code as data but never executed</strong>, or <strong>executed differently than described.</strong></p>
+<p><strong>C1. Ability immunities: dead table.</strong> <code>IMMUNE_ABIL</code> is defined, but the immunity check was never inserted at the top of <code>moveDamage</code>; the function still begins its effectiveness computation with <code>eff(moveType, defenderTypes)</code>, which only knows <em>type</em> immunities. <strong>Consequence:</strong> Levitate does not stop Earthquake; Volt Absorb does not stop Thunderbolt. The model silently deals full damage through documented immunities. <em>This is a correctness bug, not an approximation.</em></p>
+<p><strong>C2. Intimidate: dormant.</strong> <code>moveDamage</code> reads <code>ctx.foeIntimidate</code>, but no caller in the matchup path ever sets it. Intimidate — one of the format's most impactful abilities — is modeled in principle and applied never. Either wire it (the defender side brings the flag) or remove the claim.</p>
+<p><strong>C3. <code>Sheer Force</code> is a no-op.</strong> The line <code>if(ab==='sheer force') M*=1.0;</code> multiplies by one. It is a placeholder that was never implemented but reads, to a casual reviewer, as "handled."</p>
+<p><strong>C4. Max-roll drives the decision.</strong> <code>bestDamage</code> returns <code>pct</code> (the 100-roll). Every downstream comparison (<code>≥100</code>, <code>≥50</code>) uses this best case. The min roll is computed and discarded. So the reported "KO%" is the <em>most optimistic</em> outcome, and the bring logic is correspondingly optimistic. This contradicts A1/B1 and should be replaced with P(KO) or at least expected damage.</p>
+<p><strong>C5. Speed-modifying abilities never fire in scoring.</strong> <code>speed()</code> honors Speed Boost and Tailwind via <code>ctx</code>, but the matchup path calls it at <code>turn:0</code> with no tailwind set, so Swift Swim/Sand Rush aside, Speed Boost is inert in the pair scorer even though it is credited in the <em>setup</em> term (C-inconsistency: two code paths disagree on whether Speed Boost matters).</p>
+<p><strong>C6. Legality is enforced on damage but not on construction.</strong> Choice Specs/Band/AV multipliers were removed (good), but <code>buildMon</code> will still happily construct a set holding an illegal item or an unlearnable move; nothing rejects it. <code>isBannedItem</code>/<code>isBannedMon</code> (from the new FORMAT block) are defined but <strong>not called</strong> anywhere. Config exists; enforcement does not.</p>
+<p><strong>C7. Combined-modifier rounding (per B2) is a deliberate deviation</strong> from the documented "validated exact formula." The thesis should not claim exactness for a path it knowingly approximates.</p>
+<hr />
+<h2 id="d-required-corrections-priority-order">D. Required corrections (priority order)</h2>
+<ol>
+<li><strong>Wire the dead code (C1, C2, C6).</strong> Insert the ability-immunity check at the top of <code>moveDamage</code>; set <code>foeIntimidate</code> from the defending side; call <code>isBannedItem</code>/<code>isBannedMon</code> in <code>buildMon</code>/<code>parsePaste</code>. <em>(Correctness — mandatory.)</em></li>
+<li><strong>Replace max-roll KO with P(KO)</strong> over the 16 rolls × accuracy × crit (B1, C4). Report probabilities, not a single fraction.</li>
+<li><strong>Implement the chained-4096 rounding</strong> or retract "exact" (B2, C7).</li>
+<li><strong>Learnset-filter and usage-weight opponent inference</strong> (B5) — promote roadmap #2 into the method.</li>
+<li><strong>Calibrate the score to win rate</strong> (A1) and <strong>de-duplicate the speed-control terms</strong> (A4).</li>
+<li><strong>Treat speed ties as 0.5 and bracket priority</strong> (B4).</li>
+<li><strong>Report tuned constants with their sample size</strong> and prefer mechanisms to fitted magic numbers (B7).</li>
+<li>Remove or implement the <code>Sheer Force</code> no-op (C3); reconcile the two Speed-Boost code paths (C5).</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<p>A promising, honest, and genuinely useful engineering artifact whose <strong>empirical claims outrun its formalism</strong> and whose <strong>code contains several mechanics that are declared but not executed.</strong> None of the defects is fatal; all are fixable. With the dead-code corrections (C1–C3, C6), a probabilistic KO treatment (B1), and either calibration or a reframing as a heuristic (A1), this would be a strong thesis. <strong>Major revisions.</strong></p></main></body></html>

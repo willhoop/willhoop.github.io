@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHANGELOG — CHOMP</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
+<main><h1 id="changelog-chomp">CHANGELOG — CHOMP</h1>
+<p>Newest first. Every change to code or documents is logged here.</p>
+<h2 id="2026-07-22">2026-07-22</h2>
+<ul>
+<li><strong>Restructured</strong> to the standard project layout (<code>docs/ engine/ app/ build/ data/ tests/ assets/</code>).</li>
+<li><strong>Technical documentation rewritten</strong> in ASD-STE100 Simplified Technical English, organised by Diataxis.</li>
+<li><strong>Trimmed <code>CLAUDE.md</code></strong> to project-specific context only; universal rules moved to global instructions.</li>
+<li><strong>Plugin: fixed team reading.</strong> The panel showed nothing at team preview. Cause: the BETA client uses
+  the <code>PS</code> global, not <code>app</code>; the battle log was also empty. Fix: detect both clients, and fall back to
+  reading the "<user>'s team:" lines from the page. Verified on a real preview (6 mine / 6 foe).</li>
+<li><strong>Plugin: added a diagnostic line</strong> so a failed read reports the reason instead of showing an empty panel.</li>
+<li><strong>Plugin: auto-close</strong> the News popup and collapse the rooms sidebar (one-shot, cannot loop).</li>
+<li><strong>Engine: burn</strong> now halves physical damage (activates in the turn simulator).</li>
+<li><strong>Engine: removed Choice Specs / Choice Band / Assault Vest</strong> modifiers. They are not legal in Reg M-B.</li>
+<li><strong>Engine: <code>BAD_AUTO</code> blacklist</strong> stops inferred sets from using Blast Burn, Hydro Cannon, Explosion, etc.</li>
+<li><strong>Engine: <code>FORMAT</code> config block</strong> added. A new regulation is now a one-file edit.</li>
+<li><strong>Engine: referee-report fixes</strong> - ability immunities now execute (Levitate stops Earthquake);
+  Intimidate now applies; format legality is enforced in <code>buildMon</code>; KO is now <code>pKO</code> across all 16 rolls
+  instead of the max roll only.</li>
+<li><strong>Engine: setup-sweeper valuation</strong> added, after Speed Boost + Swords Dance sweepers scored too low.</li>
+<li><strong>Engine: full field layer</strong> - terrain, extended weather, screens, Wonder Room, doubles support abilities.</li>
+<li><strong>Engine: contested weather war</strong> - neutral boosts when both sides can set weather; sand chip
+  re-calibrated so sand-immune Steels are preferred against Tyranitar.</li>
+<li><strong>Added</strong> the referee report (self-critique of the math and the implementation).</li>
+<li><strong>Added</strong> the replay analyzer with personal-meta threat ranking and team tune-up.</li>
+</ul>
+<h2 id="2026-07-22-synthesized-opponent-sets-now-respect-the-champions-legal-move-list">2026-07-22 — synthesized opponent sets now respect the Champions legal-move list</h2>
+<p><strong>Roadmap item 2, partly closed.</strong> The engine invented an opponent's moves by taking the strongest
+move of the right category from the whole move table. It never checked whether the species could
+learn it. This is how Charizard was once given Eruption.</p>
+<ul>
+<li>Added <code>data/champions-legal-moves.json</code> (49 KB), generated from the HoopaDex export
+  <code>champions-learnsets.json</code>. One bitmask per species over 496 moves, for each regulation. The
+  bitmask form keeps the table small enough to inline in the userscript.</li>
+<li>Added <code>canLearn(species, move, regulation)</code> to <code>engine/champ-model.js</code>, and wired it into the
+  synthesis filter in both build scripts.</li>
+<li><strong>Safety rule.</strong> The oracle answers "is this pair recorded as legal", not "is this pair illegal".
+  Five moves in the legal pool (spore, softboiled, milk drink, power shift, struggle) are absent
+  from the export. Anything the export does not know about is ALLOWED. A missing datum must never
+  delete a real move. Pinned by five tests.</li>
+<li>Measured effect: Charizard's synthesized set changed from Eruption to
+  <code>Overheat / Hurricane / Focus Blast</code>. Every synthesized set checked is now learnset-legal.</li>
+</ul>
+<p><strong>Separate defect found and fixed during this work.</strong> The built userscript called <code>isBannedItem</code>
+but never defined it. The build script sliced the engine from <code>const byName</code>, which starts after
+that definition, so fix C6 (banned-item enforcement) would have thrown a ReferenceError as soon as
+a set was parsed. The slice now starts at <code>const FORMAT</code>. Verified by loading the built file and
+calling the function.</p>
+<p><strong>Domain note.</strong> Champions has no level-up movesets and no TM items; a species can learn a move or
+it cannot. The <code>methods</code> field in the export holds <code>["TM"]</code> for all 14,192 pairs and carries no
+information. A Scarlet/Violet moveset is not a guide to Champions legality — Garchomp learns Surf
+in Champions but not Waterfall.</p>
+<p>Added <code>tests/test-legality.js</code> (16 tests). <code>test-damage-golden.js</code> (16) and <code>test-engine.js</code> (4)
+still pass.</p></main></body></html>
