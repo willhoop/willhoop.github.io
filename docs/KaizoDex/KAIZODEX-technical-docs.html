@@ -1,0 +1,420 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KAIZODEX technical docs — KaizoDex</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>KaizoDex</span></div></div>
+<main><h1 id="kaizo-dex-technical-documentation">Kaizo Dex — Technical Documentation</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English and is organised by Diátaxis:
+tutorial, how-to, reference, explanation.</em></p>
+<hr />
+<h1 id="tutorial-run-it-in-one-minute">Tutorial — run it in one minute</h1>
+<p>You need a browser. You do not need Node, Python, or an install.</p>
+<ol>
+<li>Get the three files: <code>index.html</code>, <code>trainers.json</code>, <code>changes.json</code>. Keep them in the same folder.</li>
+<li>Start a local web server in that folder:</li>
+</ol>
+<p><code>python3 -m http.server 8000</code></p>
+<ol start="3">
+<li>Open <code>http://localhost:8000/</code>.</li>
+</ol>
+<p><strong>Do not open <code>index.html</code> with a double click.</strong> The page fetches the two JSON files. A browser
+blocks <code>fetch</code> from a <code>file://</code> page, so the Trainers, Bosses, and Changes sections stay empty. A
+local server is required.</p>
+<p>The published copy is at <code>https://willhoop.github.io/kaizodex/</code>.</p>
+<hr />
+<h1 id="how-to-guides">How-to guides</h1>
+<h2 id="how-to-update-the-trainer-data">How to update the trainer data</h2>
+<ol>
+<li>Open <code>trainers.json</code>.</li>
+<li>Find or add the record. Keep the shape exactly:</li>
+</ol>
+<p><code>json
+   {
+     "loc": "Rustboro Gym",
+     "name": "Leader Roxanne",
+     "cat": "Boss",
+     "dbl": 0,
+     "team": [
+       { "species": "Nosepass", "g": "f", "lv": 15, "item": "Sitrus Berry",
+         "nat": "Naughty", "moves": ["SELFDESTRUCT","Attract","Seismic Toss","Thunder Wave"] }
+     ]
+   }</code></p>
+<ol start="3">
+<li>Use the species name that Pokémon Showdown uses. The sprite function derives the image filename
+   from this string. A wrong name gives a broken image.</li>
+<li>Validate before you commit:</li>
+</ol>
+<p><code>python3 -c "import json;d=json.load(open('trainers.json'));print(len(d),'records')"</code></p>
+<ol start="5">
+<li>Reload the page and check the record in the <strong>Trainers</strong> section.</li>
+</ol>
+<h2 id="how-to-add-a-boss-to-the-bosses-section">How to add a boss to the Bosses section</h2>
+<p>The Bosses section is built at run time. It is not a separate list.</p>
+<p><code>buildBosses()</code> selects every record where <code>cat === "Boss"</code>, plus every record where <code>cat ===
+"Evil"</code> <strong>and</strong> the name contains <code>Leader</code>. So:</p>
+<ul>
+<li>To make a trainer a boss, set <code>"cat": "Boss"</code>.</li>
+<li>To make an evil-team fight a boss, keep <code>"cat": "Evil"</code> and put <code>Leader</code> in the name.</li>
+</ul>
+<p>The category shown in the interface is derived from the name: <code>Elite Four</code> in the name gives Elite
+Four, <code>Champion</code> gives Champion, <code>cat === "Evil"</code> gives Evil Team, anything else gives Gym. The
+level cap shown is the highest level on the team.</p>
+<p>Optional threat text and a plan come from the <code>BOSSMETA</code> table in <code>index.html</code>. Without an entry
+there, the section falls back to listing the team and telling the reader to open the Trainers tab.</p>
+<h2 id="how-to-update-the-romhack-change-tables">How to update the romhack change tables</h2>
+<p>Open <code>changes.json</code>. It holds five arrays. Match the shape of the existing rows:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Row shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>abilities</code></td>
+<td><code>{"m":"Venusaur","old":"Overgrow","new":"Chlorophyll/Overgrow"}</code></td>
+</tr>
+<tr>
+<td><code>stats</code></td>
+<td><code>{"m":"Ditto","k":[100,100,100,100,100,100],"note":"..."}</code> — <code>k</code> is HP, Atk, Def, SpA, SpD, Spe</td>
+</tr>
+<tr>
+<td><code>moves</code></td>
+<td><code>{"name":"Drill Run","repl":"Horn Drill","type":"Ground","bp":"80","acc":"100%","eff":"High crit ratio"}</code></td>
+</tr>
+<tr>
+<td><code>tms</code></td>
+<td><code>{"tm":"TM01","move":"Focus Punch","note":""}</code></td>
+</tr>
+<tr>
+<td><code>evos</code></td>
+<td><code>"Pidgey-&gt;Pidgeotto:"</code> — a plain string, not an object</td>
+</tr>
+</tbody>
+</table>
+<p><code>evos</code> is a string array while the others are object arrays. This is inconsistent and is recorded as
+open work in the white paper.</p>
+<h2 id="how-to-change-the-level-caps">How to change the level caps</h2>
+<p>Edit the <code>CAPS</code> constant in <code>index.html</code>:</p>
+<pre><code class="language-js">const CAPS = [
+  [&quot;Roxanne&quot;,&quot;Rock&quot;,15], [&quot;Brawly&quot;,&quot;Fighting&quot;,19], [&quot;Wattson&quot;,&quot;Electric&quot;,29],
+  [&quot;Flannery&quot;,&quot;Fire&quot;,42,1], ...
+];
+</code></pre>
+<p>The fields are: boss name, type, cap level, and an optional flag. The flag marks a large jump from
+the previous cap, which the interface highlights — 29→42 at Flannery and 55→70 at Tate &amp; Liza are
+the two places runs stall.</p>
+<h2 id="how-to-update-the-encounter-tables">How to update the encounter tables</h2>
+<p>The <code>ENC</code> constant in <code>index.html</code> holds 91 locations:</p>
+<pre><code class="language-js">const ENC = [
+  [&quot;Littleroot Town&quot;, [
+    [&quot;Surf&quot;, &quot;Squirtle 60, Totodile 30, Croconaw 5, Wartortle 5&quot;],
+    [&quot;Old Rod&quot;, &quot;Luvdisc 70, Goldeen 30&quot;]
+  ]],
+  ...
+];
+</code></pre>
+<p>Each location has a list of <code>[method, "Species rate, Species rate, ..."]</code> pairs. The recognised
+methods are <code>Grass</code>, <code>Cave</code>, <code>Inside</code>, <code>Surf</code>, <code>Old Rod</code>, <code>Good Rod</code>, <code>Super Rod</code>.</p>
+<p><strong>This table drives the run tracker.</strong> <code>encSpeciesFor(route)</code> parses these strings to decide which
+species the tracker will let a player log for that route. A change here changes the tracker.</p>
+<h2 id="how-to-deploy">How to deploy</h2>
+<p>The repository root is the site root, so the published files are the source files.</p>
+<ol>
+<li>Make the change in the local folder.</li>
+<li>Run <code>publish.bat "what changed"</code> from <code>Projects\</code>.</li>
+<li>Wait about a minute for GitHub Pages to rebuild.</li>
+<li>Open <code>https://willhoop.github.io/kaizodex/</code> and press Ctrl+Shift+R.</li>
+<li>Confirm the Trainers section is populated. An empty section means the JSON did not load.</li>
+</ol>
+<hr />
+<h1 id="reference">Reference</h1>
+<h2 id="files">Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Size</th>
+<th>It holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>index.html</code></td>
+<td>112 kB</td>
+<td>Markup, styles, logic, encounter tables, level caps, boss metadata</td>
+</tr>
+<tr>
+<td><code>trainers.json</code></td>
+<td>247 kB</td>
+<td>450 trainer records</td>
+</tr>
+<tr>
+<td><code>changes.json</code></td>
+<td>11.7 kB</td>
+<td>Five romhack change tables</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sections">Sections</h2>
+<p><code>overview</code>, <code>tracker</code>, <code>bosses</code>, <code>ai</code>, <code>pokedex</code>, <code>trainers</code>, <code>encounters</code>, <code>changes</code>, <code>calc</code>,
+<code>tools</code>, <code>routing</code>, <code>caps</code>, <code>resources</code>.</p>
+<p>Navigation is driven by the <code>tabs</code> array in <code>index.html</code>. Each entry is <code>[id, label]</code>.</p>
+<h2 id="persistent-state">Persistent state</h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Store</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kaizodex_team</code></td>
+<td><code>localStorage</code></td>
+<td>One entry per route: species and status</td>
+</tr>
+</tbody>
+</table>
+<p>Statuses: On Team, Boxed, Dead, Missed, Not logged.</p>
+<p>There is no server and no account. Clearing browser data destroys the run log. Export first.</p>
+<h2 id="external-dependencies">External dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Used for</th>
+<th>Failure behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>play.pokemonshowdown.com</code></td>
+<td>Sprite images</td>
+<td>Broken image icons; text still readable</td>
+</tr>
+<tr>
+<td><code>pokeapi.co</code> (species 1–386)</td>
+<td>Pokédex detail</td>
+<td>Pokédex section stays empty</td>
+</tr>
+<tr>
+<td><code>calc.anastarawneh.com</code></td>
+<td>Damage calculator (iframe)</td>
+<td>Blank panel; open-in-new-tab link works</td>
+</tr>
+<tr>
+<td><code>ekdex.anastarawneh.com</code></td>
+<td>EK Pokédex (iframe)</td>
+<td>Blank panel; open-in-new-tab link works</td>
+</tr>
+</tbody>
+</table>
+<p>Every embedded panel has a labelled external link beside it, because a site can refuse to be framed
+at any time.</p>
+<h2 id="key-functions-in-indexhtml">Key functions in <code>index.html</code></h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>It does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sprite(name)</code></td>
+<td>Turns a species name into a Showdown sprite URL. Lowercases, maps <code>♀</code>/<code>♂</code> to <code>f</code>/<code>m</code>, strips punctuation, special-cases the Deoxys forms.</td>
+</tr>
+<tr>
+<td><code>buildBosses()</code></td>
+<td>Assembles the boss list from the trainer records at run time.</td>
+</tr>
+<tr>
+<td><code>encSpeciesFor(route)</code></td>
+<td>Returns the species a route can give. Drives the tracker's species filter.</td>
+</tr>
+<tr>
+<td><code>routeMons()</code> / <code>pickSpecies()</code></td>
+<td>Render the tracker's per-route controls.</td>
+</tr>
+<tr>
+<td><code>saveRun()</code> / <code>exportRun()</code> / <code>resetRun()</code></td>
+<td>Write, export, and clear <code>kaizodex_team</code>.</td>
+</tr>
+<tr>
+<td><code>renderTrainers()</code> / <code>renderBosses()</code> / <code>renderChanges()</code> / <code>renderEnc()</code></td>
+<td>Render their sections from the loaded data.</td>
+</tr>
+<tr>
+<td><code>initCalc()</code> / <code>calc()</code> / <code>statAt()</code> / <code>stageMult()</code></td>
+<td>Set up the calculator panel and its helpers.</td>
+</tr>
+<tr>
+<td><code>initDexMaps()</code> / <code>loadDexList()</code> / <code>renderDex()</code> / <code>renderDexDetail()</code></td>
+<td>The PokéAPI-backed Pokédex.</td>
+</tr>
+<tr>
+<td><code>toggleTeam()</code> / <code>saveTeam()</code> / <code>renderMyTeamBar()</code></td>
+<td>The team bar that carries a selection between sections.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="data-counts-verified-2026-07-22">Data counts, verified 2026-07-22</h2>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trainer records</td>
+<td>450</td>
+</tr>
+<tr>
+<td>Enemy Pokémon</td>
+<td>1,633</td>
+</tr>
+<tr>
+<td>Distinct species used</td>
+<td>376</td>
+</tr>
+<tr>
+<td>Trainer locations</td>
+<td>65</td>
+</tr>
+<tr>
+<td>Encounter locations</td>
+<td>91</td>
+</tr>
+<tr>
+<td>Double battles</td>
+<td>68</td>
+</tr>
+<tr>
+<td>Boss-tagged records</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Ability changes</td>
+<td>74</td>
+</tr>
+<tr>
+<td>Stat changes</td>
+<td>30</td>
+</tr>
+<tr>
+<td>New or replaced moves</td>
+<td>12</td>
+</tr>
+<tr>
+<td>TM changes</td>
+<td>50</td>
+</tr>
+<tr>
+<td>Evolution changes</td>
+<td>50</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="explanation">Explanation</h1>
+<h2 id="why-there-is-no-build-step">Why there is no build step</h2>
+<p>The application is three static files. Adding a bundler would add a toolchain, a lockfile, and a
+class of failure where the built output differs from the source. The cost of not having one is that
+the encounter table and the level caps live inside a 112 kB HTML file instead of separate modules.</p>
+<p>That trade is acceptable at this size and would stop being acceptable if the encounter data grew.
+The natural next step, if it does, is to move <code>ENC</code> and <code>CAPS</code> into their own JSON files alongside
+the two that already exist — not to add a framework.</p>
+<h2 id="why-the-calculator-is-embedded-and-not-implemented">Why the calculator is embedded and not implemented</h2>
+<p>A generic Gen-3 damage calculator gives <strong>wrong answers</strong> for this romhack. 30 species have
+rewritten base stats and 74 have different abilities. Damage depends on both.</p>
+<p>Implementing a correct calculator means importing the romhack's full stat and ability tables and
+then keeping that import correct across every future patch. The community calculators already carry
+that data and are maintained by people who track the patches.</p>
+<p>Embedding them keeps one source of truth. The cost is a live dependency on a third-party site, which
+is why every panel has a visible fallback link and why the interface states that a blank panel means
+the remote site refused to be framed.</p>
+<h2 id="why-the-tracker-filters-the-species-list-by-route">Why the tracker filters the species list by route</h2>
+<p>A free-text field accepts a typo and accepts a species the route cannot give. Both produce a run log
+that is quietly wrong, and the log is the thing the player trusts to remember what happened forty
+hours ago.</p>
+<p>Because the encounter table is already in the file, the tracker can offer only the legal options.
+The constraint is free. This is the same principle as a form that offers a date picker instead of a
+text box.</p>
+<h2 id="why-the-ai-section-is-written-as-prose-and-not-as-a-table">Why the AI section is written as prose and not as a table</h2>
+<p>The battle AI is a scoring loop with several branches that are roughly 50% random rolls. A table
+implies determinism that does not exist.</p>
+<p>The section therefore states the order of the checks, marks which ones are random, and ends with the
+practical conclusion — bait a move, then bring in the answer. It tells the reader what is likely and
+labels what is not, rather than presenting a decision table that would be wrong at the margin.</p>
+<h2 id="why-localstorage-and-not-an-account">Why <code>localStorage</code> and not an account</h2>
+<p>The run log is one player's private data about a single-player game. An account would require a
+server, a password, and a privacy policy, for a benefit — sync across devices — that most players do
+not need.</p>
+<p>The cost is real: clearing browser data destroys the log, and the log does not follow the player to
+another device. The Export button is the mitigation, and Import is listed as open work.</p>
+<hr />
+<h2 id="open-work">Open work</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Record the romhack patch version in the data files</td>
+<td>Open. The most important gap.</td>
+</tr>
+<tr>
+<td>Derive the Start Here counts from the data rather than hand-writing them</td>
+<td>Open. The stated counts disagree with the shipped files.</td>
+</tr>
+<tr>
+<td>Import for the run log</td>
+<td>Open. Export exists.</td>
+</tr>
+<tr>
+<td>Normalise <code>changes.json</code> <code>evos</code> to objects like the other four tables</td>
+<td>Open.</td>
+</tr>
+<tr>
+<td>Move <code>ENC</code> and <code>CAPS</code> out of <code>index.html</code> into JSON</td>
+<td>Open. Only worth doing if the data grows.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Kaizo Dex is a fan-made planning companion for Pokémon Emerald Kaizo. It is not affiliated with
+Nintendo, Creatures Inc., or Game Freak, and it ships no game files.</em></p></main></body></html>

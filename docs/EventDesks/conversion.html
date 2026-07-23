@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>conversion — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="explanation-why-conversion-is-the-key-number">Explanation: why conversion is the key number</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English.</em></p>
+<h2 id="the-problem">The problem</h2>
+<p>A prediction market shows a price. A price alone does not tell you where the market is
+wrong.</p>
+<p>The Presidency desk once covered one candidate. That desk answered one question: "Is Jon
+Ossoff cheap?" A reader could not compare Ossoff against the field. The desk also fixed
+the candidate in the code. The desk went stale when the market moved.</p>
+<h2 id="the-idea">The idea</h2>
+<p>Each serious candidate has two markets:</p>
+<ol>
+<li>Will the party nominate them?</li>
+<li>Will they win the election?</li>
+</ol>
+<p>Divide the second by the first.</p>
+<pre><code>conversion = presidency ÷ nomination
+</code></pre>
+<p>The result reads as one sentence: <strong>"If the party nominates this person, this is the
+market's chance that they win it all."</strong></p>
+<h2 id="why-the-ratio-carries-information">Why the ratio carries information</h2>
+<p>The two markets share the nomination. When you divide, the nomination cancels. What is
+left is the general election alone.</p>
+<p>A candidate at 15c for the nomination and 10c for the presidency converts at 67%. The
+market says: nominate Ossoff and he wins two elections out of three.</p>
+<p>That is a strong claim. The election is more than two years away. No party has a nominee.
+No poll tests the matchup. The market is confident about a result nobody can see.</p>
+<h2 id="why-a-high-conversion-is-a-selling-opportunity">Why a high conversion is a selling opportunity</h2>
+<p>The wedge is long the nomination and short the presidency. The wedge wins in one world:
+the party nominates the candidate, and the candidate loses in November.</p>
+<p>A high conversion makes that world cheap. The market has priced it as unlikely. If you
+think a first-term senator is not a two-in-three favourite against an unknown opponent,
+the wedge pays you to say so.</p>
+<p>The desk therefore ranks by conversion, not by price. The highest conversion is the house
+pick.</p>
+<h2 id="why-the-pick-is-computed">Why the pick is computed</h2>
+<p>The pick falls out of the data. No name is in the code.</p>
+<p>This has two results:
+1. The pick moves when the money moves. The desk cannot go stale.
+2. The desk cannot argue with itself. The front page and the desk read the same engine.</p>
+<h2 id="the-yardstick-moves-too">The yardstick moves too</h2>
+<p>A conversion of 67% means nothing alone. The desk compares it against the median of the
+liquid board.</p>
+<p>The median is computed today from today's prices. "High" therefore means high against
+this market, not against a number somebody chose.</p>
+<h2 id="why-quarter-kelly">Why quarter-Kelly</h2>
+<p>The Kelly criterion gives the stake that maximises long-run growth. Kelly assumes you know
+the true probability.</p>
+<p>You do not know it. You estimated it. An error in the estimate is punished hard: full
+Kelly on a wrong probability loses money faster than a flat stake.</p>
+<p>We stake a quarter of Kelly. A quarter keeps most of the growth and cuts the variance by
+a large factor. A quarter also survives an estimate that is wrong.</p>
+<h2 id="the-limits">The limits</h2>
+<ul>
+<li>The ratio needs two liquid markets. See
+  <a href="thin-markets.md">Why we exclude thin markets</a>.</li>
+<li>A conversion above 1.0 is incoherent. A candidate cannot win without the nomination.
+  The engine rejects a ratio above 1.6 as a quoting error.</li>
+<li>The ratio says nothing about <em>why</em> the market is confident. That is the analyst's job.</li>
+</ul>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>Kelly, J. L. (1956). "A New Interpretation of Information Rate." <em>Bell System Technical
+  Journal</em> 35(4), 917–926.</li>
+<li>Thorp, E. O. (2006). "The Kelly Criterion in Blackjack, Sports Betting, and the Stock
+  Market." <em>Handbook of Asset and Liability Management</em>, Vol. 1.</li>
+<li>Kalshi market data, event tickers <code>KXPRESNOMD-28</code>, <code>KXPRESNOMR-28</code>, <code>KXPRESPERSON-28</code>.</li>
+<li>Polymarket event <code>presidential-election-winner-2028</code>.</li>
+</ul></main></body></html>

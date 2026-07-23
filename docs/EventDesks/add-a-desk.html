@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>add a desk — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="how-to-add-a-new-desk">How to add a new desk</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English.</em></p>
+<p>A desk is one article about one market. This document tells you to add one.</p>
+<h2 id="step-1-make-the-page-file">Step 1. Make the page file</h2>
+<p>Make a file in <code>app/pages/</code>. Name it <code>&lt;Name&gt;Desk.tsx</code>.</p>
+<p>Use the shared parts. Do not write an inline style. The parts are in
+<code>app/components/ui.tsx</code> and <code>app/components/Shell.tsx</code>.</p>
+<pre><code class="language-tsx">import { Wrap, Header, Section, Footer } from &quot;../components/Shell&quot;;
+import { Lead, Verdict, BarRow, Loading } from &quot;../components/ui&quot;;
+
+export default function NameDesk() {
+  return (
+    &lt;Wrap&gt;
+      &lt;Header title=&quot;Name&quot; sub={&lt;&gt;a short subtitle&lt;/&gt;} ticker={segs} /&gt;
+      &lt;Section n=&quot;01&quot; title=&quot;The board&quot; dek=&quot;tap anyone&quot;&gt;
+        &lt;Lead&gt;One sentence that says what the reader sees.&lt;/Lead&gt;
+        {/* content */}
+      &lt;/Section&gt;
+      &lt;Footer desk=&quot;Name&quot; /&gt;
+    &lt;/Wrap&gt;
+  );
+}
+</code></pre>
+<h2 id="step-2-add-the-route">Step 2. Add the route</h2>
+<p>Open <code>app/router.tsx</code>. Import the page. Add the path:</p>
+<pre><code class="language-tsx">{ path: &quot;name&quot;, element: &lt;NameDesk /&gt; },
+</code></pre>
+<p>The router uses hash routing. The address becomes <code>/#/name</code>.</p>
+<h2 id="step-3-get-the-prices">Step 3. Get the prices</h2>
+<p>Use a hook. Do not fetch inside a component.</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Hook</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Polymarket, one market</td>
+<td><code>usePolyRunner</code></td>
+<td>Live in the browser.</td>
+</tr>
+<tr>
+<td>Polymarket, a whole board</td>
+<td><code>useField</code></td>
+<td>Live in the browser.</td>
+</tr>
+<tr>
+<td>Polymarket, price history</td>
+<td><code>useHistory</code></td>
+<td>Feeds <code>LineChart</code>.</td>
+</tr>
+<tr>
+<td>Kalshi</td>
+<td><code>useLive</code></td>
+<td>Reads <code>kalshi.json</code>. Server-refreshed.</td>
+</tr>
+</tbody>
+</table>
+<p>Do not fetch Kalshi from the browser. Kalshi blocks the browser.</p>
+<h2 id="step-4-obey-the-data-rule">Step 4. Obey the data rule</h2>
+<p>Compute each number, or read it live. Do not write a number in the code.</p>
+<p>If a value is a snapshot, label it as a snapshot on the screen. Give the source and the
+date. Put the value in <code>data/</code> with a comment. See <code>data/lebron.ts</code> for the pattern.</p>
+<h2 id="step-5-link-the-desk">Step 5. Link the desk</h2>
+<p>Open <code>app/pages/Home.tsx</code>. Add a link. Rank the desks by real-world importance. Do not
+rank them alphabetically.</p>
+<h2 id="step-6-test-the-math">Step 6. Test the math</h2>
+<p>Add a test in <code>tests/</code>. Test each new function in <code>engine/</code>. Pin each result to a value
+you calculated by hand. Do not pin a result to the current output of the code.</p>
+<h2 id="step-7-update-the-documentation">Step 7. Update the documentation</h2>
+<ol>
+<li>Add the desk to the white paper.</li>
+<li>Add the desk to the deck.</li>
+<li>Add the desk to <code>docs/reference/structure.md</code>.</li>
+<li>Add a line to <code>CHANGELOG.md</code>.</li>
+</ol>
+<h2 id="step-8-check-the-desk-on-a-phone">Step 8. Check the desk on a phone</h2>
+<p>Support mobile. Use one column below 720px. Make each tap target 36px high or more. Let
+each table scroll sideways.</p></main></body></html>

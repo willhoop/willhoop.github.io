@@ -1,0 +1,220 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHANGELOG — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="changelog">Changelog</h1>
+<p><strong>Version 1.0.1 · Last updated 2026-07-22</strong></p>
+<p>All notable changes to Event Desks are recorded here.</p>
+<p>The format follows <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>.
+Versions follow <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<p><strong>Rule.</strong> Every change to the code is logged here in the same pass, together with the
+matching updates to the white paper, the deck, and the technical documentation. A prior
+conclusion is never silently rewritten; what changed and why is stated.</p>
+<hr />
+<h2 id="102-2026-07-22">[1.0.2] — 2026-07-22</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li><strong>The source tree is now in version control.</strong> 82 files pushed to
+  <code>willhoop/event-desk</code> under <code>prediction-market/</code>, in 12 commits, one per folder. The
+  three living documents, the engine, the tests, and the data are all tracked. Before
+  this, only the built <code>index.html</code> was in the repository, so a lost folder lost the
+  source.</li>
+</ul>
+<h3 id="note-on-the-repository-layout">Note on the repository layout</h3>
+<p>The project sits in <code>prediction-market/</code> inside the repository, not at the repository
+root. The reason is a filename collision: the repository root already holds the built
+<code>index.html</code>, which is the live site that Cloudflare Pages serves. The source tree also
+holds an <code>index.html</code> — the ten-line Vite shell. Pushing the source to the root would
+overwrite the live site.</p>
+<p>The repository root therefore keeps the deployment artefacts:
+<code>index.html</code> (built), <code>kalshi.json</code>, <code>polls.json</code>, and <code>.github/workflows/</code>.</p>
+<p>The proper fix is to set Cloudflare Pages to build from source: root directory
+<code>prediction-market</code>, build command <code>npm run build</code>, output directory <code>dist</code>. The data
+files must move to <code>prediction-market/public/</code> first, and the Actions must be updated to
+write them there. This is open work. A failed Pages build does not take the site down,
+because Pages keeps serving the last successful deployment.</p>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><strong>The project moved into <code>prediction-market/</code>.</strong> The workspace folder now holds one
+  folder per project. Every path inside the project is unchanged.</li>
+<li><strong>The Electoral desk no longer implies a 2028 forecast.</strong> The desk reads the 2024 result
+  by state and moves it with a national swing parameter. There is no 2028 general-election
+  polling in the dataset, and none exists publicly this far out. The desk previously read
+  "The 2028 map, simulated" with a "2028 · LIVE" chip, which invited the reader to treat
+  the electoral-vote total as a projection.</li>
+<li>The subtitle now reads "2024 baseline, your assumptions".</li>
+<li>The year chip now reads "2024 base" instead of "2028 · live".</li>
+<li>A caveat sits directly under the electoral-vote bar, because that bar is the number a
+    reader screenshots: "NOT A FORECAST — this is the 2024 result, moved by your settings."</li>
+<li>The prior conclusion is not withdrawn. The simulation is unchanged and correct. What
+    changed is the label, which over-claimed. See white paper §7, which already stated the
+    limitation.</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>Version and date headers added to <code>CHANGELOG.md</code>, <code>build/README.md</code>, and
+  <code>assets/README.md</code>. Every document in the project now carries both.</li>
+</ul>
+<hr />
+<h2 id="100-2026-07-22"><a href="https://github.com/willhoop/event-desk">1.0.0</a> — 2026-07-22</h2>
+<p>The project is brought up to the project standards: fixed folder structure, tests, one
+config block, and the three living documents.</p>
+<h3 id="added_1">Added</h3>
+<ul>
+<li><strong>Documentation set</strong>, all versioned and dated.</li>
+<li><code>docs/white-paper.md</code> — every formula, derivation, worked value, limitation, and
+    source. Sections cover venue fees, the cross-venue lock, the wedge, the conversion
+    ratio, Kelly sizing, the electoral model, the sports desk, and verification.</li>
+<li><code>docs/deck.md</code> — the same content in plain words, 13 slides, linking the white paper
+    on the final slide.</li>
+<li><code>docs/</code> — technical documentation in ASD-STE100 Simplified Technical English,
+    organised by Diátaxis: 1 tutorial, 4 how-to guides, 5 reference documents,
+    4 explanations.</li>
+<li>This changelog.</li>
+<li><strong><code>engine/config.ts</code></strong> — one configuration block. Every value that changes over time is
+  now a single edit: site identity, refresh intervals, venue fee coefficients, the T-bill
+  rate, liquidity floors, feed freshness thresholds, electoral parameters, and the Kelly
+  fraction.</li>
+<li><strong>Test suite</strong> — 42 tests under Vitest.</li>
+<li><code>tests/pricing.test.ts</code> (20) — fees, the wedge, the lock, quarter-Kelly.</li>
+<li><code>tests/field.test.ts</code> (22) — conversion, the thin-market guard, the pick, the median.</li>
+<li>Every expected value is derived by hand, not captured from current output.</li>
+<li><code>npm test</code> and <code>npm run test:watch</code> added to <code>package.json</code>.</li>
+</ul>
+<h3 id="changed_1">Changed</h3>
+<ul>
+<li><strong>Folder structure</strong> now matches the project standard:
+  <code>docs/ engine/ app/ data/ build/ tests/ assets/</code>.</li>
+<li><code>src/lib/*</code> split: pure logic to <code>engine/</code>, React hooks to <code>app/</code>.</li>
+<li><code>src/components/*</code> → <code>app/components/</code>, <code>src/pages/*</code> → <code>app/pages/</code>.</li>
+<li><code>src/data/*</code> → <code>data/</code>.</li>
+<li>All imports rewritten. <code>tsconfig.json</code>, <code>tailwind.config.js</code>, and <code>index.html</code>
+    updated to match.</li>
+<li><strong><code>engine/pricing.ts</code></strong> now reads its fee coefficients, T-bill rate, and Kelly fraction
+  from <code>engine/config.ts</code> instead of holding literals.</li>
+<li><strong><code>engine/field.ts</code></strong> now reads its liquidity floors from <code>engine/config.ts</code>.</li>
+</ul>
+<h3 id="fixed_1">Fixed</h3>
+<ul>
+<li><strong>Wedge direction documented correctly.</strong> A higher presidency price makes the wedge
+  <em>cheaper</em>, not dearer, because the short leg is the presidency NO. This was asserted
+  backwards in a draft test; the code was always right. The corrected direction is now
+  pinned by two tests and written up in the white paper, §4.3.</li>
+</ul>
+<h3 id="removed">Removed</h3>
+<ul>
+<li><strong>Dead code.</strong> <code>pages/OssoffDesk.tsx</code> and <code>components/LockCalculator.tsx</code> were
+  unreferenced after the Presidency desk rewrite. Deleted.</li>
+<li><strong>Scratch files at root.</strong> <code>poll-data-desk.html</code>, <code>preview/</code>, <code>.probe</code>. Deleted.</li>
+</ul>
+<h3 id="design">Design</h3>
+<ul>
+<li><strong>Decorative glyphs removed</strong> from the interface: check marks, crosses, the warning
+  sign, and the pause bars are now words. Functional marks are kept — <code>+</code>/<code>−</code> for price
+  direction, disclosure triangles, the external-link arrow.</li>
+<li><strong>Accent gradient removed</strong> from the Midterms progress bar; it is now a flat brand fill.</li>
+</ul>
+<hr />
+<h2 id="090-2026-07-20"><a href="https://github.com/willhoop/event-desk">0.9.0</a> — 2026-07-20</h2>
+<h3 id="added_2">Added</h3>
+<ul>
+<li><strong>Sports desk</strong> at <code>/sports</code>. The LeBron James free-agency board, read live from
+  Polymarket in the browser: the full field, a 7-day movers strip, the price tape for the
+  top three, and a cap-space section explaining the favourite.</li>
+<li><code>engine/sports.ts</code>, <code>app/useField.ts</code>, <code>app/components/OddsBoard.tsx</code>,
+    <code>data/lebron.ts</code>.</li>
+<li>Cap figures are a labelled snapshot with source and date (ESPN, 2026-07-10).</li>
+<li><strong>Clickable ticker.</strong> Each priced segment links out to the venue it was read from. The
+  crawl pauses on hover and on touch, because a moving target is hard to tap.</li>
+<li><code>engine/venues.ts</code>. Every URL was confirmed against the venue's own API before use.</li>
+<li><strong>Electoral map affordances.</strong> A legend strip showing the tap cycle, a "N states set by
+  you" badge with a clear control, and a thumb-sized battleground row of the ten closest
+  states — Delaware is a few pixels wide on a phone.</li>
+</ul>
+<h3 id="changed_2">Changed</h3>
+<ul>
+<li><strong>The Presidency desk replaced the Ossoff desk.</strong> The article is now the whole 2028
+  field ranked by conversion, and the house pick is computed from live prices rather than
+  written into the code. <code>/ossoff</code> redirects to <code>/presidency</code>.</li>
+<li><strong>The lock calculator became a verdict panel.</strong> Five labelled form rows replaced by one
+  large answer, visible before any input is touched, with nudgeable price chips and stake
+  presets.</li>
+<li><strong>Home page</strong> now derives its poll figures and its house call from the live engines
+  instead of hard-coded percentages.</li>
+<li><strong>Cross-venue comparisons now use two real books.</strong> Polymarket is fetched per runner
+  (<code>app/usePolyRunner.ts</code>); previously the same price was passed for both venues, which
+  would have reported phantom arbitrage for any candidate other than Ossoff.</li>
+</ul>
+<h3 id="fixed_2">Fixed</h3>
+<ul>
+<li><strong>Thin markets excluded from the house pick.</strong> On first live load the engine named
+  Beshear at 75% conversion off a 4c/3c market, where one tick moves the ratio 25 points.
+  Runners must now clear 8c nomination and 4c presidency to be eligible. Thin runners are
+  still shown, labelled THIN and greyed. The field median moved 62% → 61%.
+  Written up in <code>docs/explanation/thin-markets.md</code> and white paper §5.3.</li>
+<li><strong>Chart stretching on mobile.</strong> <code>preserveAspectRatio="none"</code> was scaling every chart
+  non-uniformly, distorting lines and text. Charts now measure their container and draw
+  1:1 in CSS pixels.</li>
+<li><strong>Chart hover.</strong> The tooltip was pinned to the top of the plot regardless of cursor
+  position; it now anchors beside the points it describes. On a phone the card sat under
+  the reader's thumb, so values now render in a readout bar above the chart.</li>
+<li><strong>Sticky header bleed.</strong> The header was 800px wide while the board below it was 1080px,
+  so content slid past it on both sides. The header backdrop is now full-bleed.</li>
+<li><strong>Mobile masthead.</strong> 40px type wrapped "The Presidency" onto two lines and the sticky
+  header consumed 191px of a phone screen. Now 103px, one line, with the subtitle beneath.</li>
+<li><strong>Tap targets.</strong> The spread controls were 24px; raised to 36px.</li>
+<li><strong>Tailwind missing from a build.</strong> A build run from a scratch directory without
+  <code>tailwind.config.js</code> produced a styles-free site while reporting success. The deploy
+  procedure now greps the output for a known rule before shipping.</li>
+</ul>
+<hr />
+<h2 id="080-2026-07-20"><a href="https://github.com/willhoop/event-desk">0.8.0</a> — 2026-07-20</h2>
+<h3 id="changed_3">Changed</h3>
+<ul>
+<li><strong>Hosting moved to Cloudflare Pages</strong> with the custom domain <code>elitefourcapital.com</code>
+  (and <code>www</code> alias). Some mobile carriers block <code>github.io</code>, which made the previous
+  address unreachable for the intended readers.</li>
+<li>Both domains use a proxied CNAME to <code>event-desk.pages.dev</code>.</li>
+<li>Every commit to <code>main</code> now deploys automatically.</li>
+<li><strong>Documentation rewritten</strong> in ASD-STE100 Simplified Technical English.</li>
+</ul>
+<h3 id="fixed_3">Fixed</h3>
+<ul>
+<li><strong>Kalshi workflow push race.</strong> Run 18 failed with <code>! [rejected] main -&gt; main</code>. Each
+  Action now runs <code>git pull --rebase --autostash</code> in a five-attempt retry loop with a
+  concurrency guard.</li>
+<li><strong>Kalshi freshness claim corrected.</strong> The cron requests 10 minutes; GitHub delays
+  scheduled workflows on low-activity repositories and the true interval is 1–2 hours.
+  The site now reports the true age and no longer claims minute-level freshness.
+  Written up in <code>docs/explanation/kalshi-delay.md</code>.</li>
+</ul>
+<hr />
+<h2 id="earlier">Earlier</h2>
+<p>Versions before 0.8.0 predate this changelog. The site began as a single-candidate Ossoff
+desk and grew to cover polling, the electoral map, midterms, and bet sizing.</p></main></body></html>

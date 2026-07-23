@@ -233,7 +233,9 @@ const PROJECTS = [
     blurb: "A generation-aware Pokédex in a single HTML file.",
     desc: "A complete Pokédex in a single HTML file — no build step, no server, no dependencies. It renders the type chart, base stats, typings and evolution lines as they were in the generation you select. Steel resisted Ghost and Dark before generation 6; Fairy did not exist.",
     docs: {
-      open:   "https://willhoop.github.io/hoopadex/",
+      /* The app lives at app/index.html in its repository. Linking the repo root
+         served the README through Jekyll's default theme instead of the app. */
+      open:   "https://willhoop.github.io/hoopadex/app/",
       paper:  "docs/HoopaDex/HOOPADEX-whitepaper.html",
       deck:   "docs/HoopaDex/HOOPADEX-deck-plain-english.html",
       docs:   doc({local:"docs/HoopaDex/HOOPADEX-technical-docs.html", src:"Pokemon/HoopaDex/docs/HOOPADEX-technical-docs.md"}),
@@ -247,9 +249,9 @@ const PROJECTS = [
     desc: "A companion for an Emerald Kaizo nuzlocke. It carries the romhack's real trainer rosters and encounter tables, an embedded damage calculator, and a run tracker whose species field only offers the encounters a route can actually give you.",
     docs: {
       open:   "https://willhoop.github.io/kaizodex/",
-      paper:  "",
-      deck:   "",
-      docs:   "",
+      paper:  "docs/KaizoDex/KAIZODEX-whitepaper.html",
+      deck:   "docs/KaizoDex/KAIZODEX-deck-plain-english.html",
+      docs:   "docs/KaizoDex/KAIZODEX-technical-docs.html",
       source: "https://github.com/willhoop/kaizodex"
     }
   }

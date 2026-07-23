@@ -7,7 +7,9 @@ try:
 except ImportError:
     markdown = None
 
-ROOT = '/sessions/kind-fervent-sagan/mnt/Projects'
+# Resolve Projects/ from this file's own location: <Projects>/portfolio/build/build_docs.py
+# Hard-coding a session path made this script break the moment the session changed.
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 OUT  = os.path.join(ROOT, 'portfolio', 'docs')
 
 CSS = """
@@ -56,6 +58,8 @@ def main():
     projects = {
         'CHOMP':      os.path.join(ROOT,'Pokemon','CHOMP'),
         'HoopaDex':   os.path.join(ROOT,'Pokemon','HoopaDex'),
+        'KaizoDex':   os.path.join(ROOT,'Pokemon','KaizoDex'),
+        'EventDesks': os.path.join(ROOT,'prediction-market'),
         'Pokemon':    os.path.join(ROOT,'Pokemon'),
     }
     made = 0
@@ -83,8 +87,8 @@ def main():
             for fn in files:
                 if fn.endswith('.pptx'):
                     try:
-                        subprocess.run(['python3','/sessions/kind-fervent-sagan/mnt/.claude/skills/pptx/scripts/office/soffice.py',
-                                        '--headless','--convert-to','pdf','--outdir',odir,os.path.join(dirpath,fn)],
+                        subprocess.run(['soffice','--headless','--convert-to','pdf',
+                                        '--outdir',odir,os.path.join(dirpath,fn)],
                                        capture_output=True, timeout=180)
                     except Exception: pass
     print(f'rendered {made} documents into portfolio/docs/')

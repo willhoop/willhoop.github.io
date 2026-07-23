@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>deploy — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="how-to-deploy-a-change">How to deploy a change</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English.</em></p>
+<p>This document tells you to put a change on https://elitefourcapital.com.</p>
+<h2 id="before-you-start">Before you start</h2>
+<p>Complete the documentation first. The documentation is living. Obey these rules:
+1. Update the white paper if you changed a formula or a data source.
+2. Update the deck if you changed what the site does.
+3. Update the technical documentation if you changed a procedure or a value.
+4. Add a line to <code>CHANGELOG.md</code>.
+5. Increase the version number. Change the "last updated" date.</p>
+<h2 id="step-1-check-the-types-and-the-tests">Step 1. Check the types and the tests</h2>
+<pre><code>npm test
+npm run build
+</code></pre>
+<p>Both commands must pass. <code>npm run build</code> runs <code>tsc -b</code> first. A type error stops the
+build.</p>
+<h2 id="step-2-check-the-build-output">Step 2. Check the build output</h2>
+<p>The build writes <code>dist/index.html</code>. Check the file:</p>
+<pre><code>grep -c 'bg-paper{' dist/index.html
+</code></pre>
+<p>The result must be <code>1</code>. A result of <code>0</code> means Tailwind did not run. The site will have no
+styles. Do not deploy a file that fails this check.</p>
+<h2 id="step-3-upload-the-file">Step 3. Upload the file</h2>
+<ol>
+<li>Open https://github.com/willhoop/event-desk/upload/main.</li>
+<li>Select <code>dist/index.html</code>.</li>
+<li>Write a commit message. Describe the change.</li>
+<li>Click <strong>Commit changes</strong>.</li>
+</ol>
+<p>Name the file <code>index.html</code> in the repository root.</p>
+<h2 id="step-4-wait-for-the-deployment">Step 4. Wait for the deployment</h2>
+<p>Cloudflare Pages sees the commit. Cloudflare builds and deploys the site. This takes
+about 60 seconds. Do not do a manual step.</p>
+<h2 id="step-5-verify-the-live-site">Step 5. Verify the live site</h2>
+<ol>
+<li>Open https://elitefourcapital.com.</li>
+<li>Press Ctrl+Shift+R. This clears the cached copy.</li>
+<li>Check your change on the screen.</li>
+</ol>
+<p>Verify the change. Do not report success before you see the change.</p>
+<h2 id="if-the-deployment-fails">If the deployment fails</h2>
+<p>Open https://dash.cloudflare.com and go to <strong>Workers &amp; Pages → event-desk →
+Deployments</strong>. The failed deployment shows a log.</p>
+<p>Cloudflare keeps each earlier deployment. To go back, open the earlier deployment and
+click <strong>Rollback</strong>.</p></main></body></html>

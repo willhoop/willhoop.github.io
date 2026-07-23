@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>kalshi delay — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="explanation-why-the-kalshi-prices-are-not-live-to-the-minute">Explanation: why the Kalshi prices are not live to the minute</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English.</em></p>
+<h2 id="the-constraint">The constraint</h2>
+<p>Kalshi blocks a request from a browser. The API sends no CORS header. Therefore the site
+cannot read Kalshi prices the way it reads Polymarket prices.</p>
+<p>Polymarket permits a browser request. Polymarket prices are live in the page.</p>
+<h2 id="the-current-method">The current method</h2>
+<p>A GitHub Action reads Kalshi on a schedule. The workflow is
+<code>.github/workflows/kalshi.yml</code>. The workflow runs <code>build/build-kalshi.js</code>. The script
+writes <code>kalshi.json</code> and commits the file. The site reads <code>kalshi.json</code> from the same
+origin.</p>
+<h2 id="the-delay">The delay</h2>
+<p>The cron asks for every 10 minutes:</p>
+<pre><code class="language-yaml">schedule:
+  - cron: &quot;*/10 * * * *&quot;
+</code></pre>
+<p>GitHub does not obey this. GitHub delays a scheduled workflow on a repository with low
+activity. GitHub documents this behaviour.</p>
+<p>The observed run times on 2026-07-20 were 13:04, 15:05, 16:39, and 17:49. The true
+interval was 1 hour to 2 hours.</p>
+<h2 id="what-we-do-about-it">What we do about it</h2>
+<p>We do not claim the prices are live to the minute.</p>
+<ul>
+<li>The admin page shows the true age in minutes.</li>
+<li>The threshold for the "live" label is 90 minutes, not 10. The value is
+  <code>FRESHNESS.liveMins</code> in <code>engine/config.ts</code>.</li>
+<li>Over the threshold, the page reads "stale" and the light turns gold.</li>
+</ul>
+<p>A number that is an hour old is fine for a market that resolves in 2028. A label that
+lies about the age is not fine at any horizon.</p>
+<h2 id="the-proper-fix">The proper fix</h2>
+<p>Move the fetch to a Cloudflare Pages Function.</p>
+<ol>
+<li>Put a file at <code>functions/kalshi.json.js</code>.</li>
+<li>The Function fetches Kalshi on each request. The Function runs on the server, so CORS
+   does not apply.</li>
+<li>The Function replaces the GitHub Action.</li>
+</ol>
+<p>The prices then become true live data. The Action can be deleted.</p>
+<p>This is not done yet. Two things must be checked first:
+- The Function shadows the static <code>kalshi.json</code>. Test the failure path.
+- Confirm Kalshi does not block requests from Cloudflare's network.</p>
+<h2 id="the-related-failure">The related failure</h2>
+<p>Run 18 of the workflow failed with <code>! [rejected] main -&gt; main (fetch first)</code>. Two commits
+raced: the Action pushed <code>kalshi.json</code> while a deployment pushed <code>index.html</code>.</p>
+<p>The fix: each Action runs <code>git pull --rebase --autostash origin main</code> inside a five-attempt
+retry loop, with a concurrency guard on the workflow.</p>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>GitHub Actions documentation, "Events that trigger workflows — schedule": a scheduled
+  workflow can be delayed during periods of high load, and workflows on repositories with
+  low activity are disabled or delayed.
+  https://docs.github.com/en/actions/reference/events-that-trigger-workflows</li>
+<li>Observed run history, <code>willhoop/event-desk</code>, workflow <code>kalshi.yml</code>, runs 44 to 47,
+  read 2026-07-20.</li>
+</ul></main></body></html>

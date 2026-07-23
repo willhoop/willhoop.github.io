@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>field api — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="reference-the-field-engine">Reference: the field engine</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English.</em></p>
+<p>The file is <code>engine/field.ts</code>. The tests are in <code>tests/field.test.ts</code>.</p>
+<p>The field engine turns the Kalshi board into a ranked list. The engine computes the house
+pick. No candidate name is written into the code.</p>
+<h2 id="runner"><code>Runner</code></h2>
+<pre><code class="language-ts">interface Runner {
+  name: string;          // the full name, as the venue writes it
+  last: string;          // the short display name
+  party: &quot;D&quot; | &quot;R&quot;;
+  nom: number | null;    // the party nomination price, 0 to 1
+  pres: number | null;   // the presidency price, 0 to 1
+  conv: number | null;   // pres ÷ nom
+  atRisk: number | null; // the wedge cost per pair
+  pays: number | null;   // the wedge payout multiple
+  color: string;         // stable per name. Never ember. Never green.
+}
+</code></pre>
+<h2 id="buildfieldkalshi"><code>buildField(kalshi)</code></h2>
+<p>Returns a <code>Runner[]</code>. A runner appears if the nomination board or the presidency board
+quotes the name.</p>
+<p>The engine reads the Democratic board, then the Republican board, then any name quoted
+only for the presidency. The engine adds each name one time.</p>
+<h2 id="conv-the-conversion"><code>conv</code> — the conversion</h2>
+<pre><code>conv = pres ÷ nom
+</code></pre>
+<p>Read it as: "The market says this person wins the election in this share of the worlds
+where the party nominates them."</p>
+<p>A high conversion means the market is confident about a general election that is still
+years away. The wedge sells that confidence.</p>
+<h2 id="the-liquidity-floors">The liquidity floors</h2>
+<p>Each value comes from <code>LIQUIDITY</code> in <code>engine/config.ts</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>It means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MIN_LIQ</code></td>
+<td>0.03</td>
+<td>Below this, the engine does not show a ratio.</td>
+</tr>
+<tr>
+<td><code>PICK_MIN_NOM</code></td>
+<td>0.08</td>
+<td>Below this, the runner cannot be the pick.</td>
+</tr>
+<tr>
+<td><code>PICK_MIN_PRES</code></td>
+<td>0.04</td>
+<td>Below this, the runner cannot be the pick.</td>
+</tr>
+<tr>
+<td><code>LIQUIDITY.maxConv</code></td>
+<td>1.6</td>
+<td>Above this, the ratio is incoherent.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="isthinrunner"><code>isThin(runner)</code></h2>
+<p>Returns <code>true</code> when the ratio is real but the quotes are too small to carry it.</p>
+<pre><code>isThin = nom &lt; PICK_MIN_NOM  OR  pres &lt; PICK_MIN_PRES
+</code></pre>
+<p>A 4c nomination against a 3c presidency reads as 75%. One tick moves that by twenty
+points. The board marks the runner THIN. The engine never picks the runner. The engine
+never counts the runner in the median.</p>
+<p>See <a href="../explanation/thin-markets.md">Why we exclude thin markets</a>.</p>
+<h2 id="tradablefield"><code>tradable(field)</code></h2>
+<p>Returns each runner with both legs quoted, a nomination at or above <code>MIN_LIQ</code>, and a
+conversion between 0 and <code>maxConv</code>.</p>
+<h2 id="liquidfield-party"><code>liquid(field, party?)</code></h2>
+<p>Returns each tradable runner that is not thin. This is the pool for the pick and for the
+median.</p>
+<h2 id="housepickfield-party"><code>housePick(field, party?)</code></h2>
+<p>Returns the liquid runner with the highest conversion. Returns <code>null</code> when the pool is
+empty.</p>
+<p>The house pick is computed. The pick moves when the prices move.</p>
+<h2 id="medianconvfield-party"><code>medianConv(field, party?)</code></h2>
+<p>Returns the median conversion across the liquid pool. This is the yardstick. "High" means
+high against today's board, not against a fixed number.</p>
+<h2 id="shortnamename"><code>shortName(name)</code></h2>
+<p>Returns the surname. Keeps a generational suffix.</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"Jon Ossoff"</code></td>
+<td><code>"Ossoff"</code></td>
+</tr>
+<tr>
+<td><code>"Alexandria Ocasio-Cortez"</code></td>
+<td><code>"Ocasio-Cortez"</code></td>
+</tr>
+<tr>
+<td><code>"Donald J. Trump Jr."</code></td>
+<td><code>"Trump Jr."</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="presslugname-and-nomslugname"><code>presSlug(name)</code> and <code>nomSlug(name)</code></h2>
+<p><code>presSlug</code> builds the Polymarket address for a presidency market. The pattern is stable.</p>
+<p><code>nomSlug</code> returns a confirmed address, or <code>null</code>. The nomination addresses carry a numeric
+suffix that you cannot guess. Only confirmed addresses are listed.</p></main></body></html>

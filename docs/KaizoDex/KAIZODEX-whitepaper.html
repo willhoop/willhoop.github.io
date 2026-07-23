@@ -1,0 +1,403 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KAIZODEX whitepaper — KaizoDex</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>KaizoDex</span></div></div>
+<main><h1 id="kaizo-dex-white-paper">Kaizo Dex — White Paper</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English.</em></p>
+<hr />
+<h2 id="1-what-this-is">1. What this is</h2>
+<p>Kaizo Dex is a planning companion for a hardcore nuzlocke run of <strong>Pokémon Emerald Kaizo</strong>, a
+difficulty romhack of Pokémon Emerald. It is one HTML file with two JSON data files. It runs in a
+browser with no server, no build step, and no install.</p>
+<p>The application does not play the game and does not read the game's memory. It is a reference and a
+planner. The player still fights every battle.</p>
+<hr />
+<h2 id="2-the-problem">2. The problem</h2>
+<p>A nuzlocke adds two rules to a Pokémon game:</p>
+<ol>
+<li><strong>Permadeath.</strong> A Pokémon that faints is dead. The player boxes it or releases it.</li>
+<li><strong>First encounter only.</strong> The player catches one Pokémon on each route. A miss gives nothing.</li>
+</ol>
+<p>A <em>hardcore</em> nuzlocke adds three more: a level cap tied to the next boss, SET battle mode (no free
+preview of the opponent's switch), and no healing items during a battle.</p>
+<p>Emerald Kaizo then changes the game underneath those rules:</p>
+<table>
+<thead>
+<tr>
+<th>Vanilla Emerald</th>
+<th>Emerald Kaizo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gym leaders carry 2–4 Pokémon</td>
+<td>Every boss carries a full 6</td>
+</tr>
+<tr>
+<td>Most trainers hold no items</td>
+<td>Nearly every trainer holds an item</td>
+</tr>
+<tr>
+<td>Base stats and abilities are the official ones</td>
+<td>345 species are rebalanced; abilities and movesets are changed</td>
+</tr>
+<tr>
+<td>Basic battle AI</td>
+<td>Every trainer runs the full "smart" AI flag set</td>
+</tr>
+</tbody>
+</table>
+<p>The combination is the problem. <strong>A player who improvises loses Pokémon permanently.</strong> The
+information needed to avoid that — the exact enemy roster, the exact held items, the exact ability
+after the romhack changed it — exists, but it is scattered across a community spreadsheet, four
+separate web tools, and a shared drive folder.</p>
+<p>Kaizo Dex is the answer to a narrow question: <em>can the planning information for one fight fit on one
+screen, before the fight, with no tab switching?</em></p>
+<hr />
+<h2 id="3-what-the-data-actually-contains">3. What the data actually contains</h2>
+<p>Every figure below was counted from the shipped files on 2026-07-22, not copied from the interface.</p>
+<h3 id="31-trainersjson-247-kb">3.1 <code>trainers.json</code> — 247 kB</h3>
+<table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trainer records</td>
+<td>450</td>
+</tr>
+<tr>
+<td>Locations covered</td>
+<td>65</td>
+</tr>
+<tr>
+<td>Individual enemy Pokémon</td>
+<td>1,633</td>
+</tr>
+<tr>
+<td>Distinct species used by trainers</td>
+<td>376</td>
+</tr>
+<tr>
+<td>Double battles</td>
+<td>68</td>
+</tr>
+<tr>
+<td>Records marked <code>Boss</code></td>
+<td>18</td>
+</tr>
+<tr>
+<td>Records marked <code>Evil</code> (Magma / Aqua)</td>
+<td>84</td>
+</tr>
+<tr>
+<td>Records marked <code>Trainer</code></td>
+<td>348</td>
+</tr>
+</tbody>
+</table>
+<p>One record has this shape:</p>
+<pre><code class="language-json">{
+  &quot;loc&quot;: &quot;Rustboro Gym&quot;,
+  &quot;name&quot;: &quot;Leader Roxanne&quot;,
+  &quot;cat&quot;: &quot;Boss&quot;,
+  &quot;dbl&quot;: 0,
+  &quot;team&quot;: [
+    { &quot;species&quot;: &quot;Nosepass&quot;, &quot;g&quot;: &quot;f&quot;, &quot;lv&quot;: 15, &quot;item&quot;: &quot;Sitrus Berry&quot;,
+      &quot;nat&quot;: &quot;Naughty&quot;, &quot;moves&quot;: [&quot;SELFDESTRUCT&quot;,&quot;Attract&quot;,&quot;Seismic Toss&quot;,&quot;Thunder Wave&quot;] }
+  ]
+}
+</code></pre>
+<p>Every enemy Pokémon carries its <strong>species, gender, level, held item, nature, and all four moves</strong>.
+This is the level of detail that makes a fight plannable. Roxanne is the first gym in the game; in
+vanilla Emerald she has two Pokémon. Here she has six, and the lead holds a Sitrus Berry and knows
+Selfdestruct.</p>
+<h3 id="32-changesjson-117-kb">3.2 <code>changes.json</code> — 11.7 kB</h3>
+<p>Five tables of what the romhack changed against vanilla Emerald:</p>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Rows</th>
+<th>It records</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>abilities</code></td>
+<td>74</td>
+<td>Old ability → new ability</td>
+</tr>
+<tr>
+<td><code>stats</code></td>
+<td>30</td>
+<td>The six base stats, plus a note</td>
+</tr>
+<tr>
+<td><code>moves</code></td>
+<td>12</td>
+<td>New moves, what they replaced, type, power, accuracy, effect</td>
+</tr>
+<tr>
+<td><code>tms</code></td>
+<td>50</td>
+<td>The TM list, which is completely rewritten</td>
+</tr>
+<tr>
+<td><code>evos</code></td>
+<td>50</td>
+<td>Changed evolution methods</td>
+</tr>
+</tbody>
+</table>
+<p>This table is not decoration. Vanilla knowledge is actively wrong in this romhack. Ditto is a
+100/100/100/100/100/100 statline with Shadow Tag, which traps the player's Pokémon. A player who
+treats Ditto as a joke loses a team member.</p>
+<h3 id="33-encounter-tables-held-inside-indexhtml">3.3 Encounter tables — held inside <code>index.html</code></h3>
+<p>91 locations, each with its wild encounter table split by method: Grass, Cave, Inside, Surf, Old
+Rod, Good Rod, Super Rod. Each entry carries the species and its encounter rate.</p>
+<h3 id="34-a-known-inconsistency">3.4 A known inconsistency</h3>
+<p>The <strong>Start Here</strong> page states "345 rebalanced Pokémon · 67 locations · 37 boss battles". The
+shipped data holds 91 encounter locations, 65 trainer locations, and 18 records tagged <code>Boss</code>.</p>
+<p>Two of those three gaps have an explanation. The boss list is assembled at run time from the <code>Boss</code>
+records <strong>plus</strong> every <code>Evil</code> record whose name contains "Leader", so the count the interface shows
+is higher than 18. The location counts differ because encounter locations and trainer locations are
+different sets — a route can have wild Pokémon and no trainers.</p>
+<p>The numbers in the prose are still not derived from the data. They are written by hand and they do
+not agree with it. This is recorded here rather than quietly corrected, and it is listed as open
+work in §7.</p>
+<hr />
+<h2 id="4-how-the-application-is-built">4. How the application is built</h2>
+<h3 id="41-one-file-three-fetches">4.1 One file, three fetches</h3>
+<p><code>index.html</code> is 112 kB. It holds the markup, the styles, the logic, and the 91-location encounter
+table. At load it fetches <code>trainers.json</code> and <code>changes.json</code> from the same folder.</p>
+<p>There is no framework. There is no bundler. The 13 sections are <code>&lt;section&gt;</code> elements; the navigation
+sets a class. This is a deliberate trade: the whole application is one file a person can read, and
+it cannot break because a dependency changed.</p>
+<h3 id="42-the-thirteen-sections">4.2 The thirteen sections</h3>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>It answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start Here</td>
+<td>What are the rules, and what am I in for</td>
+</tr>
+<tr>
+<td>My Run</td>
+<td>What did I catch on each route, and what is still alive</td>
+</tr>
+<tr>
+<td>Bosses</td>
+<td>What is the next boss carrying, and what is the plan</td>
+</tr>
+<tr>
+<td>Enemy AI</td>
+<td>What will the enemy click, and when will it switch</td>
+</tr>
+<tr>
+<td>Pokédex</td>
+<td>What are this Pokémon's stats and types</td>
+</tr>
+<tr>
+<td>Trainers</td>
+<td>What is the exact roster of any of the 450 trainers</td>
+</tr>
+<tr>
+<td>Encounters</td>
+<td>What can I catch here, and where does this species appear</td>
+</tr>
+<tr>
+<td>Changes</td>
+<td>What did the romhack change against vanilla</td>
+</tr>
+<tr>
+<td>Dmg Calc</td>
+<td>Does my attack kill, and does theirs kill me</td>
+</tr>
+<tr>
+<td>EK Tools</td>
+<td>The community tools, embedded</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>Which catches should I prioritise</td>
+</tr>
+<tr>
+<td>Level Caps</td>
+<td>What is my ceiling for the next fight</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>What do I set up before I start</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-the-run-tracker">4.3 The run tracker</h3>
+<p>The tracker is the only part that holds the player's own data. It stores one row per route: the
+species caught and its status — On Team, Boxed, Dead, Missed, or Not logged.</p>
+<p>Its useful property is that <strong>the species field is filtered by the route</strong>. <code>encSpeciesFor(route)</code>
+reads the encounter table and offers only the species that route can actually give. A player cannot
+log a Pokémon they could not have caught there. The typo case and the misremembering case both
+disappear.</p>
+<p>State is saved to <code>localStorage</code> under the key <code>kaizodex_team</code>. There is no account and no server.
+The data does not leave the browser. The consequence is stated plainly in §6.</p>
+<h3 id="44-the-damage-calculator-and-the-enemy-ai-tool">4.4 The damage calculator and the enemy AI tool</h3>
+<p>Kaizo Dex does <strong>not</strong> implement Gen-3 damage. It embeds the community calculators — Ana's and
+May's — and the Enemy Move AI tool in <code>&lt;iframe&gt;</code> elements, with a labelled "open in a new tab" link
+beside each one for the case where the remote site refuses to be framed.</p>
+<p>This is the correct decision and it is worth stating why. A generic Gen-3 calculator gives wrong
+answers in this romhack, because the base stats and abilities differ. The community calculators
+carry the romhack's real data and are maintained by people who track it patch by patch. Reproducing
+that inside this application would create a second copy that goes stale.</p>
+<p>The cost is real and it is accepted: the calculator is a remote dependency. If the site is down or
+blocks framing, the panel is blank. The application says so in the interface rather than showing an
+empty box.</p>
+<h3 id="45-sprites-and-the-pokedex">4.5 Sprites and the Pokédex</h3>
+<p>Sprites are loaded from Pokémon Showdown by a name-to-filename function that lowercases the name,
+maps <code>♀</code>/<code>♂</code> to <code>f</code>/<code>m</code>, strips punctuation, and special-cases the four Deoxys forms. Pokédex detail
+is fetched from PokéAPI, limited to the first 386 species — the Gen-3 range, which is the correct
+bound for this game.</p>
+<p>Both are external services and both are read-only.</p>
+<hr />
+<h2 id="5-what-the-enemy-ai-section-is-for">5. What the Enemy AI section is for</h2>
+<p>This is the part of the application with the most writing in it, and it is the part that changes
+outcomes.</p>
+<p>Emerald Kaizo runs the vanilla Emerald battle AI with <strong>every "smart" flag enabled on every
+trainer</strong>. The AI is therefore predictable in a way that a random AI is not. The section documents
+the loop it runs each turn:</p>
+<ul>
+<li><strong>Step 0 — Switch check.</strong> This happens before move selection. If it switches, the player's move
+  hits the incoming Pokémon.</li>
+<li><strong>Step 1 — Score every legal move from 100.</strong></li>
+<li><strong>Step 2 — Penalise bad moves.</strong> Immunities, moves that fail, redundant stat drops, healing at
+  full health.</li>
+<li><strong>Step 3 — Take a kill.</strong> A lethal move gets a large bonus, and among lethal moves it prefers the
+  faster one. <em>Never stay in front of a Pokémon that has a clean kill.</em></li>
+<li><strong>Step 4 — Otherwise maximise damage,</strong> reading the player's typing, including into the expected
+  switch-in.</li>
+<li><strong>Step 5 — Set up when safe.</strong> Spikes, weather, screens, Thunder Wave, Hypnosis.</li>
+<li><strong>Step 6 — Play the highest score.</strong> Ties break randomly. This is the only real coin flip.</li>
+</ul>
+<p>The switch logic is documented separately, in the order the checks run: trapped or last Pokémon,
+walled with no damaging move, an ability on the bench that absorbs the expected move, and bad
+matchup with a better answer available. Several of these are roughly 50% random rolls, so the
+section says so instead of promising determinism.</p>
+<p>The practical conclusion the section draws: because the AI predicts the switch-in, the player should
+<strong>bait a move with one Pokémon and bring the answer in on the move they forced</strong>. That is steering
+the AI rather than gambling against it.</p>
+<hr />
+<h2 id="6-limitations">6. Limitations</h2>
+<p>Stated plainly, because a planning tool that overstates its reliability is worse than no tool.</p>
+<ol>
+<li><strong>The data is a snapshot of one patch.</strong> Emerald Kaizo is updated. Movesets, abilities, and
+   stats change between patches. The interface says "verify movesets in the calc — they change
+   between patches", and that instruction is correct. This document does not claim the data matches
+   any specific patch version, because the shipped files do not record one. See §7.</li>
+<li><strong><code>localStorage</code> is not a backup.</strong> Clearing browser data destroys the run log. A different
+   browser or a different device shows nothing. The Export button exists for this reason and should
+   be used.</li>
+<li><strong>The calculators are remote.</strong> If the embedded site is down or refuses framing, that panel does
+   not work. The open-in-new-tab links are the fallback.</li>
+<li><strong>The AI description is a model, not the disassembly.</strong> It is written from community
+   documentation and play experience. Several branches are explicitly random. It tells the player
+   what is likely, not what is certain.</li>
+<li><strong>The counts in the Start Here prose do not match the shipped data.</strong> See §3.4.</li>
+<li><strong>This is a fan tool.</strong> It is not affiliated with Nintendo or Game Freak. It ships no game data,
+   no ROM, and no copyrighted asset — sprites are hot-linked to Showdown and dex text is fetched
+   from PokéAPI.</li>
+</ol>
+<hr />
+<h2 id="7-open-work">7. Open work</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Record the romhack patch version in the data files</td>
+<td>A reader cannot currently tell which patch the rosters came from. This is the most important gap.</td>
+</tr>
+<tr>
+<td>Derive the Start Here counts from the data</td>
+<td>Removes the §3.4 inconsistency permanently instead of correcting it by hand.</td>
+</tr>
+<tr>
+<td>Import for the run log</td>
+<td>Export exists; a run cannot be moved back in, or to another device.</td>
+</tr>
+<tr>
+<td>Verify the encounter tables against the current mastersheet</td>
+<td>They are labelled "v2.0 data" in the interface with no date.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-sources">8. Sources</h2>
+<p>The application is built on community work and says so in its own Resources section. The sources it
+names and links:</p>
+<ol>
+<li><strong>EK Dex</strong> — anastarawneh. Kaizo-accurate Pokédex: stats, abilities, learnsets, locations.
+   <code>https://ekdex.anastarawneh.com/</code></li>
+<li><strong>EK Damage Calculator</strong> — anastarawneh. <code>https://calc.anastarawneh.com/hacks?game=2&amp;gen=3</code></li>
+<li><strong>EKalc</strong> — may8th1995. An alternate damage calculator.</li>
+<li><strong>EK Move AI</strong> — bpark16ek. Shows the move the enemy AI will select.</li>
+<li><strong>Nuzlocke Lua script</strong> — UnopenedClosure. mGBA and BizHawk conveniences.</li>
+<li><strong>EK Resources drive folder</strong> — the mastersheet, FAQ, moves, learnsets, and rival teams. The
+   interface describes this as "the source docs this site is built from".</li>
+<li><strong>Pokémon Showdown</strong> — sprite images.</li>
+<li><strong>PokéAPI</strong> — Pokédex detail for species 1–386.</li>
+</ol>
+<hr />
+<h2 id="9-verification">9. Verification</h2>
+<p>The figures in §3 were produced by counting the shipped files directly:</p>
+<pre><code class="language-python">import json, collections
+t = json.load(open('trainers.json'))
+len(t)                                          # 450 records
+collections.Counter(x['cat'] for x in t)        # Boss 18, Evil 84, Trainer 348
+len({x['loc'] for x in t})                      # 65 locations
+sum(len(x['team']) for x in t)                  # 1633 Pokémon
+len({m['species'] for x in t for m in x['team']})  # 376 species
+sum(1 for x in t if x['dbl'])                   # 68 doubles
+</code></pre>
+<p>Anyone can re-run this against the repository and get the same numbers.</p>
+<hr />
+<p><em>Kaizo Dex is a fan-made planning companion for Pokémon Emerald Kaizo. It is not affiliated with
+Nintendo, Creatures Inc., or Game Freak.</em></p></main></body></html>

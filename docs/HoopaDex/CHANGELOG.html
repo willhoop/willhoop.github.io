@@ -79,4 +79,17 @@ learnable move is taught for 100 VP. Checked against the export: all 14,192 spec
 hold the single value <code>["TM"]</code>, so the field has zero variance and no meaning in this format.</p>
 <p>Earlier documentation described the export as recording "how a move is learned". That was wrong and
 is corrected. The export is a flat legality list for each regulation. Documented in the technical
-documentation under "How Champions movesets differ from the main games".</p></main></body></html>
+documentation under "How Champions movesets differ from the main games".</p>
+<h2 id="2026-07-22-white-paper-and-deck-written">2026-07-22 — white paper and deck written</h2>
+<p>HoopaDex had technical documentation but no white paper and no plain-English deck. The project
+standard requires all three. This was a gap in the documentation work, not a decision.</p>
+<ul>
+<li>Added <code>docs/HOOPADEX-whitepaper.md</code>: the historical-correctness problem stated with examples,
+  the generation-as-query-parameter data model, the Champions SP formulas, the learnset export
+  and the rule that absence means unknown rather than illegal, the URL-routing defect and its
+  correction, and the limitations. Sources cited.</li>
+<li>Added <code>docs/HOOPADEX-deck-plain-english.md</code>: the same content in plain words.</li>
+<li>Both state the largest verification gap plainly: the historical type charts and stat
+  revisions are not covered by any automated test, which matters because historical accuracy
+  is the whole premise of the project.</li>
+</ul></main></body></html>

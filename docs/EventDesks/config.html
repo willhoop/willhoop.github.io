@@ -1,0 +1,223 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>config — EventDesks</title><style>
+:root{--ink:#0d1226;--navy:#131a35;--line:#26305c;--ice:#c9d6f5;--gold:#e8b33d;--slate:#8695bd;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--ice);line-height:1.7;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.bar{background:var(--navy);border-bottom:1px solid var(--line);padding:14px 0}
+.bar .w{max-width:860px;margin:0 auto;padding:0 28px;display:flex;gap:18px;align-items:center}
+.bar a{color:var(--gold);text-decoration:none;font-size:13.5px;font-weight:600}
+.bar span{color:var(--slate);font-size:13.5px}
+main{max-width:860px;margin:0 auto;padding:44px 28px 90px}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;color:var(--white);line-height:1.25;margin:1.9em 0 .6em}
+h1{font-size:38px;margin-top:0;letter-spacing:-.5px}h2{font-size:27px}h3{font-size:20px}h4{font-size:17px}
+p{margin:0 0 1.05em}
+a{color:var(--gold)}
+code{background:#1a2247;padding:2px 6px;border-radius:4px;font-size:13.5px;color:#ffd98a;
+ font-family:"JetBrains Mono",Consolas,monospace}
+pre{background:#111838;border:1px solid var(--line);border-radius:9px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:var(--ice);font-size:13px;line-height:1.55}
+table{border-collapse:collapse;width:100%;margin:1.3em 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-weight:700}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+blockquote{border-left:3px solid var(--gold);margin:1.3em 0;padding:2px 0 2px 18px;color:var(--slate)}
+hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
+ul,ol{padding-left:22px}li{margin:.32em 0}
+strong{color:var(--white)}
+</style></head><body>
+<div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>EventDesks</span></div></div>
+<main><h1 id="reference-the-configuration-block">Reference: the configuration block</h1>
+<p><strong>Version 1.0.0 · Last updated 2026-07-22</strong></p>
+<p><em>This document uses ASD-STE100 Simplified Technical English.</em></p>
+<p>The file is <code>engine/config.ts</code>.</p>
+<h2 id="rule">Rule</h2>
+<p>Each value that changes over time lives in this file. An update is one edit.</p>
+<p>If a number will be stale next month, put it here. Do not put it in a component.</p>
+<h2 id="site"><code>SITE</code></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>brand</code></td>
+<td><code>"Elite Four Capital"</code></td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>"Event Desks"</code></td>
+</tr>
+<tr>
+<td><code>origin</code></td>
+<td><code>"https://elitefourcapital.com"</code></td>
+</tr>
+<tr>
+<td><code>repo</code></td>
+<td><code>"https://github.com/willhoop/event-desk"</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="refresh"><code>REFRESH</code></h2>
+<p>Each value is in milliseconds.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+<th>It controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prices</code></td>
+<td>60000</td>
+<td>The Polymarket price polling.</td>
+</tr>
+<tr>
+<td><code>board</code></td>
+<td>60000</td>
+<td>The sports board polling.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="venue_econ"><code>VENUE_ECON</code></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+<th>It means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>polyFeeCoeff</code></td>
+<td>0.04</td>
+<td>The Polymarket taker fee coefficient.</td>
+</tr>
+<tr>
+<td><code>kalshiFeeCoeff</code></td>
+<td>0.07</td>
+<td>The Kalshi taker fee coefficient.</td>
+</tr>
+<tr>
+<td><code>kalshiInterest</code></td>
+<td>0.0325</td>
+<td>The yearly interest Kalshi pays on collateral.</td>
+</tr>
+<tr>
+<td><code>polyFrictionPct</code></td>
+<td>0.05</td>
+<td>The Polymarket conversion and withdrawal drag.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tbill_rate"><code>TBILL_RATE</code></h2>
+<p>The value is 0.043. This is the risk-free yearly rate. A locked trade must beat this rate
+after tax. Update this value when the market moves.</p>
+<h2 id="liquidity"><code>LIQUIDITY</code></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+<th>It means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>minShow</code></td>
+<td>0.03</td>
+<td>The floor to show a conversion ratio.</td>
+</tr>
+<tr>
+<td><code>minPickNom</code></td>
+<td>0.08</td>
+<td>The nomination floor to be the house pick.</td>
+</tr>
+<tr>
+<td><code>minPickPres</code></td>
+<td>0.04</td>
+<td>The presidency floor to be the house pick.</td>
+</tr>
+<tr>
+<td><code>maxConv</code></td>
+<td>1.6</td>
+<td>Above this, the ratio is incoherent.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="freshness"><code>FRESHNESS</code></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+<th>It means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>liveMins</code></td>
+<td>90</td>
+<td>Under this age, the feed reads as live.</td>
+</tr>
+<tr>
+<td><code>staleMins</code></td>
+<td>90</td>
+<td>Over this age, the admin page reads stale.</td>
+</tr>
+</tbody>
+</table>
+<p>The Kalshi cron asks for 10 minutes. GitHub delays the run. The true interval is 1 to 2
+hours. Therefore the threshold is 90 minutes and not 10.</p>
+<p>See <a href="../explanation/kalshi-delay.md">Why the Kalshi prices are not live to the minute</a>.</p>
+<h2 id="electoral"><code>ELECTORAL</code></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runs</code></td>
+<td>20000</td>
+</tr>
+<tr>
+<td><code>sigma</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>toWin</code></td>
+<td>270</td>
+</tr>
+<tr>
+<td><code>total</code></td>
+<td>538</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sizing"><code>SIZING</code></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+<th>It means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kellyFraction</code></td>
+<td>0.25</td>
+<td>We stake a quarter of full Kelly.</td>
+</tr>
+</tbody>
+</table></main></body></html>
