@@ -15,6 +15,7 @@ PROJECTS = {
     'HoopaDex':   'Pokemon/HoopaDex',
     'Event Desks':'prediction-market',
     'KaizoDex':    'Pokemon/KaizoDex',
+    'ABRA':        'Pokemon/ABRA',
     'Portfolio':  'portfolio',
 }
 
