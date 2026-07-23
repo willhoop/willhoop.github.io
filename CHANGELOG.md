@@ -10,6 +10,17 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.5.0] — 2026-07-23
+
+### Added
+- **Jeopardy Wagering** project card (the 5th project), linking its live app, white paper (PDF),
+  slide deck, documentation index, and source repository `willhoop/jeopardy-wagering`. Follows the
+  same Option-A pattern as the other own-repo projects (HoopaDex, Kaizo Dex): the app is served
+  from `.../jeopardy-wagering/app/`, not the repo root.
+- The project is wired into the shared publish scripts (`../auto-publish.bat`, `../publish.bat`),
+  so it auto-pushes on the same 2-minute background cadence as every other project once its GitHub
+  repository exists.
+
 ## [1.4.0] — 2026-07-22
 
 ### Added
