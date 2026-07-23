@@ -8,15 +8,24 @@ Exits non-zero when anything is missing, so it can gate a publish step.
 """
 import os, sys, glob, io, re
 
-ROOT = '/sessions/kind-fervent-sagan/mnt/Projects'
+# ROOT resolves to the Projects folder that contains this repo, derived from
+# this script's own location (Projects/portfolio/build/check_projects.py ->
+# Projects/). Override with the PROJECTS_ROOT env var if the layout differs.
+# This replaces a previously hardcoded absolute sandbox path that only
+# resolved in one environment.
+ROOT = os.environ.get(
+    'PROJECTS_ROOT',
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
 
 PROJECTS = {
-    'CHOMP':      'Pokemon/CHOMP',
-    'HoopaDex':   'Pokemon/HoopaDex',
-    'Event Desks':'prediction-market',
-    'KaizoDex':    'Pokemon/KaizoDex',
-    'ABRA':        'Pokemon/ABRA',
-    'Portfolio':  'portfolio',
+    'CHOMP':          'Pokemon/CHOMP',
+    'HoopaDex':       'Pokemon/HoopaDex',
+    'Event Desks':    'prediction-market',
+    'KaizoDex':       'Pokemon/KaizoDex',
+    'ABRA':           'Pokemon/ABRA',
+    'Portfolio':      'portfolio',
+    'Jeopardy Wager': 'jeopardy-wagering',
 }
 
 def has(base, *patterns):
@@ -85,6 +94,7 @@ def stamped_version(base, relpath, pattern):
 STAMPS = {
     'Pokemon/CHOMP':    ('app/plugin/chomp-bring4.user.js', r'@version\s+([0-9.]+)'),
     'Pokemon/HoopaDex': ('app/index.html',                  r'HOOPADEX VERSION:\s*([0-9.]+)'),
+    'jeopardy-wagering':('docs/white-paper.md',             r'Version\s+([0-9.]+)'),
 }
 def norm(v): return None if v is None else '.'.join(v.split('.')[:2])  # compare major.minor
 
