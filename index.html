@@ -215,6 +215,19 @@ const PROJECTS = [
     }
   },
   {
+    name: "ABRA",
+    status: "In development — v2.2.0", live: false,
+    blurb: "The model family behind CHOMP — and it grades every prediction it makes.",
+    desc: "The research engine behind CHOMP. It ingests thousands of real Champions VGC ladder games and builds a family of small, CPU-only models: an exact damage engine validated against @smogon/calc, and a mid-game win-probability net (PORY) that beats a coin flip on held-out games — log-loss 0.567 versus 0.693, calibrated to within 1.6%. Its discipline is honesty. Every probability ships with a proper score, a confidence interval, and a baseline, and it reports what it cannot predict — the winner from team sheets alone is a coin flip in this format — as plainly as what it can.",
+    docs: {
+      open:   "https://github.com/willhoop/abra",
+      paper:  "https://github.com/willhoop/abra/blob/main/docs/ABRA-whitepaper.md",
+      deck:   "https://github.com/willhoop/abra/blob/main/docs/ABRA-deck-plain-english.md",
+      docs:   "https://github.com/willhoop/abra/blob/main/docs/ABRA-technical-docs.md",
+      source: "https://github.com/willhoop/abra"
+    }
+  },
+  {
     name: "Event Desks",
     status: "Live at elitefourcapital.com", live: true,
     blurb: "Prediction-market desk that prices Polymarket and Kalshi contracts.",
