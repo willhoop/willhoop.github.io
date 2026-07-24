@@ -204,8 +204,8 @@ const PROJECTS = [
   {
     name: "ABRA",
     status: "In development — v2.3.0", live: true,
-    blurb: "Poker theory, pointed at Pokémon — the model brain behind CHOMP.",
-    desc: "The research engine behind CHOMP: a family of small models that read real Champions VGC replays and grade every prediction they make — measured, honest, and clear about what can't be predicted.",
+    blurb: "A competitive-Pokémon AI stack — damage, belief, value, and equilibrium, each measured against a real baseline.",
+    desc: "A full decision engine for Champions VGC, built from thousands of real ladder games. ABRA runs an exact damage engine (validated to the integer against @smogon/calc), a mid-game win-probability net that beats a coin flip (log-loss 0.567 vs 0.693, calibrated), an opponent-set belief model, and a team-preview equilibrium solver that proves the meta is genuinely rock-paper-scissors. CHOMP — the bring/lead engine — is one piece of it. The endgame is ALAKAZAM, an in-battle engine that plays the mind-game, not just the math. Every claim ships with a proper score, a confidence interval, and an honest baseline.",
     docs: {
       open:   "https://willhoop.github.io/abra/app/",
       paper:  "https://github.com/willhoop/abra/blob/main/docs/ABRA-whitepaper.md",
@@ -217,8 +217,8 @@ const PROJECTS = [
   {
     name: "CHOMP",
     status: "In daily use", live: true,
-    blurb: "Real-time team-preview engine for competitive Pokémon VGC.",
-    desc: "A decision engine for competitive Pokémon, running as a Pokémon Showdown userscript. At team preview on the Champions VGC (Reg M-B) ladder you have about 30 seconds to choose four of six Pokémon and which two to lead. CHOMP runs the game's real damage mathematics across every matchup and answers in under 50 milliseconds, in the browser.",
+    blurb: "ABRA's team-preview arm — real-time bring/lead for Champions VGC.",
+    desc: "The team-preview engine of the ABRA stack, running as a Pokémon Showdown userscript. At team preview on the Champions VGC (Reg M-B) ladder you have about 30 seconds to choose four of six Pokémon and which two to lead. CHOMP runs the game's real damage mathematics across every matchup and answers in under 50 milliseconds, in the browser.",
     docs: {
       open:   "https://github.com/willhoop/chomp",
       paper:  doc({local:"docs/CHOMP/CHOMP-whitepaper.html", src:"Pokemon/CHOMP/docs/CHOMP-whitepaper.md"}),
