@@ -204,8 +204,8 @@ const PROJECTS = [
   {
     name: "ABRA",
     status: "In development — v2.3.0", live: true,
-    blurb: "A competitive-Pokémon AI stack — damage, belief, value, and equilibrium, each measured against a real baseline.",
-    desc: "A full decision engine for Champions VGC, built from thousands of real ladder games. ABRA runs an exact damage engine (validated to the integer against @smogon/calc), a mid-game win-probability net that beats a coin flip (log-loss 0.567 vs 0.693, calibrated), an opponent-set belief model, and a team-preview equilibrium solver that proves the meta is genuinely rock-paper-scissors. CHOMP — the bring/lead engine — is one piece of it. The endgame is ALAKAZAM, an in-battle engine that plays the mind-game, not just the math. Every claim ships with a proper score, a confidence interval, and an honest baseline.",
+    blurb: "A full AI for competitive Pokémon — built from real games, honest about what it knows.",
+    desc: "A complete decision engine for competitive Pokémon, built from thousands of real matches. ABRA learns how the game is actually played and turns it into a family of models — one that knows the damage cold, one that reads what your opponent is hiding, one that tells you your real chances in the middle of a battle, and one that maps out the metagame's rock-paper-scissors. CHOMP, the team-picking tool, is one piece of it. The endgame is ALAKAZAM: an engine that plays the mind-game, not just the math.",
     docs: {
       open:   "https://willhoop.github.io/abra/app/",
       paper:  "https://github.com/willhoop/abra/blob/main/docs/ABRA-whitepaper.md",
