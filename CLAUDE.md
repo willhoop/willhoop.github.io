@@ -4,8 +4,8 @@ Universal rules live in my global Claude Instructions. This file is project-spec
 **Goal.** Present projects to engineers and investors. Evidence first, marketing never.
 
 **Rules.**
-- Every project card leads with a real, measured number — or an honest dash if none exists yet.
-- Never state a performance claim on this site that is not backed by that project's validation report.
+- Project cards are plain-English and readable — not a spec sheet. They do NOT need to lead with a number.
+- Measured numbers and performance claims live in the white paper (backed by that project's validation report), not on the card.
 - Adding a project must stay a one-object edit in the `PROJECTS` array.
 - No emoji, no stock imagery, no filler copy.
 
