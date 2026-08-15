@@ -26,6 +26,7 @@ PROJECTS = {
     'ABRA':           'Pokemon/ABRA',
     'Portfolio':      'portfolio',
     'Jeopardy Wager': 'jeopardy-wagering',
+    'Guardian Chess': 'Guardian Chess',
 }
 
 def has(base, *patterns):

@@ -10,6 +10,26 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.6.0] — 2026-08-15
+
+### Added
+- **Guardian Chess** project card, inserted as the 5th project so the numbering of
+  Kaizo Dex and Jeopardy Wagering moves down one. Links the live site on Render, the
+  white paper, the plain-English deck, the technical documentation, and the source
+  repository `willhoop/guardian-chess`.
+- `Guardian Chess` registered in `build/check_projects.py`. It was added to the audit
+  in the same pass as the card, rather than after, so the standard could not be met
+  unevenly the way HoopaDex once was. It passes all twelve artefact checks.
+
+### Notes
+- The project credits the variant itself to Alex Hooper; the card and the documents
+  say so. What is mine is the implementation.
+- Pre-existing and untouched: the audit reports a CHOMP version mismatch
+  (changelog 2.5.0 against file 2.9). Not introduced by this change and not fixed
+  here.
+
+---
+
 ## [1.5.0] — 2026-07-23
 
 ### Added
