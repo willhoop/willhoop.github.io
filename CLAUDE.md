@@ -36,11 +36,11 @@ Repository map:
 |---|---|---|
 | Portfolio | not yet created | not yet published |
 | HoopaDex | `willhoop/hoopadex` | `willhoop.github.io/hoopadex` |
-| Event Desks | `willhoop/event-desk` | `elitefourcapital.com` |
+| Event Desks | private | `elitefourcapital.com` |
 | CHOMP | not yet created | runs locally in the browser |
 
-Warning: the root `index.html` of `willhoop/event-desk` IS the live site at elitefourcapital.com.
-Never push another project into that repository root.
+Event Desks is private. Its card links to https://elitefourcapital.com and nothing else. Do not
+publish its documents, source, or repository names here.
 
 
 ## Rule: identical treatment, enforced by a check

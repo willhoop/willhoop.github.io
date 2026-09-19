@@ -189,10 +189,6 @@
 const GITHUB = "";                     // "" = use local rendered docs
 const doc = (p) => GITHUB ? GITHUB + p.src : p.local;
 
-/* Event Desks keeps its source in its own repository, like every other project.
-   willhoop/event-desk is the DEPLOY target for elitefourcapital.com and holds only
-   the built file — never push source there. */
-
 /* Every project shows the SAME five rows in the SAME order, so the columns line
    up across the whole page. A document that does not exist yet is shown dimmed
    rather than hidden — a gap you can see is better than a gap you cannot. */
@@ -230,14 +226,12 @@ const PROJECTS = [
   {
     name: "Event Desks",
     status: "Live at elitefourcapital.com", live: true,
-    blurb: "Prediction-market desk that prices Polymarket and Kalshi contracts.",
-    desc: "Prices event contracts on Polymarket and Kalshi and shows where the market looks overconfident. It ranks a candidate field by conversion — the presidency price divided by the nomination price — which reads as the market's odds a candidate wins once nominated.",
+    blurb: "Prediction markets, priced and explained.",
+    desc: "A live site that reads prediction markets, polls and the news, one desk per trade.",
+    /* Private project: the site link only. Its documents and source are not published. */
+    slots: ["open"],
     docs: {
-      open:   "https://elitefourcapital.com",
-      paper:  "docs/EventDesks/white-paper.html",
-      deck:   "docs/EventDesks/deck.html",
-      docs:   "docs/EventDesks/README.html",
-      source: "https://github.com/willhoop/elitefourcapital"
+      open:   "https://elitefourcapital.com"
     }
   },
   {
@@ -307,7 +301,7 @@ document.getElementById('rows').innerHTML = PROJECTS.map((p, i) => `
       </div>
       <p class="desc">${p.desc}</p>
     </div>
-    <div class="links">${SLOTS.map(k => p.docs[k]
+    <div class="links">${(p.slots || SLOTS).map(k => p.docs[k]
       ? `<a href="${p.docs[k]}" target="_blank" rel="noopener">${LABEL[k]}</a>`
       : `<span title="not written yet">${LABEL[k]}</span>`).join('')}</div>
   </article>`).join('');

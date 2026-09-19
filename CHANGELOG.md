@@ -10,6 +10,17 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.7.0] — 2026-09-19
+
+### Changed
+- **Event Desks is private.** Its card now shows the site link only, elitefourcapital.com.
+  The white paper, deck, technical documentation and source links are removed, and the
+  rendered documents in `docs/EventDesks/` are deleted. *Why:* the owner made the project's
+  source and documentation private.
+- A project can set `slots` to draw only some link rows. Event Desks uses `slots: ["open"]`,
+  so the empty rows are not drawn as dimmed placeholders.
+- `build/build_docs.py` no longer renders Event Desks documents.
+
 ## [1.6.0] — 2026-08-15
 
 ### Added

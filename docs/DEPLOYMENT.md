@@ -47,16 +47,14 @@ This site uses **Option A** for any project that has its own repository.
 |---|---|
 | CHOMP | Local rendered HTML in `docs/CHOMP/`. Move to a repository URL when published. |
 | HoopaDex | The published site and repository, `willhoop/hoopadex`. |
-| Event Desks | The repository `willhoop/event-desk`, through the `EVENTDESK` constant. |
+| Event Desks | Not served. The project is private; its card uses **Option C** and links to the live site only. |
 
 To move a project to Option A, put its repository base URL in one constant at the top of the
 script block, then build each document link from that constant. Do not write full URLs into each
 link. One constant keeps a repository move to one edit.
 
-### Warning — do not publish into `willhoop/event-desk`
-The root `index.html` of that repository **is** the live site at elitefourcapital.com. If you push
-this portfolio into that repository root, you replace the live site and it goes down. Publish this
-portfolio to its own repository.
+To show only some links on one card, give the project a `slots` list, for example
+`slots: ["open"]`. The other rows are then not drawn at all, instead of drawn dimmed.
 
 ## 6. Live demos
 Two files run in the browser with no server:

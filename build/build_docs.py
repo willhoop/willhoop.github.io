@@ -59,7 +59,6 @@ def main():
         'CHOMP':      os.path.join(ROOT,'Pokemon','CHOMP'),
         'HoopaDex':   os.path.join(ROOT,'Pokemon','HoopaDex'),
         'KaizoDex':   os.path.join(ROOT,'Pokemon','KaizoDex'),
-        'EventDesks': os.path.join(ROOT,'prediction-market'),
         'Pokemon':    os.path.join(ROOT,'Pokemon'),
     }
     made = 0
