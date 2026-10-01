@@ -72,18 +72,59 @@ if gaps:
     print(f'{len(gaps)} gap(s):')
     for proj, label in gaps:
         print(f'  - {proj}: no {label}')
-    sys.exit(1)
-print('All projects meet the standard.')
+    # NOT sys.exit HERE. Until 2026-09-06 this exited immediately, so the whole
+    # version-consistency section below was UNREACHABLE whenever any project was
+    # missing a LICENSE or a SECURITY.md. A check that only runs when everything
+    # else already passes is unchecked, not verified. Both sections now always
+    # run and the process still exits non-zero at the end if either failed.
+else:
+    print('All projects meet the standard.')
 
 
 # ---- changelog / version consistency ----
+# WHICH CHANGELOG IS LIVE. A project normally has one, CHANGELOG.md, and that is
+# still the rule: the artefact table above requires CHANGELOG.md to exist for every
+# project. But a project can close a version line and open another — ABRA closed its
+# Reg M-B line at 7.0.0 and runs Reg M-C in CHANGELOG-REGMC.md. Comparing the closed
+# file's top version (7.0.0) with the current white paper (1.0.0) compared two
+# different series.
+#
+# Nothing is hardcoded per project. A changelog declares itself closed in its own
+# header with a line marker, `<!-- LINE: id=...; closed=X.Y.Z -->`. The live changelog
+# is CHANGELOG.md unless it is closed; then it is the ONE open CHANGELOG-*.md sibling.
+# None open, or more than one, is reported as a gap rather than guessed at.
+LINE_RE = re.compile(r'<!--\s*LINE:(.*?)-->', re.S)
+LINE_HEAD = 25
+
+def _line_closed(path):
+    head = ''.join(io.open(path, encoding='utf-8', errors='ignore').readlines()[:LINE_HEAD])
+    m = LINE_RE.search(head)
+    return bool(m and re.search(r'(^|;)\s*closed\s*=', m.group(1)))
+
+def active_changelog(base):
+    """(relpath, None) for the live changelog, or (None, reason)."""
+    main = os.path.join(ROOT, base, 'CHANGELOG.md')
+    if not os.path.exists(main):
+        return None, 'no CHANGELOG.md'
+    if not _line_closed(main):
+        return 'CHANGELOG.md', None
+    sibs = sorted(glob.glob(os.path.join(ROOT, base, 'CHANGELOG-*.md')))
+    live = [s for s in sibs if not _line_closed(s)]
+    if len(live) == 1:
+        return os.path.basename(live[0]), None
+    if not live:
+        return None, 'CHANGELOG.md is closed and no open CHANGELOG-*.md line exists'
+    return None, 'AMBIGUOUS — CHANGELOG.md is closed and %d CHANGELOG-*.md lines are open' % len(live)
+
 def newest_changelog_version(base):
-    f = os.path.join(ROOT, base, 'CHANGELOG.md')
-    if not os.path.exists(f): return None
-    for line in io.open(f, encoding='utf-8'):
+    """(relpath, version) of the live changelog's newest release, or (None, reason)."""
+    rel, why = active_changelog(base)
+    if rel is None:
+        return None, why
+    for line in io.open(os.path.join(ROOT, base, rel), encoding='utf-8'):
         m = re.match(r'##\s*\[([^\]]+)\]', line)
-        if m: return m.group(1)
-    return None
+        if m: return rel, m.group(1)
+    return rel, None
 
 def stamped_version(base, relpath, pattern):
     f = os.path.join(ROOT, base, relpath)
@@ -91,29 +132,101 @@ def stamped_version(base, relpath, pattern):
     m = re.search(pattern, io.open(f, encoding='utf-8', errors='ignore').read())
     return m.group(1) if m else None
 
-# (project, file, regex) — the artifact whose stamp must match the changelog top version.
+# OVERRIDES ONLY. Every project not named here is DERIVED by find_stamp() below.
+#
+# This dict used to be the whole mechanism, and a hand-typed list of three is how a
+# project goes unchecked while looking checked: a project with no entry printed
+# "(no stamped artifact to compare)" and was counted as fine. ABRA sat in that state
+# — unchecked, not verified — which is the same hand-maintained-list failure ABRA's
+# own CLAUDE.md is written about. An entry belongs here ONLY when the stamp lives in
+# a place no shape rule can find: a userscript header or a deployed HTML comment.
 STAMPS = {
+    # the published artifact is the userscript itself, not a document
     'Pokemon/CHOMP':    ('app/plugin/chomp-bring4.user.js', r'@version\s+([0-9.]+)'),
+    # the stamp is a comment inside the deployed page
     'Pokemon/HoopaDex': ('app/index.html',                  r'HOOPADEX VERSION:\s*([0-9.]+)'),
-    'jeopardy-wagering':('docs/white-paper.md',             r'Version\s+([0-9.]+)'),
 }
+
+# ---- the derived half ----
+# A version stamp is a MASTHEAD: it sits in the opening block of the document, under
+# the title, before the first section. Searching the whole file would credit a document
+# that merely mentions "retracted in 2.7.0" with a header. Same rule, same 25-line
+# window, as ABRA's own Pokemon/ABRA/engine/docs_scan.js versionHeader().
+MASTHEAD_LINES = 25
+MASTHEAD_RE = re.compile(r'\bversion\b\s*:?\s*\*{0,2}\s*(\d+\.\d+(?:\.\d+)?)', re.I)
+
+def _slug(s): return re.sub(r'[^a-z0-9]', '', s.lower())
+
+def masthead_version(path):
+    try:
+        head = ''.join(io.open(path, encoding='utf-8', errors='ignore').readlines()[:MASTHEAD_LINES])
+    except OSError:
+        return None
+    m = MASTHEAD_RE.search(head)
+    return m.group(1) if m else None
+
+def find_stamp(base):
+    """(relpath, version) for the project's own white paper, or (None, reason).
+
+    A project can hold several white papers — ABRA/docs has ABRA-whitepaper.md
+    alongside MEW-whitepaper.md and SLOWKING-whitepaper.md, which carry their own
+    component version schemes. Picking the first glob hit would compare the project
+    CHANGELOG against a component's stamp and accuse a correct document. So the file
+    is chosen by NAME AGAINST THE PROJECT FOLDER, and an ambiguous set is reported
+    as ambiguous rather than guessed at.
+    """
+    cands = []
+    for pat in ('docs/*whitepaper*.md', 'docs/*white-paper*.md'):
+        cands += sorted(glob.glob(os.path.join(ROOT, base, pat)))
+    cands = [c for c in cands if masthead_version(c)]
+    if not cands:
+        return None, 'no white paper carries a masthead version'
+    proj = _slug(os.path.basename(base.rstrip('/\\')))
+    named = [c for c in cands if _slug(os.path.basename(c)).startswith(proj)]
+    # a single generically named white paper is unambiguous on its own
+    generic = [c for c in cands if re.fullmatch(r'white-?paper\.md', os.path.basename(c), re.I)]
+    pick = named or generic or (cands if len(cands) == 1 else [])
+    if not pick:
+        return None, 'AMBIGUOUS — %d white papers, none named for the project' % len(cands)
+    p = pick[0]
+    return os.path.relpath(p, os.path.join(ROOT, base)).replace(os.sep, '/'), masthead_version(p)
+
 def norm(v): return None if v is None else '.'.join(v.split('.')[:2])  # compare major.minor
 
 print('\nVersion consistency')
 print('=' * 60)
 vgaps = []
 for proj, base in PROJECTS.items():
-    cv = newest_changelog_version(base)
+    if not os.path.isdir(os.path.join(ROOT, base)):
+        print(f'{proj.ljust(14)} FOLDER NOT FOUND'); vgaps.append((proj, 'folder')); continue
+    clog, cv = newest_changelog_version(base)
+    if clog is None:
+        # cv carries the reason: no CHANGELOG.md, or no live line to compare
+        print(f'{proj.ljust(14)} UNCHECKED — {cv}')
+        vgaps.append((proj, f'no live changelog ({cv})')); continue
+    # name the file only when it is not the default, so a non-default line is visible
+    cl = 'changelog' if clog == 'CHANGELOG.md' else clog
     if base in STAMPS:
         rel, pat = STAMPS[base]
         sv = stamped_version(base, rel, pat)
-        ok = norm(cv) == norm(sv) and cv is not None
-        print(f'{proj.ljust(14)} changelog={cv}  file={sv}  {"ok" if ok else "MISMATCH"}')
-        if not ok: vgaps.append((proj, f'changelog {cv} vs file {sv}'))
+        src = rel + ' (override)'
     else:
-        print(f'{proj.ljust(14)} changelog={cv}  (no stamped artifact to compare)')
+        rel, sv = find_stamp(base)
+        if rel is None:
+            # sv carries the reason. UNCHECKED IS ITS OWN ROW, and it is a gap:
+            # printing "nothing to compare" and moving on is what left ABRA
+            # unverified while the table looked complete.
+            print(f'{proj.ljust(14)} {cl}={cv}  UNCHECKED — {sv}')
+            vgaps.append((proj, f'no version stamp found ({sv})'))
+            continue
+        src = rel + ' (derived)'
+    ok = norm(cv) == norm(sv) and cv is not None
+    print(f'{proj.ljust(14)} {cl}={cv}  file={sv}  {"ok" if ok else "MISMATCH"}  <- {src}')
+    if not ok: vgaps.append((proj, f'{clog} {cv} vs {rel} {sv}'))
 if vgaps:
     for p_, m_ in vgaps: print(f'  - {p_}: {m_}')
-    sys.exit(1)
+else:
+    print('\nAll versions consistent.')
 
-print('\nAll versions consistent.')
+if gaps or vgaps:
+    sys.exit(1)

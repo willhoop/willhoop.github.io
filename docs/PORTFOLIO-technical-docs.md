@@ -1,6 +1,6 @@
 # Portfolio — Technical Documentation
 
-**Version 1.0 · Last updated 2026-07-22**
+**Version 1.0 · Last updated 2026-10-01**
 
 *Written in ASD-STE100 Simplified Technical English. Sentences are short. The voice is
 active. Organised by the Diátaxis model.*
@@ -39,6 +39,12 @@ active. Organised by the Diátaxis model.*
 ## Audit the project standard
 Run `python3 build/check_projects.py`. The script prints a table of every project against the
 seven required artefacts. The script exits non-zero if an artefact is absent.
+
+The script then compares the newest version in the live changelog with the version stamp on the
+project's primary artefact. The live changelog is `CHANGELOG.md`. If the header of `CHANGELOG.md`
+has a line marker with `closed=` (for example `<!-- LINE: id=abra/regmb; closed=7.0.0 -->`), the
+live changelog is the one `CHANGELOG-*.md` file that is not closed. If no such file is open, or if
+more than one is open, the script reports a gap. `CHANGELOG.md` must still exist for every project.
 
 ---
 

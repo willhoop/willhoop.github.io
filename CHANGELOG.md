@@ -10,6 +10,30 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.7.1] — 2026-10-01
+
+### Fixed
+- **`build/check_projects.py` reads a project's LIVE changelog, not always `CHANGELOG.md`.** ABRA
+  closed its Reg M-B line at 7.0.0 and runs Reg M-C in `CHANGELOG-REGMC.md`, so the check compared
+  the closed 7.0.0 with the Reg M-C white paper's 1.0.0 — two different version series. The live
+  changelog is now chosen from the `<!-- LINE: ...; closed=X.Y.Z -->` marker the changelog writes in
+  its own header: `CHANGELOG.md` unless it is closed, then the one open `CHANGELOG-*.md`. No project
+  name is hardcoded. None open, or more than one, is reported as a gap. `CHANGELOG.md` is still
+  required for every project. Approved by Will, 2026-10-01.
+- The version section no longer runs only when the artefact table passes, and a project with no
+  stamp override has its white paper's masthead version derived instead of being skipped as
+  "no stamped artifact to compare". *Why:* ABRA was unchecked while the table looked complete. This
+  work was found uncommitted in the working tree (dated 2026-09-06 in its comments) and is released
+  here with the fix above.
+
+### Notes
+- ABRA still reports a MISMATCH after the fix: `CHANGELOG-REGMC.md` 1.51.0 against the white paper's
+  1.0.0. ABRA re-stamps its white paper only at a MAJOR release, by its own rule, so the umbrella rule
+  "top version MUST equal the stamp" (compared at major.minor) cannot be met without bumping ABRA's
+  documents. Not changed here; a rule change is proposed to Will.
+- Pre-existing and untouched: version mismatches for CHOMP, Event Desks, KaizoDex and Portfolio, and
+  three red checks in `tests/test-projects.js` (Event Desks document slots, since 1.7.0).
+
 ## [1.7.0] — 2026-09-19
 
 ### Changed
