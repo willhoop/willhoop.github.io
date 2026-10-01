@@ -46,6 +46,12 @@ has a line marker with `closed=` (for example `<!-- LINE: id=abra/regmb; closed=
 live changelog is the one `CHANGELOG-*.md` file that is not closed. If no such file is open, or if
 more than one is open, the script reports a gap. `CHANGELOG.md` must still exist for every project.
 
+The script compares the major and minor versions. A project can declare `docs=major` in the line
+marker of its live changelog, for example
+`<!-- LINE: id=abra/regmc; ...; docs=major -->`. Use this only when the project re-stamps its
+documents at a major release and at no other release. The script then compares the major version
+only. Any other `docs=` value is a gap. The marker must be on a line of its own.
+
 ---
 
 # PART 3 - REFERENCE

@@ -93,13 +93,34 @@ else:
 # header with a line marker, `<!-- LINE: id=...; closed=X.Y.Z -->`. The live changelog
 # is CHANGELOG.md unless it is closed; then it is the ONE open CHANGELOG-*.md sibling.
 # None open, or more than one, is reported as a gap rather than guessed at.
-LINE_RE = re.compile(r'<!--\s*LINE:(.*?)-->', re.S)
+# The marker must stand on its OWN line. Unanchored, a changelog entry that merely QUOTES
+# the marker in prose (portfolio's own 1.7.1 entry does) read as a closed line.
+LINE_RE = re.compile(r'^[ \t]*<!--\s*LINE:([^\n]*?)-->[ \t]*$', re.M)
 LINE_HEAD = 25
 
-def _line_closed(path):
+def line_params(path):
+    """The `key=value` pairs of a changelog's LINE marker, or {} when it has none."""
     head = ''.join(io.open(path, encoding='utf-8', errors='ignore').readlines()[:LINE_HEAD])
     m = LINE_RE.search(head)
-    return bool(m and re.search(r'(^|;)\s*closed\s*=', m.group(1)))
+    if not m:
+        return {}
+    out = {}
+    for part in m.group(1).split(';'):
+        if '=' in part:
+            k, v = part.split('=', 1)
+            out[k.strip().lower()] = v.strip()
+    return out
+
+def _line_closed(path):
+    return 'closed' in line_params(path)
+
+# HOW MUCH OF THE VERSION THE STAMP MUST MATCH. Default: major.minor. A line can declare
+# `docs=major` in its LINE marker when its documents are re-stamped only at a MAJOR
+# release by that project's own rule (ABRA's living-docs rule: a notes row every change,
+# the documents every X.0.0). Then only the major is compared, so 1.51.0 against a paper
+# stamped 1.0.0 passes and 2.0.0 against 1.0.0 still fails. Declared by the project in its
+# own file, never by name here. Any other `docs=` value is a gap, not a silent default.
+DOCS_GRAIN = {None: 2, 'major': 1}
 
 def active_changelog(base):
     """(relpath, None) for the live changelog, or (None, reason)."""
@@ -191,7 +212,7 @@ def find_stamp(base):
     p = pick[0]
     return os.path.relpath(p, os.path.join(ROOT, base)).replace(os.sep, '/'), masthead_version(p)
 
-def norm(v): return None if v is None else '.'.join(v.split('.')[:2])  # compare major.minor
+def norm(v, parts=2): return None if v is None else '.'.join(v.split('.')[:parts])  # default major.minor
 
 print('\nVersion consistency')
 print('=' * 60)
@@ -206,6 +227,11 @@ for proj, base in PROJECTS.items():
         vgaps.append((proj, f'no live changelog ({cv})')); continue
     # name the file only when it is not the default, so a non-default line is visible
     cl = 'changelog' if clog == 'CHANGELOG.md' else clog
+    docs = line_params(os.path.join(ROOT, base, clog)).get('docs')
+    if docs not in DOCS_GRAIN:
+        print(f'{proj.ljust(14)} {cl}={cv}  UNCHECKED — unknown docs={docs} in LINE marker')
+        vgaps.append((proj, f'unknown docs={docs} in {clog} LINE marker (allowed: major)')); continue
+    grain = DOCS_GRAIN[docs]
     if base in STAMPS:
         rel, pat = STAMPS[base]
         sv = stamped_version(base, rel, pat)
@@ -220,7 +246,8 @@ for proj, base in PROJECTS.items():
             vgaps.append((proj, f'no version stamp found ({sv})'))
             continue
         src = rel + ' (derived)'
-    ok = norm(cv) == norm(sv) and cv is not None
+    ok = norm(cv, grain) == norm(sv, grain) and cv is not None
+    if docs: src += f'; docs={docs}, major compared'
     print(f'{proj.ljust(14)} {cl}={cv}  file={sv}  {"ok" if ok else "MISMATCH"}  <- {src}')
     if not ok: vgaps.append((proj, f'{clog} {cv} vs {rel} {sv}'))
 if vgaps:

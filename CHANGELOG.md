@@ -10,6 +10,26 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.8.0] — 2026-10-01
+
+### Added
+- **A changelog line can declare `docs=major`** in its `<!-- LINE: ... -->` marker. The version check
+  then compares the MAJOR version only against the white paper's stamp, instead of major.minor. *Why:*
+  ABRA re-stamps its documents only at an `X.0.0` release by its own rule, so `CHANGELOG-REGMC.md`
+  1.52.0 against a white paper stamped 1.0.0 was a MISMATCH by design. The project declares this in its
+  own changelog; no project is named in the script. Any other `docs=` value is reported as a gap.
+  Approved by Will, 2026-10-01.
+
+### Fixed
+- **The LINE marker must stand on its own line.** In 1.7.1 the marker was matched anywhere in the first
+  25 lines, so this changelog's own 1.7.1 entry, which quotes the marker in prose, made the portfolio's
+  `CHANGELOG.md` read as a CLOSED line and its version went unchecked. Found while testing this change.
+
+### Notes
+- ABRA passes only once its `CHANGELOG-REGMC.md` marker carries `docs=major`. That edit belongs to the
+  ABRA repository and is not made here.
+- Existing mismatches for CHOMP, Event Desks, KaizoDex and Portfolio are left as they are.
+
 ## [1.7.1] — 2026-10-01
 
 ### Fixed
