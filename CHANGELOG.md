@@ -10,6 +10,16 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.8.1] — 2026-10-06
+
+### Added
+- **Move Advisor** (`Pokemon/ironmon-move-engine`, private repo `willhoop/ironmon-move-engine`) is in
+  the audited project list. It meets all twelve artefacts and its changelog matches its white paper.
+
+### Notes
+- The portfolio's own version check was already failing before this entry: `CHANGELOG.md` is 1.8.0
+  (now 1.8.1) while `docs/PORTFOLIO-whitepaper.md` is stamped 1.0. Not changed here; flagged.
+
 ## [1.8.0] — 2026-10-01
 
 ### Added
