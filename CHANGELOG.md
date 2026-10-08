@@ -10,6 +10,20 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.8.3] — 2026-10-08
+
+### Added
+- **Fourth Down Engine** is listed on the site, with links to the live app
+  (https://willhoop.github.io/fourth-down/), its white paper, deck, technical
+  documentation and source.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** The portfolio white paper and deck do not yet
+  describe Fourth Down Engine (carried from 1.8.2).
+
 ## [1.8.2] — 2026-10-08
 
 ### Added
