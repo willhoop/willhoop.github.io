@@ -10,6 +10,18 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.8.2] — 2026-10-08
+
+### Added
+- **Fourth Down Engine** (`fourth-down`) is in the audited project list: an NFL 4th-down decision
+  engine with coach and kicker grades.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** The portfolio white paper and deck do not yet list Fourth Down Engine.
+
 ## [1.8.1] — 2026-10-06
 
 ### Added
