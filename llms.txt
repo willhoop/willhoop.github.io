@@ -44,10 +44,10 @@ Keywords: prediction markets, forecasting, polling, event contracts, probability
 
 ### HoopaDex
 
-A Pokédex in one HTML file that shows types, stats and evolutions exactly as they were in the generation you pick.
+A Pokédex that shows types, stats and evolutions exactly as they were in the game you pick — every generation, Pokémon Champions, and six ROM hacks such as Renegade Platinum.
 
-Status: Live — v5.54
-Keywords: Pokémon, Pokédex, type chart, base stats, evolution, generations, single-file app
+Status: Live — v5.55
+Keywords: Pokémon, Pokédex, type chart, base stats, evolution, generations, Pokémon Champions, ROM hacks, Renegade Platinum, Emerald Kaizo, nuzlocke
 
 - [Open](https://willhoop.github.io/hoopadex/app/)
 - [White paper](https://willhoop.github.io/docs/HoopaDex/HOOPADEX-whitepaper.html)

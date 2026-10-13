@@ -22,6 +22,20 @@ silently rewritten; what changed and why is stated.
 - **Supersedes.** Live — v1.2.5.
 - **Owed to the next major.** Nothing new.
 
+## [1.9.2] — 2026-10-13
+
+### Changed
+- **HoopaDex card: status "Live — v5.55" and a new description** that names its ROM-hack section.
+  *Why:* HoopaDex 5.55 shipped that section, covering six ROM hacks including Emerald Kaizo, which is
+  what replaced the Kaizo Dex card in 1.9.0. Checked on the live app before the change. Keywords add
+  Pokémon Champions, ROM hacks, Renegade Platinum, Emerald Kaizo and nuzlocke.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Nothing.
+
 ## [1.9.1] — 2026-10-13
 
 ### Added
