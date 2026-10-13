@@ -72,7 +72,7 @@ Keywords: chess, chess variant, fairy chess, Dabbaba, Capablanca chess, online m
 
 A trainer for Jeopardy!'s two betting decisions, the Daily Double and Final Jeopardy. It shows the safe bet and the best bet, then quizzes you on both.
 
-Status: Live — v2.0
+Status: Live — v2.1
 Keywords: Jeopardy!, Final Jeopardy, Daily Double, wagering strategy, game theory, Monte Carlo simulation, simulated opponents, quiz
 
 - [Open](https://willhoop.github.io/jeopardy-wagering/app/)

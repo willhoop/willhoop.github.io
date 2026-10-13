@@ -10,6 +10,19 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.6] — 2026-10-13
+
+### Changed
+- **Jeopardy Wagering card: status "Live — v2.1".** *Why:* jeopardy-wagering 2.1.0 is live, with its
+  simulated rivals calibrated to modern-era play. Checked on the live app before the change. The
+  description is unchanged.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Nothing.
+
 ## [1.9.5] — 2026-10-13
 
 ### Added
