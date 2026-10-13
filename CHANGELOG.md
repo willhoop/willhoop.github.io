@@ -10,6 +10,19 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.4] — 2026-10-13
+
+### Changed
+- **Jeopardy Wagering card: status "Live — v2.0"**, and "simulated opponents" added to its keywords.
+  *Why:* jeopardy-wagering 2.0.0 is live; Smart Bet now plays against simulated contestants. Checked on
+  the live app (footer "Wager Trainer v2.0.0") before the change. The description is unchanged.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Nothing.
+
 ## [1.9.3] — 2026-10-13
 
 ### Changed
