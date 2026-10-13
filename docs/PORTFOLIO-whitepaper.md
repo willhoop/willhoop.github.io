@@ -2,7 +2,7 @@
 
 ### Design and verification of the project index
 
-**Version 1.0 · Last updated 2026-07-22**
+**Version 1.9 · Last updated 2026-10-13**
 **Will Hooper**
 
 > Living document. Updated in the same pass as any change to the site.
@@ -22,15 +22,19 @@ linking to evidence contradicts its own thesis.
 
 ## 2. The data structure
 
-Everything renders from one array. A project is an object with a name, a status, two prose
-fields, and a `docs` map keyed by a fixed set of slots:
+Everything renders from one array. A project is an object with a name, a status, a short
+description, a list of search keywords, and a `docs` map keyed by a fixed set of slots:
 
 ```
 SLOTS = ["open", "paper", "deck", "docs", "source"]
 ```
 
-Adding a project is appending one object. There is no other edit, and no HTML is written by
-hand. This is the same principle applied across the other projects: anything that changes
+Adding a project is appending one object and running one generator (section 5). No HTML is
+written by hand.
+
+The description is one or two plain sentences about the whole project, capped at 200
+characters by a test. Figures do not appear on the card. They belong in each project's own
+white paper, where a validation report backs them. This is the same principle applied across the other projects: anything that changes
 lives in exactly one place.
 
 ## 3. The layout rule, and why it is a rule
@@ -44,7 +48,7 @@ lists of four and five items wrapped differently and the column looked ragged. S
 more importantly, **a gap you can see is better than a gap you cannot.** A missing white paper
 is a fact about the project. Hiding it makes the page prettier and the reader less informed.
 
-This rule also makes the standard enforceable, which section 5 covers.
+This rule also makes the standard enforceable, which section 6 covers.
 
 ## 4. Document links and the drift problem
 
@@ -55,14 +59,37 @@ that the links leave the site; the benefit is that they cannot go stale.
 Each external repository is referenced through a single constant, so moving a repository is
 one edit.
 
-## 5. Verification
+## 5. Readable by agents
+
+The page draws its rows with JavaScript. Search crawlers and AI agents often read the raw HTML
+without running scripts. Before version 1.8.4 such a reader saw no projects at all.
+
+`build/build_agent_files.js` runs the page's own script against a stub document and writes,
+from the same array:
+
+| Output | For |
+|---|---|
+| Static rows inside `index.html` | Any reader that does not run JavaScript |
+| schema.org JSON-LD inside `index.html` | Search engines: name, description, keywords, links per project [3] |
+| `llms.txt` | Language-model agents, in the llms.txt format [4] |
+| `sitemap.xml`, `robots.txt` | Crawlers [5] |
+
+The static rows come from the same render function the browser uses, so the two cannot
+differ. Keywords appear in the JSON-LD and `llms.txt` only. They are not shown on the card,
+because the tag chips they would become were removed deliberately (Technical documentation,
+Part 4).
+
+## 6. Verification
 
 Two scripts.
 
-`tests/test-projects.js` (22 assertions) reads the project array out of the shipped
-`index.html` rather than copying it, and asserts that every project defines every slot, that
-no link renders `undefined`, that every link column has an identical number of rows, that
-every title is a link, and that the removed chrome — card boxes, tag chips — stays removed.
+`tests/test-projects.js` (77 assertions with the current seven projects) reads the project
+array out of the shipped `index.html` rather than copying it, and asserts that every project
+defines every slot it declares, that no link renders `undefined`, that every link column has
+the rows its project declares, that every title is a link, that the removed chrome — card
+boxes, tag chips — stays removed, that each description is 200 characters or fewer with at
+least three keywords, and that every generated file in section 5 matches the array. A stale
+generated file fails the suite, and CI runs the suite on every push.
 
 `build/check_projects.py` audits every project folder on disk for the seven required
 artefacts: white paper, deck, technical documentation, README, changelog, agent notes, tests.
@@ -73,15 +100,23 @@ paper or a deck, and nothing caught it. The standard was written down but not en
 was followed unevenly. The audit converts the standard from a stated intention into a check
 that fails.
 
-## 6. Limitations
+## 7. Limitations
 
 1. No automated rendering check. The layout is verified by reasoning about the CSS and by
    inspection, not by a headless browser.
 2. Link targets are verified by hand at publish time, not on a schedule. A repository rename
    would break links silently.
-3. The site is static. Project descriptions are written prose and can fall behind the project.
+3. Project descriptions and statuses are written by hand and can fall behind the project. In
+   October 2026 two statuses were found stale (HoopaDex v1.93 against a live v5.54, Fourth Down
+   v1.1.0 against a live v1.2.5). CI checks out only this repository, so it cannot read another
+   project's version stamp.
+4. Nothing measures whether agents or search engines actually use the generated files. The
+   files follow published formats; their effect on discovery is not measured.
 
-## 7. References
+## 8. References
 
 1. Diátaxis documentation framework. <https://diataxis.fr/>
 2. ASD-STE100 Simplified Technical English specification.
+3. Schema.org vocabulary, `SoftwareApplication` and `ItemList`. <https://schema.org/>
+4. The /llms.txt file proposal. <https://llmstxt.org/>
+5. Sitemaps XML format. <https://www.sitemaps.org/protocol.html>

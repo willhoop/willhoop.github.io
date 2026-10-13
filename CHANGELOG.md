@@ -10,6 +10,28 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.0] — 2026-10-13
+
+### Removed
+- **The Kaizo Dex card.** *Why:* Will retired it. HoopaDex's ROM-hack section is to replace it.
+  That section is not live yet, so the HoopaDex card does not claim it. The `kaizodex` repository,
+  its app and the rendered copies in `docs/KaizoDex/` are unchanged; only the card is gone.
+
+### Changed
+- **The white paper, deck and technical documentation are brought up to date and stamped 1.9.**
+  They now describe the short descriptions, the `keywords` field and `build/build_agent_files.js`.
+  The deck ends with a link to the white paper.
+
+### Record
+- **Measured.** Project count on the site: 8 became 7 (`index.html`, `PROJECTS`). Test count: 77
+  assertions (`node tests/test-projects.js`).
+- **Basis.** unchanged
+- **Supersedes.** ~~8 projects~~. The white paper's ~~22 assertions~~ is replaced by 77; it had been
+  stale since the suite grew.
+- **Owed to the next major.** Nothing. The 1.8.2–1.8.4 records are folded in. The white paper does
+  not list projects by name, so "list Fourth Down Engine" needs no text. The portfolio's own documents
+  have no PDFs to rebuild; they ship as Markdown.
+
 ## [1.8.4] — 2026-10-13
 
 ### Changed

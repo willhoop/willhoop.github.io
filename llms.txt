@@ -68,19 +68,6 @@ Keywords: chess, chess variant, fairy chess, Dabbaba, Capablanca chess, online m
 - [Technical docs](https://github.com/willhoop/guardian-chess/blob/main/docs/GUARDIAN-CHESS-technical-docs.md)
 - [Source](https://github.com/willhoop/guardian-chess)
 
-### Kaizo Dex
-
-A companion for the Emerald Kaizo nuzlocke, with the romhack's real trainers and encounters, a damage calculator and a run tracker.
-
-Status: Live
-Keywords: Pokémon, Emerald Kaizo, nuzlocke, romhack, IronMON, damage calculator, run tracker, encounter tables
-
-- [Open](https://willhoop.github.io/kaizodex/app/)
-- [White paper](https://willhoop.github.io/docs/KaizoDex/KAIZODEX-whitepaper.html)
-- [Slide deck](https://willhoop.github.io/docs/KaizoDex/KAIZODEX-deck-plain-english.html)
-- [Technical docs](https://willhoop.github.io/docs/KaizoDex/KAIZODEX-technical-docs.html)
-- [Source](https://github.com/willhoop/kaizodex)
-
 ### Jeopardy Wagering
 
 A trainer for Jeopardy!'s two betting decisions, the Daily Double and Final Jeopardy. It shows the safe bet and the best bet, then quizzes you on both.

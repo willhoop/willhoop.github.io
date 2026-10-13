@@ -1,6 +1,6 @@
 # The portfolio — the deck
 
-**Version 1.0 · Last updated 2026-07-22**
+**Version 1.9 · Last updated 2026-10-13**
 
 > Plain words. The detail is in the [white paper](PORTFOLIO-whitepaper.md).
 
@@ -34,19 +34,36 @@ a gap you can't.
 
 ## Slide 6 — Adding a project
 
-Add one entry to a list. That's the whole job. No HTML.
+Add one entry to a list: a name, one or two sentences about it, and the links. Then press the
+push button. No HTML.
 
-## Slide 7 — How it's checked
+## Slide 7 — Short on the page, detail in the paper
+
+Each project gets one or two plain sentences. The numbers live in that project's white paper,
+where they can be checked.
+
+## Slide 8 — Machines can read it too
+
+Search engines and AI assistants often read a page without running it. So the page also
+carries a plain copy of the list, a summary file written for AI (`llms.txt`), and a map of
+every page. All of it is generated from the same list, so it can't fall out of date.
+
+## Slide 9 — How it's checked
 
 Two scripts run before publishing:
 
-- one checks the page itself — no broken links, every column the same length
+- one checks the page itself — no broken links, every column the same length, and the
+  machine-readable copies match the page
 - one checks every project folder actually has all its documents
 
 The second exists because HoopaDex once shipped without a white paper and nothing noticed.
 Now something notices.
 
-## Slide 8 — What it can't do
+## Slide 10 — What it can't do
 
 It's a plain static page. It can't check that a link still works next month, and the
-descriptions are written by hand so they can fall behind.
+descriptions and version labels are written by hand so they can fall behind.
+
+## Slide 11 — Read more
+
+The full detail and the sources are in the [white paper](PORTFOLIO-whitepaper.md).
