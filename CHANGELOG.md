@@ -10,6 +10,39 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.8.4] — 2026-10-13
+
+### Changed
+- **Every project description is one or two short sentences about the whole project.** *Why:* the old
+  paragraphs were spec sheets. Detail and figures belong in each white paper, per this project's rule.
+  The unused `blurb` field is removed.
+- **HoopaDex status reads "Live — v5.54".** *Why:* the card said v1.93, a superseded version. The
+  HoopaDex session reported it; `app/index.html` line 2 and the live app both read 5.54.
+- **Fourth Down Engine status reads "Live — v1.2.5"**, its pushed version. The card said v1.1.0.
+
+### Added
+- **The site is readable by agents and crawlers that do not run JavaScript.** *Why:* the rows were
+  drawn by script, so the raw HTML held no project text. `build/build_agent_files.js` now writes,
+  from the `PROJECTS` array: a static copy of the rows, schema.org JSON-LD, `llms.txt`,
+  `sitemap.xml` and `robots.txt`. `PUSH-TO-GITHUB.bat` runs it before each push.
+- **Each project has a `keywords` list**, published in JSON-LD and `llms.txt`, not on the card.
+- **Tests:** descriptions are 200 characters or fewer; each project has three or more keywords; every
+  generated file matches `PROJECTS` (CI fails when one is stale); Event Desks publishes its site link
+  only.
+
+### Fixed
+- **The test suite passes again.** It required all five document slots on Event Desks, which
+  declares only `open` by design, so it failed 3 checks. It now checks the slots a project declares.
+
+### Record
+- **Measured.** No portfolio figure changed. Card text no longer repeats project figures (for
+  example CHOMP's response time); those figures stay in each project's white paper.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** The technical documentation must describe `build/build_agent_files.js`
+  and the agent-readable files. The white paper and deck must use the new short descriptions and
+  list Fourth Down Engine (carried from 1.8.2).
+
 ## [1.8.3] — 2026-10-08
 
 ### Added

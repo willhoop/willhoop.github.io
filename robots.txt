@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://willhoop.github.io/sitemap.xml

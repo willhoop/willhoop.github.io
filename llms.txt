@@ -1,0 +1,108 @@
+# Will Hooper — Projects
+
+> Applied modelling and tooling projects by Will Hooper. Each project ships with a white paper (results, math, sources), a plain-English deck and technical documentation.
+
+Site: https://willhoop.github.io/
+Contact: willjhooper@msn.com
+
+## Projects
+
+### ABRA
+
+An AI for competitive Pokémon, trained on real ladder battles. It calculates damage, reads what the opponent is likely hiding, and estimates who is winning mid-battle.
+
+Status: In development — v2.3.0
+Keywords: Pokémon, competitive Pokémon, VGC, Pokémon Showdown, game AI, machine learning, damage calculator, win probability, metagame analysis
+
+- [Open](https://willhoop.github.io/abra/app/)
+- [White paper](https://github.com/willhoop/abra/blob/main/docs/ABRA-whitepaper.md)
+- [Slide deck](https://github.com/willhoop/abra/blob/main/docs/ABRA-deck-plain-english.md)
+- [Technical docs](https://github.com/willhoop/abra/blob/main/docs/ABRA-technical-docs.md)
+- [Source](https://github.com/willhoop/abra)
+
+### CHOMP
+
+ABRA's team-preview tool, packaged as a Pokémon Showdown userscript. At team preview it tells you which four Pokémon to bring and which two to lead.
+
+Status: In daily use
+Keywords: Pokémon, VGC, Champions VGC, Pokémon Showdown, userscript, team preview, team selection, damage calculator
+
+- [Open](https://github.com/willhoop/chomp)
+- [White paper](https://willhoop.github.io/docs/CHOMP/CHOMP-whitepaper.html)
+- [Slide deck](https://willhoop.github.io/docs/CHOMP/CHOMP-deck-plain-english.pdf)
+- [Technical docs](https://willhoop.github.io/docs/CHOMP/CHOMP-technical-docs.html)
+- [Source](https://github.com/willhoop/chomp)
+
+### Event Desks
+
+A live site that prices prediction markets against polls and the news, one desk per trade.
+
+Status: Live at elitefourcapital.com
+Keywords: prediction markets, forecasting, polling, event contracts, probability
+
+- [Open](https://elitefourcapital.com)
+
+### HoopaDex
+
+A Pokédex in one HTML file that shows types, stats and evolutions exactly as they were in the generation you pick.
+
+Status: Live — v5.54
+Keywords: Pokémon, Pokédex, type chart, base stats, evolution, generations, single-file app
+
+- [Open](https://willhoop.github.io/hoopadex/app/)
+- [White paper](https://willhoop.github.io/docs/HoopaDex/HOOPADEX-whitepaper.html)
+- [Slide deck](https://willhoop.github.io/docs/HoopaDex/HOOPADEX-deck-plain-english.html)
+- [Technical docs](https://willhoop.github.io/docs/HoopaDex/HOOPADEX-technical-docs.html)
+- [Source](https://github.com/willhoop/hoopadex)
+
+### Guardian Chess
+
+A chess variant invented by my brother Alex: a wider board and a new piece, the Guardian, that leaps exactly two squares. Play a friend online, the computer, or pass one device back and forth.
+
+Status: Live — v1.0.0
+Keywords: chess, chess variant, fairy chess, Dabbaba, Capablanca chess, online multiplayer, Elo rating, chess engine
+
+- [Open](https://guardian-chess.onrender.com)
+- [White paper](https://github.com/willhoop/guardian-chess/blob/main/docs/GUARDIAN-CHESS-whitepaper.md)
+- [Slide deck](https://github.com/willhoop/guardian-chess/blob/main/docs/GUARDIAN-CHESS-deck-plain-english.md)
+- [Technical docs](https://github.com/willhoop/guardian-chess/blob/main/docs/GUARDIAN-CHESS-technical-docs.md)
+- [Source](https://github.com/willhoop/guardian-chess)
+
+### Kaizo Dex
+
+A companion for the Emerald Kaizo nuzlocke, with the romhack's real trainers and encounters, a damage calculator and a run tracker.
+
+Status: Live
+Keywords: Pokémon, Emerald Kaizo, nuzlocke, romhack, IronMON, damage calculator, run tracker, encounter tables
+
+- [Open](https://willhoop.github.io/kaizodex/app/)
+- [White paper](https://willhoop.github.io/docs/KaizoDex/KAIZODEX-whitepaper.html)
+- [Slide deck](https://willhoop.github.io/docs/KaizoDex/KAIZODEX-deck-plain-english.html)
+- [Technical docs](https://willhoop.github.io/docs/KaizoDex/KAIZODEX-technical-docs.html)
+- [Source](https://github.com/willhoop/kaizodex)
+
+### Jeopardy Wagering
+
+A trainer for Jeopardy!'s two betting decisions, the Daily Double and Final Jeopardy. It shows the safe bet and the best bet, then quizzes you on both.
+
+Status: Live — v1.4
+Keywords: Jeopardy!, Final Jeopardy, Daily Double, wagering strategy, game theory, Monte Carlo simulation, quiz
+
+- [Open](https://willhoop.github.io/jeopardy-wagering/app/)
+- [White paper](https://willhoop.github.io/jeopardy-wagering/build/white-paper.pdf)
+- [Slide deck](https://willhoop.github.io/jeopardy-wagering/build/deck.pdf)
+- [Technical docs](https://github.com/willhoop/jeopardy-wagering/blob/main/docs/README.md)
+- [Source](https://github.com/willhoop/jeopardy-wagering)
+
+### Fourth Down Engine
+
+Go for it, kick or punt? It scores every NFL fourth-down option by the chance to win, on your phone during the game, and grades every head coach and kicker.
+
+Status: Live — v1.2.5
+Keywords: NFL, American football, fourth down, win probability, sports analytics, coaching decisions, kicker ratings, go for it
+
+- [Open](https://willhoop.github.io/fourth-down/)
+- [White paper](https://github.com/willhoop/fourth-down/blob/main/build/fourth-down-whitepaper.pdf)
+- [Slide deck](https://github.com/willhoop/fourth-down/blob/main/build/fourth-down-deck.pdf)
+- [Technical docs](https://github.com/willhoop/fourth-down/blob/main/docs/README.md)
+- [Source](https://github.com/willhoop/fourth-down)
