@@ -10,6 +10,19 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.5] — 2026-10-13
+
+### Added
+- **NFL data (`nfl-data`) is in the `check_projects.py` audit.** A local Parquet mirror of nflverse
+  data, built alongside Fourth Down Engine. It meets all twelve artefacts. The repository is private,
+  so it has no card.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Nothing.
+
 ## [1.9.4] — 2026-10-13
 
 ### Changed

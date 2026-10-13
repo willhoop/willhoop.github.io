@@ -30,6 +30,7 @@ PROJECTS = {
     'Move Advisor':   'Pokemon/ironmon-move-engine',
     'Fourth Down':    'fourth-down',
     'Every Last Grain': 'every-last-grain',
+    'NFL data':       'nfl-data',
 }
 
 def has(base, *patterns):
