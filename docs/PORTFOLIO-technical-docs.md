@@ -82,6 +82,8 @@ only. Any other `docs=` value is a gap. The marker must be on a line of its own.
 | `build/build_agent_files.js` | Writes the static rows, JSON-LD, `llms.txt`, `sitemap.xml` and `robots.txt` from `PROJECTS`. |
 | `build/build_docs.py` | Renders project markdown to HTML in `docs/`. |
 | `build/check_projects.py` | Audits every project against the standard. |
+| `build/agent_dashboard.js` | Shows free RAM and the running processes per project. Run `build/dashboard.bat`. It advises only. It does not stop processes. |
+| `data/agent-budget.json` | The dashboard's state. Not tracked by git. |
 | `tests/test-projects.js` | Assertions on the project data, the layout and the generated files. |
 | `llms.txt`, `sitemap.xml`, `robots.txt` | Generated. Do not edit. |
 | `docs/` | Rendered documents, and this documentation. |

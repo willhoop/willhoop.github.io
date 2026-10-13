@@ -3,3 +3,6 @@ node_modules/
 Thumbs.db
 *.tmp
 .~lock*
+
+# Machine state written by build/agent_dashboard.js; changes as it runs
+data/agent-budget.json

@@ -29,6 +29,7 @@ PROJECTS = {
     'Guardian Chess': 'Guardian Chess',
     'Move Advisor':   'Pokemon/ironmon-move-engine',
     'Fourth Down':    'fourth-down',
+    'Every Last Grain': 'every-last-grain',
 }
 
 def has(base, *patterns):

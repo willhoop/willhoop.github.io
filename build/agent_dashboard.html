@@ -1,0 +1,82 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Who's using the box</title>
+<style>
+  :root{ --bg:#0f1115; --panel:#171a20; --edge:#2a2f38; --ink:#e8ecf1; --dim:#8a929c;
+         --ok:#3fb950; --warn:#d29922; --bad:#e5534b; }
+  *{box-sizing:border-box}
+  body{margin:0;padding:40px 24px;background:var(--bg);color:var(--ink);
+       font:15px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+       -webkit-user-select:none;user-select:none}
+  .wrap{max-width:620px;margin:0 auto}
+  h1{font-size:15px;margin:0 0 26px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:400}
+  .free{font-size:46px;font-weight:700;line-height:1;margin-bottom:6px}
+  .free.ok{color:var(--ok)} .free.warn{color:var(--warn)} .free.bad{color:var(--bad)}
+  .says{font-size:15px;color:var(--dim);margin-bottom:34px}
+  button{display:block;width:100%;text-align:left;margin-bottom:10px;padding:18px 20px;
+         border-radius:8px;border:1px solid var(--edge);background:var(--panel);color:var(--ink);
+         font:inherit;cursor:pointer}
+  button:hover{border-color:#48505c}
+  button.on{background:#1c3324;border-color:var(--ok)}
+  button b{display:block;font-size:17px;margin-bottom:2px}
+  button span{font-size:13px;color:var(--dim)}
+  button.on span{color:#8fd6a2}
+  .now{margin-top:30px;font-size:13px;color:var(--dim)}
+  .now div{margin-top:5px}
+  .err{color:var(--bad)}
+</style>
+
+<div class="wrap">
+  <h1>Who's using the box</h1>
+  <div class="free" id="free">—</div>
+  <div class="says" id="says">…</div>
+  <div id="modes"></div>
+  <div class="now" id="now"></div>
+</div>
+
+<script>
+async function set(mode){
+  await fetch('/api/budget',{method:'POST',headers:{'Content-Type':'application/json'},
+                             body:JSON.stringify({mode})});
+  tick();
+}
+function paint(d){
+  if (d.error){ document.getElementById('says').innerHTML = '<span class="err">'+d.error+'</span>'; return; }
+  const m = d.mem, b = d.budget, gap = m.free_gb - b.reserve_gb;
+
+  const f = document.getElementById('free');
+  f.textContent = m.free_gb.toFixed(1) + ' GB free';
+  f.className = 'free ' + (m.free_gb < 1 || gap < 0 ? 'bad' : gap < 2 ? 'warn' : 'ok');
+
+  document.getElementById('says').textContent =
+      m.free_gb < 1 ? 'Almost nothing left. Close something.'
+    : gap < 0       ? 'Below your line — I have stopped starting work.'
+    : gap < 2       ? 'Tight. I will stay out of your way.'
+    : gap < 4       ? 'Enough for one job.'
+                    : 'Plenty. I can run several jobs.';
+
+  const modes = document.getElementById('modes');
+  if (modes.dataset.m !== b.mode){
+    modes.dataset.m = b.mode;
+    const label = { mine:['Mine','I keep out of the way'],
+                    shared:['Shared','We both work'],
+                    overnight:['Yours','Take the whole machine'] };
+    modes.innerHTML = Object.keys(d.modes).map(k =>
+      `<button data-m="${k}" class="${k===b.mode?'on':''}"><b>${label[k][0]}</b><span>${label[k][1]}</span></button>`).join('');
+    modes.querySelectorAll('button').forEach(el => el.onclick = () => set(el.dataset.m));
+  }
+
+  /* what is running, one line per job, only if there is anything worth saying */
+  const g = {};
+  for (const p of d.procs){ const k = p.job; (g[k] = g[k] || 0); g[k] += p.mb; }
+  const big = Object.entries(g).filter(([,mb]) => mb >= 300).sort((a,z) => z[1]-a[1]);
+  document.getElementById('now').innerHTML = big.length
+    ? 'Running: ' + big.map(([j,mb]) => `<div>${j} — ${(mb/1024).toFixed(1)} GB</div>`).join('')
+    : 'Nothing heavy running.';
+}
+async function tick(){
+  try { paint(await (await fetch('/api/load')).json()); }
+  catch(e){ document.getElementById('says').innerHTML = '<span class="err">server not running</span>'; }
+}
+tick(); setInterval(tick, 5000);
+</script>

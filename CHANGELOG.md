@@ -10,6 +10,26 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.1] — 2026-10-13
+
+### Added
+- **`build/agent_dashboard.js`, `build/agent_dashboard.html` and `build/dashboard.bat`** are now
+  tracked. *Why:* they were written on 2026-08-05 and never committed. The dashboard shows free RAM
+  and which project each running process belongs to, so concurrent agents do not run the machine out
+  of memory. Its state file, `data/agent-budget.json`, changes as it runs and is now in `.gitignore`.
+- **Every Last Grain is in the `check_projects.py` audit.** This one-line change was also uncommitted.
+
+### Notes
+- **Guardian Chess's repository is now public.** Its card linked the source, white paper, deck and
+  technical docs on GitHub while the repository was private, so every visitor got a 404. Will chose
+  to make it public; its history was checked first for committed secrets and none were found.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Nothing. The technical documentation lists the dashboard in this pass.
+
 ## [1.9.0] — 2026-10-13
 
 ### Removed
