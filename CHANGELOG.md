@@ -10,7 +10,7 @@ silently rewritten; what changed and why is stated.
 
 ---
 
-## [1.9.2] — 2026-10-13
+## [1.9.3] — 2026-10-13
 
 ### Changed
 - Fourth Down Engine's card shows **Live — v1.3.0** (redesign, Games tab grading every
