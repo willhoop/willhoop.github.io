@@ -10,6 +10,18 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.2] — 2026-10-13
+
+### Changed
+- Fourth Down Engine's card shows **Live — v1.3.0** (redesign, Games tab grading every
+  team in every game, a "Since 2021" coach view, short share links).
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Live — v1.2.5.
+- **Owed to the next major.** Nothing new.
+
 ## [1.9.1] — 2026-10-13
 
 ### Added
