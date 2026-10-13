@@ -28,6 +28,19 @@ silently rewritten; what changed and why is stated.
 - **Supersedes.** Nothing.
 - **Owed to the next major.** Nothing.
 
+## [1.9.7] — 2026-10-13
+
+### Changed
+- **Jeopardy Wagering card: status "Live — v2.2".** *Why:* jeopardy-wagering 2.2.0 is live. Among
+  wagers with equal win chance, Smart Bet now picks the one with the highest average earnings.
+  Checked on the live app before the change. The description is unchanged.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Nothing.
+
 ## [1.9.6] — 2026-10-13
 
 ### Changed
