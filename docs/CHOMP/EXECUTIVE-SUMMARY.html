@@ -29,40 +29,28 @@ strong{color:var(--white)}
 </style></head><body>
 <div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
 <main><h1 id="chomp-executive-summary">CHOMP — Executive Summary</h1>
-<p><strong>One page · Version 1.0 · 2026-07-22</strong></p>
+<p><strong>One page · Version 3.0.0 · 2026-10-13</strong></p>
 <h3 id="the-problem">The problem</h3>
-<p>Competitive Pokémon (VGC) opens with a hidden-information decision under a 30-second clock:
-you build six, but bring only four and start only two. That single choice heavily shapes the
-match. The strategy space is roughly 10^139 team configurations — larger than chess, Go, poker,
-StarCraft and Dota combined. Players make the call on instinct.</p>
+<p>At team preview in competitive Pokémon doubles, each player secretly picks four of six Pokémon to bring and two of
+those four to lead. Each side has 90 options, and both choose at once. In Champions VGC Reg M-C with open team sheets,
+both full sheets are visible, so the choice is a small, fully specified game.</p>
 <h3 id="the-approach">The approach</h3>
-<p>CHOMP replaces instinct with arithmetic. It reads both teams the moment a match opens, runs the
-game's real damage formula across all 24 attacker/defender pairings, and returns the four to
-bring and the two to lead — in under 50 milliseconds, entirely in the browser.</p>
-<p>Unlike published work in this space (minimax agents, Monte-Carlo tree search, reinforcement
-learning), CHOMP does not attempt to play the match. It solves only the opening decision. That
-scope is what makes it fast, interpretable, and usable by a human under a clock: every
-recommendation is backed by a number the player can verify.</p>
+<p>CHOMP scores all 90 × 90 option pairs with a learned chance to win, then solves the game exactly for a mixed strategy
+that an opponent cannot exploit. In games 2 and 3 of a best-of-three it leans halfway towards punishing the opponent's
+previous pick. It lives inside ABRA and plays on the Pokémon Showdown ladder through ABRA's client, ROTOM.</p>
 <h3 id="evidence">Evidence</h3>
-<p>Measured over 50 real ranked games (<code>docs/VALIDATION-REPORT.md</code>):
-- Agreed with at least 3 of the player's 4 picks in <strong>74%</strong> of games; never diverged on more than two.
-- Win rate was <strong>57%</strong> when the player's bring matched CHOMP versus <strong>46%</strong> when it did not —
-  directionally positive, but <strong>not statistically significant</strong> at this sample size.
-- In the specific failure mode it was built to catch (sandstorm attrition), it made the correct
-  call in <strong>2 of 2</strong> available cases.</p>
+<p>Every figure, with its source, is in the <a href="CHOMP-whitepaper.md">white paper</a> §3. In brief: in pre-registered simulated
+tests CHOMP beat the most common human pick for each team, and it showed no clear edge over the pick a human made after
+seeing the opponent.</p>
 <h3 id="status">Status</h3>
-<p>Working and in daily use: a browser plugin (live recommendation), a replay analyzer that learns
-the player's personal metagame, and a standalone damage calculator. The engine is regression-tested
-and the mathematics are validated against the official calculator.</p>
-<h3 id="honest-limitations">Honest limitations</h3>
-<p>CHOMP evaluates one turn. It does not model recoil, flinch, status over time, or redirection.
-Opponent sets are inferred from usage statistics, not known. Output is deterministic, so a
-repeat opponent could learn the pattern. Scores are relative and not yet calibrated to win
-probability. All of this is documented, not hidden.</p>
+<p>CHOMP v1 is live at preview in ABRA's ladder arm. A later version with stat spreads and field effects did not beat v1
+and was not promoted. The ladder runs so far are too short to measure CHOMP's effect on rating.</p>
+<h3 id="retired">Retired</h3>
+<p>The old CHOMP browser userscript for Reg M-B (versions 1.0 to 2.5.1) is retired. Its code stays in this repository as
+history.</p>
 <h3 id="next">Next</h3>
 <ol>
-<li>Turn simulator (multi-turn lookahead) — the largest accuracy gain.</li>
-<li>Usage-weighted opponent modelling — replaces estimated sets with measured distributions.</li>
-<li>Mixed-strategy recommendations — removes predictability.</li>
-<li>Prospective trial at n &gt; 200 to convert the directional result into evidence.</li>
+<li>An A/B on the ladder: CHOMP against each team's own recorded bring.</li>
+<li>A scorer built on ABRA's next value network; it must beat v1 on the same gate first.</li>
+<li>A best-of-three arena, to test the game 2 and 3 adjustment in play.</li>
 </ol></main></body></html>

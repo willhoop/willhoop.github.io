@@ -22,10 +22,10 @@ Keywords: Pokémon, competitive Pokémon, VGC, Pokémon Showdown, game AI, machi
 
 ### CHOMP
 
-ABRA's team-preview tool, packaged as a Pokémon Showdown userscript. At team preview it tells you which four Pokémon to bring and which two to lead.
+ABRA's team-preview solver for Champions VGC Reg M-C. It reads both open team sheets and returns a mixed strategy over the 90 bring-and-lead options, and it plays at preview in ABRA's ladder client.
 
-Status: In daily use
-Keywords: Pokémon, VGC, Champions VGC, Pokémon Showdown, userscript, team preview, team selection, damage calculator
+Status: Live in ABRA — v3.0.0
+Keywords: Pokémon, VGC, Champions VGC, Reg M-C, open team sheets, Pokémon Showdown, team preview, game theory, mixed strategy
 
 - [Open](https://github.com/willhoop/chomp)
 - [White paper](https://willhoop.github.io/docs/CHOMP/CHOMP-whitepaper.html)

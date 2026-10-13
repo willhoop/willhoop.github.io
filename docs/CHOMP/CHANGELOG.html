@@ -28,57 +28,297 @@ ul,ol{padding-left:22px}li{margin:.32em 0}
 strong{color:var(--white)}
 </style></head><body>
 <div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
-<main><h1 id="changelog-chomp">CHANGELOG — CHOMP</h1>
-<p>Newest first. Every change to code or documents is logged here.</p>
-<h2 id="2026-07-22">2026-07-22</h2>
+<main><h1 id="changelog-chomp">Changelog — CHOMP</h1>
+<p>All notable changes to CHOMP are recorded here, newest first.
+The format follows <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>.
+Versions follow <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<p><strong>Rule.</strong> Every change is logged here in the same pass as the code, together with the matching
+updates to the white paper, the deck, and the technical documentation. A prior conclusion is never
+silently rewritten; what changed and why is stated. The top version here must match the plugin
+<code>@version</code> stamp.</p>
+<hr />
+<h2 id="300-2026-10-13">[3.0.0] — 2026-10-13</h2>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><strong>CHOMP is now the Reg M-C team-preview solver inside ABRA.</strong> The README, white paper, technical documentation,
+  plain-English deck, executive summary and <code>llms.txt</code> are rewritten to describe CHOMP v1 (ABRA <code>solver/chomp/v1/</code>,
+  abra/regmc 1.25.0): both open sheets in, a mixed strategy over the 90 bring-and-lead options out, scored by a learned
+  cell model and solved exactly by linear programming, live at preview in ABRA's ladder client ROTOM. <em>Why:</em> Will asked
+  for the CHOMP project to describe the CHOMP built inside ABRA. The ABRA repository is public, so the documents link
+  its files.</li>
+<li><strong>Deck slide 6 is rebuilt.</strong> It paired a Reg M-B sandstorm anecdote with three figures that did not measure the
+  tool. It now tells the v0-failed / v1-passed story and shows three measured figures, each stated in the white paper
+  with its source (see Record). <em>Why:</em> Will: "this chomp deck slide makes no sense". The whole deck was checked the same
+  way, and <code>tests/test-deck-figures.js</code> now enforces it.</li>
+<li>The deck's last slide links the rendered white paper; it linked <code>https://github.com/</code>.</li>
+<li><code>build/build_deck.js</code> writes to <code>docs/</code> relative to the script; it wrote to a dead sandbox path.</li>
+<li><code>CLAUDE.md</code> states that CHOMP's code lives in ABRA and that the engine and build rules apply to the retired tool only.</li>
+<li><code>docs/VALIDATION-REPORT.md</code> carries a banner: it measures the retired Reg M-B userscript.</li>
+<li>Userscript <code>@version</code> (and its builder's stamp) set to 3.0.0 so the stamp matches this changelog. No userscript code
+  changed.</li>
+</ul>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>tests/test-deck-figures.js</code>: every number on a slide must map to text in the white paper, the three withdrawn
+  figures must stay off the deck, and the last slide must link the white paper. Shown RED on a deliberate break
+  (<code>1323</code> put back on slide 6) before it was trusted.</li>
+<li><code>build/export_deck_pdf.ps1</code>: exports the deck PDF with PowerPoint. LibreOffice, which the portfolio build calls, is
+  not installed on this machine.</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li><strong>CI was red on every push since 2026-07-31.</strong> <code>tests/test-engine-contract.js</code> section 1 compared this repository's
+  Reg M-B engine with ABRA's browser engine at ABRA's HEAD. CI has no ABRA checkout, so the section failed there; locally
+  it failed too, because ABRA retired Reg M-B and no longer reads this engine. The section is retired (run it with
+  <code>CHOMP_CROSS_REPO=1</code>); sections 2 and 3, which test this repository alone, still run.</li>
+</ul>
+<h3 id="removed">Removed</h3>
+<ul>
+<li>The browser userscript is <strong>retired</strong>. Its code stays in <code>app/</code>, <code>engine/</code> and <code>build/</code> as history and is not
+  maintained. It targets Reg M-B and stale species data.</li>
+</ul>
+<h3 id="record">Record</h3>
+<ul>
+<li><strong>Measured.</strong> New figures, all read from ABRA artifacts at commit <code>06f8a881</code> and stated in the white paper with their
+  sources: gate (b) SPRT H1 at 524 games, <strong>0.561 [0.518, 0.603]</strong> vs the human-modal bring
+  (<code>solver/results/2026-09-27-chomp-v1/sprt-chomp1-vs-hprior.json</code>); gate (c) <strong>0.470 [0.422, 0.519]</strong> over 400 games vs
+  the humans' own bring (<code>…/gatec-vs-human.json</code>); gate (a) Δlog-loss <strong>−0.0203 [−0.0309, −0.0108]</strong>
+  (<code>solver/chomp/v1/model/chomp1.metrics.json</code>); screen <strong>0.625 [0.556, 0.689]</strong> (<code>…/screen-vs-hprior.json</code>); mean
+  solve <strong>18 ms</strong> (p90 21 ms) over 173 test pairs × 2 chairs (<code>docs/_reports/2026-09-27-chomp-v1.md</code> §4); v0 <strong>0.430</strong>,
+  v2 gate (a) <strong>−0.0004 [−0.0032, +0.0024]</strong>; three ladder runs of 15 to 20 series each
+  (<code>docs/_reports/2026-10-01-earned-forfeits.md</code>). New slide 6 tiles: <strong>56%</strong> (0.561), <strong>47%</strong> (0.470), <strong>18 ms</strong>.</li>
+<li><strong>Basis.</strong> CHANGED — CHOMP is a different system. A reader can no longer be told how the Reg M-B userscript performs
+  from any current CHOMP figure: the old figures measured a deterministic damage heuristic on 50 of the author's own
+  Reg M-B games; the new ones measure a learned equilibrium solver in simulated Reg M-C games.</li>
+<li><strong>Supersedes.</strong> ~~1323 "highest ranking reached"~~ retracted (the peak Reg M-B rating of the author's account, not a
+  CHOMP measurement); ~~154% "damage it calculates exactly"~~ retracted (one example readout); ~~0.05 s "to answer"~~
+  retracted (a design goal, no recorded timing). The Reg M-B validation figures (57% vs 46%, n = 50, not significant)
+  stay as history, labelled Reg M-B and retired.</li>
+<li><strong>Owed to the next major.</strong> Nothing. The white paper, deck and technical documentation are folded in this release.</li>
+</ul>
+<hr />
+<h2 id="251-2026-10-13">[2.5.1] — 2026-10-13</h2>
+<h3 id="added_1">Added</h3>
+<ul>
+<li><strong><code>llms.txt</code></strong> at the repo root, in the llmstxt.org format. It gives AI agents and search tools a
+  one-line summary, key terms, and absolute links to the install, the white paper, the deck, the
+  technical docs, the key files, ABRA and the portfolio. It carries no figures, because the white
+  paper is the one home for every published figure.</li>
+<li>A one-line link to <code>llms.txt</code> in <code>README.md</code>.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>Docs-only change. The userscript <code>@version</code> is not bumped, because a bump pushes an update to every
+  installed copy. The existing mismatch between this file and the userscript stamp (2.9) is not
+  addressed here.</li>
+</ul>
+<h3 id="record_1">Record</h3>
+<ul>
+<li><strong>Measured.</strong> No figure changed.</li>
+<li><strong>Basis.</strong> unchanged</li>
+<li><strong>Supersedes.</strong> Nothing.</li>
+<li><strong>Owed to the next major.</strong> Nothing.</li>
+</ul>
+<hr />
+<h2 id="250-2026-07-31">[2.5.0] — 2026-07-31</h2>
+<h3 id="fixed-every-build-in-build-was-unrunnable-which-is-why-the-data-froze">Fixed — every build in <code>build/</code> was unrunnable, which is why the data froze</h3>
+<p><code>build/build_lab.js</code> read <code>/tmp/champ_dex.json</code>, <code>/tmp/champ_megas.json</code> and <code>/tmp/champ_moves.json</code>
+and wrote to <code>/sessions/kind-fervent-sagan/mnt/outputs/</code>. <code>build_v2_userscript.py</code> and
+<code>build_replay_app.py</code> each carried four absolute paths into that same sandbox mount. <strong>Three temp
+files that were never version controlled, plus a session directory that no longer exists</strong> — so the
+species table beneath <code>champions-damage-lab.html</code> → <code>engine/champ-model.js</code> → the shipped userscripts
+could not be regenerated by anyone, including its author. Nobody noticed the data ageing because
+nobody could re-run it to find out.</p>
+<p><strong>Measured:</strong> the shipped plugin carried <strong>289 species and 57 mega formes</strong> against ABRA's <strong>308 and
+76</strong>. <strong>Nineteen mega formes were absent from the species table entirely</strong> — starmie-mega,
+meganium-mega, chimecho-mega, froslass-mega, emboar-mega, excadrill-mega and thirteen others could
+not be looked up at all.</p>
+<p><strong>CORRECTION, recorded rather than quietly fixed.</strong> An earlier draft of this entry and of commit
+<code>ced6137</code> claimed the plugin had "no abilities at all" and that "every mega was a stat block with no
+identity". <strong>That was wrong.</strong> <code>data/mega-formes.json</code> carries a <code>by_item</code> stone table with the
+ability for all 95 stones, and <code>buildMon</code> applies it (<code>if(!ab &amp;&amp; mf.ab) ab = mf.ab</code>) — 75 of the 76
+megas in the current dex resolve an ability through it. Mega identity was working. The error came
+from testing only the first 5 KB of the <code>MONS</code> literal and generalising.</p>
+<p>What is true: the <code>MONS</code> table itself carried no <code>ab</code> field (0 of 289), and the 306 now added there
+are <strong>inert</strong> — <code>engine/champ-model.js</code> never reads <code>mon.ab</code>, only <code>set.ability</code> from the paste and
+<code>mf.ab</code> from the stone table. They are carried for future consumers, not because anything reads them
+today. The real defect fixed here is the 19 missing formes, not missing abilities.</p>
+<p><strong>A second silent empty.</strong> <code>build_v2_userscript.py</code>'s threat list pointed at an absolute ABRA path
+that could never resolve, so it has been shipping <code>{"threats":[]}</code>. The plugin's threat awareness was
+not stale, it was <strong>empty</strong>. It now resolves relative to the repo and prints which case it took,
+because a fallback indistinguishable from success is how this survived unnoticed.</p>
+<h3 id="added_2">Added</h3>
+<ul>
+<li><strong><code>build/refresh_dex_from_abra.js</code></strong> — vendors ABRA's validated dex into <code>data/champ-dex.json</code>
+  with provenance stamped inside it (source commit, date, counts). CHOMP still builds standalone;
+  only <em>refreshing</em> needs the sibling repo, which is the difference between a vendored input and a
+  dependency. Move display names come from ABRA's <code>tags.json</code>, because title-casing an id cannot
+  recover "High Horsepower".</li>
+</ul>
+<p>After: <strong>308 species, 76 mega formes, 306 with an ability, 500 moves with real names.</strong></p>
+<h3 id="a-bug-introduced-during-this-work-caught-by-the-tests">A bug introduced during this work, caught by the tests</h3>
+<p>ABRA encodes move category as <code>'P'</code>/<code>'S'</code>; CHOMP's engine tests <code>mv.c === 'Physical'</code>. Passing that
+encoding straight through meant <code>phys</code> was <strong>never true</strong> — Intimidate silently stopped firing and
+every damage number came off the wrong attacking stat. <code>test-damage-golden.js</code> still passed 16/16,
+because none of its cases distinguishes physical from special; <code>test-engine.js</code> caught it on the one
+that does. Two artifacts agreeing on a field <em>name</em> while disagreeing on its <em>values</em> type-checks and
+then lies. Category is now translated at the boundary.</p>
+<p>Both suites green: <code>test-engine</code> 4/4, <code>test-damage-golden</code> 16/16.</p>
+<h3 id="the-plugin-now-ships-the-current-dex-patched-surgically-not-regenerated">The plugin now ships the current dex — patched surgically, not regenerated</h3>
+<p><code>build_v2_userscript.py</code> emits <strong>version 2.4</strong>; the shipped <code>chomp-bring4.user.js</code> is <strong>2.8</strong>. A diff
+shows regenerating it <strong>loses ten functions</strong> — <code>liveMon</code>, <code>readField</code>, <code>mkMon</code>, <code>refresh</code>,
+<code>realMoves</code>, <code>renderMoves</code> among them: the entire Showdown bridge that reads a live battle.</p>
+<p><strong>Versions 2.5–2.8 were written directly into the built <code>.user.js</code> and never went back into the
+builder or this changelog.</strong> The shipped plugin has diverged from its own build system, and this file
+being four versions behind is the visible symptom — the rule at the top says the top version must
+match the plugin's <code>@version</code> stamp, and it has not for four releases.</p>
+<p>Regenerating would have replaced four versions of the live bridge with an older template and called
+it an update. So <code>build/patch_plugin_data.js</code> replaces <strong>only the <code>MONS</code> and <code>MOVES</code> literals</strong> and
+touches nothing else. It refuses unless it can verify, before writing: the eight bridge functions are
+present both before and after, the patched file parses as JavaScript, and no move carries ABRA's
+<code>P</code>/<code>S</code> encoding — the mismatch that silently disabled Intimidate earlier in this same change.</p>
+<p><strong>Shipped: <code>chomp-bring4.user.js</code> v2.8 -&gt; v2.9.</strong> MONS 34,214 -&gt; 64,689 bytes, MOVES 20,047 -&gt;
+32,921. <strong>19 mega formes that could not previously be looked up are now present.</strong> The 306 <code>ab</code>
+fields are carried but inert (see the correction above). Bridge verified 6/6 after write.</p>
+<p>The underlying divergence is <strong>not</strong> resolved: the builder still emits 2.4 and still does not contain
+the bridge. Porting 2.5-2.9 back into <code>build_v2_userscript.py</code> remains outstanding, and until it is
+done this patch script is the only safe way to ship data.</p>
+<h3 id="also-found">Also found</h3>
+<p><code>.git/index.lock</code> was <strong>seven days old</strong> with no git process holding it — a crashed auto-commit on
+2026-07-24. That is why this repository's previous commit was 2026-07-24 and why <code>champ-model.js</code>,
+<code>tests/test-mega-and-boosts.js</code>, <code>build/build_move_effects.js</code>, <code>data/move-effects.json</code> and
+<code>tests/test-engine-contract.js</code> all carried stranded changes from that same day. <strong>The auto-commit
+timer had been failing silently for a week.</strong> Removing the lock caused that timer to immediately
+commit and push everything as <code>68d2371 "auto: Fri 07/31/2026 1:39:46.67"</code> — this entry is the record
+of what that commit actually contains, since its own message says nothing.</p>
+<hr />
+<h2 id="240-2026-07-22">[2.4.0] — 2026-07-22</h2>
+<h3 id="added_3">Added</h3>
+<ul>
+<li><strong>ABRA meta model embedded in the plugin (the flow-back loop).</strong> The built plugin now carries
+  <code>CHOMP_META</code>, the ladder usage model from the separate <strong>ABRA</strong> project, and can compute the
+  opponent's <em>likely</em> four — their best four against your six (<code>bring4(theirSix, yourSix)</code>), ABRA
+  bring-rate as fallback prior. This is <strong>advisory intel</strong>, not a constraint on your pick.</li>
+<li>The bring itself <strong>covers the opponent's whole six</strong>, deliberately. You cannot know which four
+  they will bring, so CHOMP picks the four that answer all six — coverage over a gamble on a
+  prediction. ABRA tells you what they will <em>probably</em> do; the pick keeps you safe if they don't.</li>
+</ul>
+<p>Pinned by <code>tests/test-meta-flow.js</code> (5 tests) and verified on a real battle. Because CHOMP
+auto-updates from GitHub, a fresher ABRA model reaches the live plugin with no manual step.</p>
+<h2 id="230-2026-07-22">[2.3.0] — 2026-07-22</h2>
+<h3 id="added_4">Added</h3>
+<ul>
+<li><strong>Operation Ladder foundation — ladder-wide meta model.</strong> <code>build/meta-ingest.js</code> pulls public
+  replays for the format (any players, paginated) and aggregates both sides into <code>data/meta-usage.json</code>:
+  team%, bring%, lead% and win% per species. Tested on 302 teams from 151 real ladder replays; the
+  result reproduces the hand-curated threat list. This is the shared data layer that grows unattended
+  and will feed the pick-4, the dashboard, and the team optimiser.</li>
+</ul>
+<h3 id="changed_1">Changed</h3>
+<ul>
+<li><strong>Panel stripped to the decision only.</strong> It now shows two lines — <code>LEAD</code> (the two to send out) and
+  <code>BRING</code> (the four to pick) — and nothing else. Removed the per-Pokémon damage bars and percentages,
+  the weather/score line, and the <code>6/6 real sets</code> line, on the user's request for the smallest
+  possible panel. The full damage math still runs underneath to choose the four and the two; it is
+  simply no longer printed.</li>
+</ul>
+<hr />
+<h2 id="220-2026-07-22">[2.2.0] — 2026-07-22</h2>
+<h3 id="added_5">Added</h3>
+<ul>
+<li><strong>Governance and delivery files</strong> to meet the portfolio's public-company documentation bar:
+  <code>LICENSE</code> (MIT), <code>SECURITY.md</code>, <code>CONTRIBUTING.md</code>, <code>.gitignore</code>, and a GitHub Actions CI
+  workflow that runs the test suite on every push and pull request.</li>
+<li><strong>Auto-update headers</strong> (<code>@updateURL</code> / <code>@downloadURL</code> pointing at the raw GitHub script). Once the
+  plugin is installed from that URL, Tampermonkey updates it automatically on every version bump — no
+  more manual paste. Documented in the README.</li>
+</ul>
+<h2 id="210-2026-07-22">[2.1.0] — 2026-07-22</h2>
+<h3 id="added_6">Added</h3>
+<ul>
+<li><strong>Version stamp in the plugin panel.</strong> The header now reads <code>CHOMP — BRING 4 · v2.1</code>, so a stale
+  install is visible at a glance. This was the recurring support problem: the code was correct on
+  disk but an old build was installed, and there was no way to tell.</li>
+<li><code>tests/test-team-read.js</code> (12 tests) pinning the team reader against curly, straight and left
+  apostrophes on both the classic and BETA clients.</li>
+</ul>
+<h3 id="fixed_1">Fixed</h3>
+<ul>
+<li><strong>Broadened the page-text fallback</strong> to accept curly, straight and left apostrophes. A real defect,
+  though not the cause of the live failure — the battle object is the primary source and works.</li>
+</ul>
+<h3 id="verified">Verified</h3>
+<ul>
+<li>Confirmed the reader against a real finished battle (stepQueue dumped from the live client): 12
+  <code>|poke|</code> lines and both <code>sides</code> arrays present; the shipped <code>readTeams</code> returns the correct 6v6
+  even after the team-sheet text has scrolled out of the log.</li>
+</ul>
+<h3 id="documented">Documented</h3>
+<ul>
+<li>The update procedure is now in the README and the technical documentation, with a note that
+  Tampermonkey does not auto-update a paste-installed script.</li>
+</ul>
+<hr />
+<h2 id="200-2026-07-22">[2.0.0] — 2026-07-22</h2>
+<h3 id="added_7">Added</h3>
+<ul>
+<li><strong>Move-legality oracle.</strong> <code>data/champions-legal-moves.json</code> (49 KB), generated from the HoopaDex
+  export <code>champions-learnsets.json</code>: one bitmask per species over 496 moves, per regulation. Small
+  enough to inline in the userscript.</li>
+<li><code>canLearn(species, move, regulation)</code> in <code>engine/champ-model.js</code>, wired into the synthesis filter
+  in both build scripts.</li>
+<li><code>tests/test-legality.js</code> (16 tests).</li>
+</ul>
+<h3 id="changed_2">Changed</h3>
+<ul>
+<li><strong>Synthesized opponent sets now respect the Champions legal-move list.</strong> The engine used to take
+  the strongest move of the right category from the whole table without checking the learnset — this
+  is how Charizard was once given Eruption. Measured effect: Charizard's synthesized set changed from
+  Eruption to <code>Overheat / Hurricane / Focus Blast</code>. Every synthesized set checked is now legal.</li>
+</ul>
+<h3 id="fixed_2">Fixed</h3>
+<ul>
+<li><strong>Undefined <code>isBannedItem</code> in the built userscript.</strong> The build sliced the engine from <code>const
+  byName</code>, which starts after that definition, so the banned-item check would throw a ReferenceError
+  on the first parsed set. The slice now starts at <code>const FORMAT</code>. Verified by loading the built file.</li>
+</ul>
+<h3 id="notes_1">Notes</h3>
+<ul>
+<li><strong>Safety rule.</strong> The oracle answers "is this pair recorded as legal", not "is this pair illegal".
+  Five moves in the legal pool (spore, softboiled, milk drink, power shift, struggle) are absent from
+  the export. Anything absent is ALLOWED. A missing datum must never delete a real move.</li>
+<li><strong>Domain note.</strong> Champions has no level-up movesets and no TM items. The <code>methods</code> field holds
+  <code>["TM"]</code> for all 14,192 pairs and carries no information. A Scarlet/Violet moveset is not a guide
+  to Champions legality — Garchomp learns Surf in Champions but not Waterfall.</li>
+</ul>
+<hr />
+<h2 id="100-2026-07-22">[1.0.0] — 2026-07-22</h2>
+<h3 id="added_8">Added</h3>
+<ul>
+<li><strong>Replay analyzer</strong> with personal-meta threat ranking and team tune-up.</li>
+<li><strong>Referee report</strong> — self-critique of the math and its implementation.</li>
+<li><strong><code>FORMAT</code> config block</strong> — a new regulation is now a one-file edit.</li>
+<li><strong><code>BAD_AUTO</code> blacklist</strong> — inferred sets no longer use Blast Burn, Hydro Cannon, Explosion, etc.</li>
+<li><strong>Setup-sweeper valuation</strong> — added after Speed Boost + Swords Dance sweepers scored too low.</li>
+<li><strong>Full field layer</strong> — terrain, extended weather, screens, Wonder Room, doubles support abilities.</li>
+<li><strong>Contested weather war</strong> — neutral boosts when both sides can set weather; sand chip re-calibrated
+  so sand-immune Steels are preferred against Tyranitar.</li>
+<li><strong>Plugin diagnostic line</strong> — a failed read reports the reason instead of showing an empty panel.</li>
+<li><strong>Plugin auto-close</strong> of the News popup and the rooms sidebar (one-shot, cannot loop).</li>
+</ul>
+<h3 id="changed_3">Changed</h3>
 <ul>
 <li><strong>Restructured</strong> to the standard project layout (<code>docs/ engine/ app/ build/ data/ tests/ assets/</code>).</li>
-<li><strong>Technical documentation rewritten</strong> in ASD-STE100 Simplified Technical English, organised by Diataxis.</li>
-<li><strong>Trimmed <code>CLAUDE.md</code></strong> to project-specific context only; universal rules moved to global instructions.</li>
-<li><strong>Plugin: fixed team reading.</strong> The panel showed nothing at team preview. Cause: the BETA client uses
-  the <code>PS</code> global, not <code>app</code>; the battle log was also empty. Fix: detect both clients, and fall back to
-  reading the "<user>'s team:" lines from the page. Verified on a real preview (6 mine / 6 foe).</li>
-<li><strong>Plugin: added a diagnostic line</strong> so a failed read reports the reason instead of showing an empty panel.</li>
-<li><strong>Plugin: auto-close</strong> the News popup and collapse the rooms sidebar (one-shot, cannot loop).</li>
-<li><strong>Engine: burn</strong> now halves physical damage (activates in the turn simulator).</li>
-<li><strong>Engine: removed Choice Specs / Choice Band / Assault Vest</strong> modifiers. They are not legal in Reg M-B.</li>
-<li><strong>Engine: <code>BAD_AUTO</code> blacklist</strong> stops inferred sets from using Blast Burn, Hydro Cannon, Explosion, etc.</li>
-<li><strong>Engine: <code>FORMAT</code> config block</strong> added. A new regulation is now a one-file edit.</li>
-<li><strong>Engine: referee-report fixes</strong> - ability immunities now execute (Levitate stops Earthquake);
-  Intimidate now applies; format legality is enforced in <code>buildMon</code>; KO is now <code>pKO</code> across all 16 rolls
+<li><strong>Technical documentation rewritten</strong> in ASD-STE100, organised by Diátaxis.</li>
+<li><strong><code>CLAUDE.md</code> trimmed</strong> to project-specific context; universal rules moved to global instructions.</li>
+<li><strong>Engine: burn</strong> now halves physical damage.</li>
+<li><strong>Plugin: team reading fixed.</strong> The panel showed nothing at team preview. Cause: the BETA client
+  uses the <code>PS</code> global, not <code>app</code>. Fix: detect both clients, fall back to page text. Verified 6v6.</li>
+<li><strong>Engine: referee-report fixes</strong> — ability immunities now execute (Levitate stops Earthquake);
+  Intimidate now applies; format legality enforced in <code>buildMon</code>; KO is now <code>pKO</code> across all 16 rolls
   instead of the max roll only.</li>
-<li><strong>Engine: setup-sweeper valuation</strong> added, after Speed Boost + Swords Dance sweepers scored too low.</li>
-<li><strong>Engine: full field layer</strong> - terrain, extended weather, screens, Wonder Room, doubles support abilities.</li>
-<li><strong>Engine: contested weather war</strong> - neutral boosts when both sides can set weather; sand chip
-  re-calibrated so sand-immune Steels are preferred against Tyranitar.</li>
-<li><strong>Added</strong> the referee report (self-critique of the math and the implementation).</li>
-<li><strong>Added</strong> the replay analyzer with personal-meta threat ranking and team tune-up.</li>
 </ul>
-<h2 id="2026-07-22-synthesized-opponent-sets-now-respect-the-champions-legal-move-list">2026-07-22 — synthesized opponent sets now respect the Champions legal-move list</h2>
-<p><strong>Roadmap item 2, partly closed.</strong> The engine invented an opponent's moves by taking the strongest
-move of the right category from the whole move table. It never checked whether the species could
-learn it. This is how Charizard was once given Eruption.</p>
+<h3 id="removed_1">Removed</h3>
 <ul>
-<li>Added <code>data/champions-legal-moves.json</code> (49 KB), generated from the HoopaDex export
-  <code>champions-learnsets.json</code>. One bitmask per species over 496 moves, for each regulation. The
-  bitmask form keeps the table small enough to inline in the userscript.</li>
-<li>Added <code>canLearn(species, move, regulation)</code> to <code>engine/champ-model.js</code>, and wired it into the
-  synthesis filter in both build scripts.</li>
-<li><strong>Safety rule.</strong> The oracle answers "is this pair recorded as legal", not "is this pair illegal".
-  Five moves in the legal pool (spore, softboiled, milk drink, power shift, struggle) are absent
-  from the export. Anything the export does not know about is ALLOWED. A missing datum must never
-  delete a real move. Pinned by five tests.</li>
-<li>Measured effect: Charizard's synthesized set changed from Eruption to
-  <code>Overheat / Hurricane / Focus Blast</code>. Every synthesized set checked is now learnset-legal.</li>
-</ul>
-<p><strong>Separate defect found and fixed during this work.</strong> The built userscript called <code>isBannedItem</code>
-but never defined it. The build script sliced the engine from <code>const byName</code>, which starts after
-that definition, so fix C6 (banned-item enforcement) would have thrown a ReferenceError as soon as
-a set was parsed. The slice now starts at <code>const FORMAT</code>. Verified by loading the built file and
-calling the function.</p>
-<p><strong>Domain note.</strong> Champions has no level-up movesets and no TM items; a species can learn a move or
-it cannot. The <code>methods</code> field in the export holds <code>["TM"]</code> for all 14,192 pairs and carries no
-information. A Scarlet/Violet moveset is not a guide to Champions legality — Garchomp learns Surf
-in Champions but not Waterfall.</p>
-<p>Added <code>tests/test-legality.js</code> (16 tests). <code>test-damage-golden.js</code> (16) and <code>test-engine.js</code> (4)
-still pass.</p></main></body></html>
+<li><strong>Choice Specs / Choice Band / Assault Vest</strong> modifiers. They are not legal in Reg M-B.</li>
+</ul></main></body></html>

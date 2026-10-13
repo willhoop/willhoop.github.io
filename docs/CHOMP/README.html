@@ -29,48 +29,99 @@ strong{color:var(--white)}
 </style></head><body>
 <div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
 <main><h1 id="chomp">CHOMP</h1>
-<h3 id="champions-head-to-head-optimizer-for-matchup-prediction">Champions Head-to-head Optimizer for Matchup Prediction</h3>
-<p>A real-time team-preview assistant for <strong>Pokémon Champions VGC (Reg M-B)</strong> on Pokémon Showdown.</p>
-<p>At team preview you get ~30 seconds to decide <strong>which 4 of your 6 to bring and which 2 to lead</strong>. CHOMP answers that with real damage math — not type-chart intuition — in under 50 ms, in your browser.</p>
-<hr />
-<h2 id="what-it-does">What it does</h2>
+<h3 id="the-team-preview-solver-for-champions-vgc-reg-m-c">The team-preview solver for Champions VGC Reg M-C</h3>
+<p><strong>Version 3.0.0 · 2026-10-13</strong></p>
+<p>CHOMP decides what to do at team preview: which four Pokémon to bring and which two to lead. It reads <strong>both open team
+sheets</strong> and returns a <strong>mixed strategy</strong> over the 90 bring-and-lead options. It scores every pair of options with a
+learned win chance, then solves the resulting game exactly.</p>
+<p>CHOMP v1 is part of <strong><a href="https://github.com/willhoop/abra">ABRA</a></strong>. Its code is in ABRA's
+<a href="https://github.com/willhoop/abra/tree/main/solver/chomp"><code>solver/chomp/</code></a>. It plays on the Pokémon Showdown ladder
+through ABRA's live client, ROTOM. This repository holds the CHOMP documents and the retired browser tool.</p>
+<p><strong>Results, with sources and limits:</strong> the <a href="docs/CHOMP-whitepaper.md">white paper</a>. In short: CHOMP beats the most common
+human bring for a team, and it shows <strong>no clear edge</strong> over the bring a human chose after seeing the opponent.</p>
+<h2 id="components">Components</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it is</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CHOMP v1</td>
+<td>The live preview solver: learned cell scorer + exact equilibrium solve + best-of-three adjustment</td>
+<td>ABRA <code>solver/chomp/v1/</code></td>
+</tr>
+<tr>
+<td>Cell scorer</td>
+<td>P(win) for each of the 8,100 option pairs, from engine facts computed by ABRA's simulator MEDICHAM</td>
+<td>ABRA <code>solver/chomp/v1/scorer.js</code></td>
+</tr>
+<tr>
+<td>SLOWKING</td>
+<td>The exact matrix-game solver (linear program)</td>
+<td>ABRA <code>solver/slowking/matrix.js</code></td>
+</tr>
+<tr>
+<td>ROTOM hook</td>
+<td>Asks CHOMP at every preview when an arm says <code>"preview": "chomp"</code></td>
+<td>ABRA <code>solver/rotom/policy.js</code></td>
+</tr>
+<tr>
+<td>CHOMP v0, v2</td>
+<td>Earlier and later versions that did not pass their gates</td>
+<td>ABRA <code>solver/chomp/</code>, <code>solver/chomp/v2/</code></td>
+</tr>
+<tr>
+<td>Retired userscript (Reg M-B)</td>
+<td>The old Tampermonkey browser tool, versions 1.0 to 2.5.1</td>
+<td>this repository, <code>app/</code> and <code>engine/</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="documents">Documents</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="docs/CHOMP-whitepaper.md">White paper</a></td>
+<td>The method, the math, every figure and its source</td>
+</tr>
+<tr>
+<td><a href="docs/CHOMP-deck-plain-english.pptx">Plain-English deck</a> (<a href="https://willhoop.github.io/docs/CHOMP/CHOMP-deck-plain-english.pdf">PDF</a>)</td>
+<td>The same story for a non-specialist</td>
+</tr>
+<tr>
+<td><a href="docs/CHOMP-technical-docs.md">Technical documentation</a></td>
+<td>Run, test and maintain CHOMP (ASD-STE100, Diátaxis)</td>
+</tr>
+<tr>
+<td><a href="CHANGELOG.md">CHANGELOG</a></td>
+<td>Every change</td>
+</tr>
+</tbody>
+</table>
+<p>For AI agents and search tools: <a href="llms.txt"><code>llms.txt</code></a> lists the key documents and files.</p>
+<h2 id="run-it">Run it</h2>
+<p>See the <a href="docs/CHOMP-technical-docs.md">technical documentation</a>, Part 1. CHOMP runs from an ABRA checkout with
+<code>ABRA_REGULATION=regmc</code>.</p>
+<h2 id="retired-the-browser-userscript-reg-m-b">Retired: the browser userscript (Reg M-B)</h2>
+<p>Until 2.5.1 CHOMP was a Tampermonkey userscript for <strong>Reg M-B</strong> on Pokémon Showdown. It is retired: it targets a
+retired regulation and its species data is out of date. The code stays in <code>app/</code>, <code>engine/</code>, <code>build/</code> and <code>tests/</code> as
+history, and CI still runs its tests. Its Reg M-B validation is in <a href="docs/VALIDATION-REPORT.md"><code>docs/VALIDATION-REPORT.md</code></a>.
+Do not use it for Reg M-C.</p>
+<h2 id="credits-and-data">Credits and data</h2>
 <ul>
-<li><strong>Live bring/lead panel</strong> — reads both teams at team preview and recommends the best 4 + lead pair, with a per-threat breakdown (<code>Blastoise → Tyranitar 154%</code>).</li>
-<li><strong>Real damage model</strong> — exact Gen-9 damage pipeline with the Champions SP stat system, returning <strong>P(KO) across all 16 damage rolls</strong>, not a single optimistic roll.</li>
-<li><strong>Mechanics that decide games</strong> — weather (incl. sandstorm chip and weather wars), terrain, screens, items, abilities, speed modifiers, Intimidate, immunities, setup sweepers.</li>
-<li><strong>Replay analyzer</strong> — pulls your Showdown replays, scores what you brought vs what CHOMP would have brought, ranks the threats you actually face, and tunes your team against <em>your</em> metagame.</li>
-<li><strong>Damage calculator</strong> — standalone lab with 289 formes and 299 moves.</li>
-</ul>
-<h2 id="install-userscript">Install (userscript)</h2>
-<ol>
-<li>Install <a href="https://www.tampermonkey.net/">Tampermonkey</a>.</li>
-<li>Open <code>plugin/chomp-plugin-COPY-ME.txt</code>, select all, copy.</li>
-<li>Tampermonkey → <strong>Dashboard</strong> → <strong>+</strong> (new script) → select all, delete → paste → <strong>Ctrl+S</strong>.</li>
-<li>Reload Pokémon Showdown and start a Champions battle.</li>
-</ol>
-<p>Works on both the classic and BETA Showdown clients, with a page-text fallback if the client internals change.</p>
-<h2 id="replay-analyzer">Replay analyzer</h2>
-<p>Open <code>app/chomp-replay-app.html</code> in any browser, enter a Showdown username, click <strong>Pull &amp; analyze</strong>. It caches locally, so history accumulates.</p>
-<h2 id="repo-layout">Repo layout</h2>
-<pre><code>plugin/   the userscript (install this)
-app/      replay analyzer + dashboards
-calc/     standalone damage calculator
-engine/   champ-model.js — the damage/matchup engine
-docs/     white paper, technical docs, referee report
-build/    generators that assemble plugin/app from the engine
-teams/    example pokepastes
-</code></pre>
-<h2 id="updating-for-a-new-regulation">Updating for a new regulation</h2>
-<p>Edit the single <code>FORMAT</code> block at the top of <code>engine/champ-model.js</code> (format name, Pikalytics slug, SP rules, banned items, mega/tera flags), then re-run the generators in <code>build/</code>. See <code>docs/CHOMP-technical-docs.md</code>.</p>
-<h2 id="honest-limitations">Honest limitations</h2>
-<p>CHOMP is a <strong>single-ply evaluator</strong>, not a battle AI. It does <strong>not</strong> model multi-turn play: no recoil, flinch, status-over-time, PP, or redirection (Lightning Rod / Follow Me). Opponent sets are <strong>inferred</strong>, not known — inference is a point estimate and is not yet learnset-filtered. Recommendations are deterministic (no mixed strategy), and scores are relative, not calibrated to win probability. See <code>docs/CHOMP-referee-report.md</code> for a full self-critique and <code>docs/CHOMP-whitepaper.md</code> for the method.</p>
-<h2 id="credits-data">Credits &amp; data</h2>
-<ul>
-<li>Damage/stat formulas validated against the <strong>Pokémon Showdown damage calculator</strong> (Champions mode)</li>
-<li>Move legality from <strong>HoopaDex</strong> Champions learnsets</li>
-<li>Usage priors from <strong>Pikalytics</strong> (Reg M-B)</li>
-<li>Replays via the public <strong>Pokémon Showdown replay API</strong></li>
+<li>Simulator, data and training: <a href="https://github.com/willhoop/abra">ABRA</a>, on the Pokémon Showdown Reg M-C format.</li>
+<li>Human games: the public Pokémon Showdown replay API.</li>
 </ul>
 <p>Not affiliated with Nintendo, Game Freak, The Pokémon Company, or Smogon/Pokémon Showdown.</p>
 <h2 id="license">License</h2>
-<p>Add your preferred license before public release (MIT is the common choice for userscripts).</p></main></body></html>
+<p>See <a href="LICENSE">LICENSE</a>.</p></main></body></html>

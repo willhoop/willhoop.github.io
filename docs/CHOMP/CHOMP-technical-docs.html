@@ -29,20 +29,25 @@ strong{color:var(--white)}
 </style></head><body>
 <div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
 <main><h1 id="chomp-technical-documentation">CHOMP — Technical Documentation</h1>
-<p><strong>Version 1.1 · Last updated 2026-07-22</strong>
+<p><strong>Version 3.0.0 · Last updated 2026-10-13</strong>
 Written in ASD-STE100 Simplified Technical English. Organised with the Diátaxis model.</p>
 <hr />
 <h2 id="0-about-this-document">0. About this document</h2>
 <h3 id="01-purpose">0.1 Purpose</h3>
-<p>This document tells you how to install, operate, and change CHOMP. A new engineer can use this
-document to start work without help.</p>
-<h3 id="02-structure">0.2 Structure</h3>
-<p>This document has four parts:
-- <strong>Part 1 — Tutorial.</strong> Learn CHOMP. Get your first recommendation.
-- <strong>Part 2 — How-to guides.</strong> Do one specific task.
-- <strong>Part 3 — Reference.</strong> Find facts: files, formulas, and settings.
-- <strong>Part 4 — Explanation.</strong> Understand why the design is like this.</p>
-<h3 id="03-terms">0.3 Terms</h3>
+<p>This document tells you how to run, test and maintain CHOMP v1, the team-preview solver in ABRA. For results and
+figures, read the white paper: <a href="CHOMP-whitepaper.md"><code>docs/CHOMP-whitepaper.md</code></a>. This document does not repeat them.</p>
+<h3 id="02-where-the-code-is">0.2 Where the code is</h3>
+<p>The code of CHOMP v1 is in the ABRA repository, <a href="https://github.com/willhoop/abra">https://github.com/willhoop/abra</a>, in the folder <code>solver/chomp/</code>.
+This repository (<code>willhoop/chomp</code>) holds the CHOMP documents and the retired browser tool (Part 5).</p>
+<h3 id="03-structure">0.3 Structure</h3>
+<ul>
+<li><strong>Part 1 — Tutorial.</strong> Get one CHOMP answer.</li>
+<li><strong>Part 2 — How-to guides.</strong> Do one specific task.</li>
+<li><strong>Part 3 — Reference.</strong> Find files, inputs, outputs and settings.</li>
+<li><strong>Part 4 — Explanation.</strong> Understand the design.</li>
+<li><strong>Part 5 — Retired.</strong> The old browser userscript (Reg M-B).</li>
+</ul>
+<h3 id="04-terms">0.4 Terms</h3>
 <p>Use these terms with these meanings only.</p>
 <table>
 <thead>
@@ -53,389 +58,331 @@ document to start work without help.</p>
 </thead>
 <tbody>
 <tr>
-<td>the engine</td>
-<td>The file <code>engine/champ-model.js</code>. It calculates damage and matchups.</td>
+<td>a sheet</td>
+<td>The open team sheet of one player: six Pokémon with species, item, ability and moves.</td>
 </tr>
 <tr>
-<td>the plugin</td>
-<td>The userscript. It shows the panel in the battle.</td>
+<td>an option</td>
+<td>One choice at team preview: four Pokémon to bring, and two of the four to lead. Each sheet has 90 options.</td>
 </tr>
 <tr>
-<td>the analyzer</td>
-<td>The file <code>app/chomp-replay-app.html</code>. It reads your replays.</td>
+<td>a cell</td>
+<td>One pair of options: my option and the opponent option. The table has 90 × 90 = 8,100 cells.</td>
 </tr>
 <tr>
-<td>a set</td>
-<td>The moves, the item, the ability, the nature, and the stat spread of one Pokémon.</td>
+<td>the scorer</td>
+<td>The model that gives each cell a win probability. File <code>solver/chomp/v1/scorer.js</code>.</td>
 </tr>
 <tr>
-<td>the bring</td>
-<td>The four Pokémon that you take into a game.</td>
+<td>the mix</td>
+<td>A probability for each of my 90 options. CHOMP samples its choice from the mix.</td>
 </tr>
 <tr>
-<td>the lead</td>
-<td>The two Pokémon that you send out first.</td>
+<td>a release</td>
+<td>A frozen copy of the ABRA simulator MEDICHAM. CHOMP v1 was tested on release <code>eaa5becc54eb</code>.</td>
 </tr>
 <tr>
-<td>pKO</td>
-<td>The probability of a knockout. The engine calculates it from 16 damage rolls.</td>
+<td>ROTOM</td>
+<td>The ABRA client that plays on Pokémon Showdown.</td>
 </tr>
 <tr>
-<td>SP</td>
-<td>The stat points of the Champions format.</td>
+<td>an arm</td>
+<td>A ROTOM configuration file in <code>solver/rotom/arms/</code>.</td>
 </tr>
 </tbody>
 </table>
 <hr />
 <h1 id="part-1-tutorial">PART 1 — TUTORIAL</h1>
-<p><em>Learn CHOMP. Do these steps one time.</em></p>
-<h2 id="11-install-the-plugin">1.1 Install the plugin</h2>
-<p>Do these steps:</p>
+<p><em>Get one CHOMP answer. Do these steps one time.</em></p>
+<h2 id="11-get-the-code">1.1 Get the code</h2>
 <ol>
-<li>Install the Tampermonkey extension in your browser.</li>
-<li>Open the file <code>app/plugin/chomp-plugin-COPY-ME.txt</code>.</li>
-<li>Select all of the text. Copy the text.</li>
-<li>Click the Tampermonkey icon. Click <strong>Dashboard</strong>.</li>
-<li>Click the <strong>+</strong> tab to make a new script.</li>
-<li>Select all of the template text. Delete the text.</li>
-<li>Paste the text that you copied.</li>
-<li>Press <strong>Ctrl+S</strong> to save the script.</li>
-<li>Reload the Pokémon Showdown page.</li>
+<li>Clone ABRA: <code>git clone https://github.com/willhoop/abra.git</code>.</li>
+<li>Clone the Reg M-C Showdown checkout next to it, as <code>pokemon-showdown-mc</code>. ABRA reads the format from it.</li>
+<li>Make sure that the folder <code>data/releases/eaa5becc54eb</code> is in the ABRA checkout. Git does not track this folder.
+   If it is not there, copy it from a checkout that has it.</li>
 </ol>
-<p>The plugin is now active.</p>
-<h2 id="12-get-your-first-recommendation">1.2 Get your first recommendation</h2>
-<p>Do these steps:</p>
-<ol>
-<li>Start a Champions battle.</li>
-<li>Wait for the team preview screen.</li>
-<li>Look at the panel in the top right corner.</li>
-</ol>
-<p>The panel shows the bring, the lead, the weather, and a knockout percentage for each opponent
-Pokémon. If the panel is empty, it shows a diagnostic message. Read Part 2.5 for the messages.</p>
-<h2 id="13-analyse-your-games">1.3 Analyse your games</h2>
-<p>Do these steps:</p>
-<ol>
-<li>Open the file <code>app/chomp-replay-app.html</code> in your browser.</li>
-<li>Type your Showdown username in the <strong>User</strong> box.</li>
-<li>Click <strong>Pull &amp; analyze</strong>.</li>
-</ol>
-<p>The analyzer shows your record. It shows the Pokémon that you play against most. It shows the
-bring that CHOMP recommends for each game.</p>
+<h2 id="12-solve-one-preview">1.2 Solve one preview</h2>
+<p>Open a terminal in the ABRA folder. Run this command:</p>
+<pre><code class="language-bash">ABRA_REGULATION=regmc node -e &quot;
+const CH = require('./solver/chomp/v1/chomp1.js').create({ release: 'eaa5becc54eb' });
+const { parseShowteam } = require('./solver/human/parse_game.js');
+const P = require('./solver/rotom/teams/regmc-pool.json');
+const r = CH.solve({ mine: parseShowteam(P.teams['0'].packed), theirs: parseShowteam(P.teams['1'].packed) });
+console.log(r.support.map(s =&gt; s.p.toFixed(3) + '  ' + s.label).join('\n'));
+console.log('value', r.value.toFixed(3));
+&quot;
+</code></pre>
+<p>The command uses two teams from the ABRA team pool. It prints the options that have weight in the mix, and the value
+of the game for you.</p>
+<p><strong>Caution:</strong> Set <code>ABRA_REGULATION=regmc</code>. If you do not set it, ABRA reads the retired Reg M-B data and the solve
+stops with the error <code>does not build</code>.</p>
 <hr />
 <h1 id="part-2-how-to-guides">PART 2 — HOW-TO GUIDES</h1>
 <p><em>Do one task.</em></p>
-<h2 id="21-how-to-update-chomp-for-a-new-regulation">2.1 How to update CHOMP for a new regulation</h2>
+<h2 id="21-how-to-run-the-chomp-tests">2.1 How to run the CHOMP tests</h2>
+<p>In the ABRA folder, run:</p>
+<pre><code class="language-bash">node solver/tests/test-chomp1.js
+node solver/tests/test-chomp.js
+</code></pre>
+<p>Each test prints its failed clauses. Each test has deliberate breaks. A deliberate break must make the test fail.
+On Windows, start heavy runs through <code>tools\lownode.cmd</code>.</p>
+<h2 id="22-how-to-use-chomp-in-a-ladder-arm">2.2 How to use CHOMP in a ladder arm</h2>
 <ol>
-<li>Open the file <code>engine/champ-model.js</code>.</li>
-<li>Find the block <code>FORMAT</code> at the top of the file.</li>
-<li>Change the format name and the Pikalytics slug.</li>
-<li>Change the SP budget, the SP cap, and the level if the format changes them.</li>
-<li>Add the new banned items to <code>bannedItems</code>.</li>
-<li>Add the new banned Pokémon to <code>bannedMons</code>.</li>
+<li>Open an arms file in <code>solver/rotom/arms/</code>.</li>
+<li>In the arm, set <code>"preview": "chomp"</code>.</li>
+<li>Set <code>"preview_max_ms"</code> to the time budget for the preview, in milliseconds.</li>
 <li>Save the file.</li>
-<li>Do the steps in Part 2.2.</li>
 </ol>
-<h2 id="22-how-to-rebuild-the-plugin-and-the-analyzer">2.2 How to rebuild the plugin and the analyzer</h2>
-<p>The plugin and the analyzer contain a copy of the engine. You must rebuild them after you change
-the engine.</p>
+<p>ROTOM then asks CHOMP for every preview. The arm <code>solver/rotom/arms/gen5-chomp-top.json</code> is an example.</p>
+<p><strong>Caution:</strong> A ladder run uses a real rating. Only the owner (Will) starts a ladder run.</p>
+<h2 id="23-how-to-read-what-chomp-did-in-a-ladder-run">2.3 How to read what CHOMP did in a ladder run</h2>
 <ol>
-<li>Open a terminal in the folder <code>build/</code>.</li>
-<li>Run <code>python3 build_v2_userscript.py</code>.</li>
-<li>Run <code>python3 build_replay_app.py</code>.</li>
-<li>Install the new plugin again. Do the steps in Part 1.1.</li>
+<li>Run <code>node solver/rotom/report.js ladder &lt;run folder&gt;</code>.</li>
+<li>Read <code>preview_by</code> in the summary. It shows which policy answered each preview.</li>
+<li>Read the counters <code>chomp:threw</code> and <code>chomp:illegal</code>. If one of them is more than 0, CHOMP failed on that preview
+   and ROTOM used the team's own recorded bring.</li>
 </ol>
-<p><strong>Caution:</strong> If you do not rebuild, the plugin keeps the old engine.</p>
-<h2 id="23-how-to-add-a-pokemon-or-a-move">2.3 How to add a Pokémon or a move</h2>
-<p>The engine reads the Pokémon data and the move data from <code>engine/champions-damage-lab.html</code>.</p>
+<h2 id="24-how-to-train-a-new-scorer">2.4 How to train a new scorer</h2>
+<p>Do not replace v1 without a gate. A new scorer must pass gate (a) against v1 first. CHOMP v2 did not pass, so v1 stayed.</p>
 <ol>
-<li>Open <code>engine/champions-damage-lab.html</code>.</li>
-<li>Find the object <code>MONS</code> for a Pokémon, or the object <code>MOVES</code> for a move.</li>
-<li>Add the new entry. Use the same format as the entries near it.</li>
-<li>Save the file.</li>
-<li>Do the steps in Part 2.2.</li>
+<li>Write a pre-registration before you play the first game. Use <code>solver/chomp/v1/prereg.js</code> as the model.</li>
+<li>Make the targeted games with <code>solver/chomp/v1/gen.js</code>.</li>
+<li>Make the rows with <code>solver/chomp/v1/build_rows.js</code>.</li>
+<li>Train with <code>python solver/chomp/v1/train.py</code>. It reads gate (a) one time, on the test set.</li>
+<li>Run the label-shuffle break (<code>CHOMP1_BREAK=shuffle</code>). The break must fail.</li>
 </ol>
-<h2 id="24-how-to-check-that-a-move-is-legal">2.4 How to check that a move is legal</h2>
-<ol>
-<li>Open the Champions learnsets data from HoopaDex.</li>
-<li>Find the Pokémon.</li>
-<li>Make sure that the move is in the list, and that the list includes <code>reg-mb</code>.</li>
-</ol>
-<p>Do not recommend a move that fails this check.</p>
-<h2 id="25-how-to-read-the-plugin-diagnostic-messages">2.5 How to read the plugin diagnostic messages</h2>
-<p>The panel shows a message when it cannot read the teams.</p>
-<table>
-<thead>
-<tr>
-<th>Message</th>
-<th>Meaning</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>no battle open</code></td>
-<td>The plugin cannot find a battle.</td>
-<td>Open a battle. Reload the page.</td>
-</tr>
-<tr>
-<td><code>read 0 mine / 0 foe</code></td>
-<td>The plugin found a battle, but the battle log is empty.</td>
-<td>The page-text fallback runs automatically. If the message stays, report it.</td>
-</tr>
-<tr>
-<td><code>read from page text</code></td>
-<td>The plugin read the teams from the page.</td>
-<td>No action. This is normal on the BETA client.</td>
-</tr>
-<tr>
-<td><code>read 6 mine / 6 foe</code></td>
-<td>The plugin read both teams correctly.</td>
-<td>No action.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="26-how-to-change-the-recommendation-logic">2.6 How to change the recommendation logic</h2>
-<ol>
-<li>Open <code>engine/champ-model.js</code>.</li>
-<li>To change how one Pokémon scores against one opponent, edit the function <code>monVsFoe</code>.</li>
-<li>To change how the engine picks the four, edit the function <code>teamVs</code>.</li>
-<li>To change how the engine picks the two, edit the function <code>bring4</code>.</li>
-<li>Save the file. Do the steps in Part 2.2.</li>
-</ol>
+<p>The full commands are in the ABRA report <code>docs/_reports/2026-09-27-chomp-v1.md</code> §6.</p>
 <hr />
 <h1 id="part-3-reference">PART 3 — REFERENCE</h1>
-<p><em>Facts. Read this when you need a specific detail.</em></p>
-<h2 id="31-folder-structure">3.1 Folder structure</h2>
-<pre><code>CHOMP/
-  README.md            What CHOMP is. Install steps. Quick start.
-  CHANGELOG.md         All changes. Newest first.
-  CLAUDE.md            Project-specific instructions.
-  docs/                White paper, this document, referee report, guides.
-  engine/              champ-model.js, champ-iterate.js, champions-damage-lab.html
-  app/                 chomp-replay-app.html, dashboards
-    plugin/            The userscript.
-    calc/              The damage calculator.
-  build/               The scripts that build the plugin and the analyzer.
-  data/                Game logs, replay index, team pastes.
-  tests/               Test scripts.
-  assets/              Images and exports.
-</code></pre>
-<h2 id="32-architecture">3.2 Architecture</h2>
-<pre><code>champions-damage-lab.html   (Pokémon data, move data, type chart)
-HoopaDex learnsets          (move legality)
-Pikalytics Reg M-B          (opponent set priors)
-            |
-            v
-      engine/champ-model.js
-   (stats -&gt; damage -&gt; pKO -&gt; matchup -&gt; bring and lead)
-            |
-   +--------+--------+----------------+
-   v                 v                v
-plugin           analyzer        champ-iterate.js
-(live panel)     (replays)       (team optimiser)
-</code></pre>
-<p>The plugin and the analyzer contain a copy of the engine. The build scripts make the copy.</p>
-<h2 id="33-stat-formulas">3.3 Stat formulas</h2>
-<p>The Champions format uses the SP system. The engine uses these formulas:</p>
-<pre><code>statL50(base, sp, nature) = floor((floor((2 x base + 31) x 50 / 100) + 5 + sp) x nature)
-hpL50(base, sp)           = floor((2 x base + 31) x 50 / 100) + 60 + sp
-</code></pre>
-<p>The nature multiplier is 1.1, 1.0, or 0.9. Apply the nature multiplier <strong>after</strong> you add the SP.
-The SP budget is 66 points. The maximum for one stat is 32 points. The level is 50. The IVs are 31.</p>
-<h2 id="34-damage-formula">3.4 Damage formula</h2>
-<pre><code>base = floor(floor(22 x power x attack / defence) / 50) + 2
-</code></pre>
-<p>Then apply these steps in this order:
-1. Spread damage: multiply by 0.75.
-2. Weather: multiply by 1.5 or 0.5.
-3. Critical hit: multiply by 1.5.
-4. For each roll from 85 to 100:
-   a. Multiply the base by the roll. Divide by 100. Take the floor.
-   b. Apply STAB. Use <code>pokeRound</code>.
-   c. Apply type effectiveness. Take the floor.
-   d. Apply the item, the abilities, the screens, and the support modifiers. Use <code>pokeRound</code>.</p>
-<p><code>pokeRound(x)</code> gives <code>ceil(x)</code> if the fraction is more than 0.5. If not, it gives <code>floor(x)</code>.</p>
-<p><strong>pKO</strong> is the number of rolls that reach the target HP, divided by 16.</p>
-<h2 id="35-the-format-configuration-block">3.5 The FORMAT configuration block</h2>
-<p>This block is at the top of <code>engine/champ-model.js</code>. It holds all of the values that change
-between regulations.</p>
+<h2 id="31-files-abra-repository">3.1 Files (ABRA repository)</h2>
 <table>
 <thead>
 <tr>
-<th>Field</th>
+<th>File</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>solver/chomp/options.js</code></td>
+<td>The 90 options of one sheet, in a fixed order.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/v1/chomp1.js</code></td>
+<td>The solver: <code>create</code>, <code>solve</code>, <code>sample</code>.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/v1/features.js</code></td>
+<td>The engine facts for each pair of Pokémon, and the 22 cell features.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/v1/scorer.js</code></td>
+<td>The cell scorer, in JavaScript.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/v1/model/chomp1.json</code></td>
+<td>The trained v1 model.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/v1/preregistration.json</code></td>
+<td>The gates, written before the first game.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/v1/train.py</code></td>
+<td>The training script and the gate (a) read.</td>
+</tr>
+<tr>
+<td><code>solver/slowking/matrix.js</code></td>
+<td><code>solveLP</code>: the exact matrix-game solve.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/arms.js</code></td>
+<td>The arena arms that use CHOMP.</td>
+</tr>
+<tr>
+<td><code>solver/rotom/policy.js</code></td>
+<td>ROTOM's preview hook (<code>previewChomp</code>).</td>
+</tr>
+<tr>
+<td><code>solver/tests/test-chomp1.js</code></td>
+<td>The v1 tests.</td>
+</tr>
+<tr>
+<td><code>solver/chomp/chomp.js</code>, <code>solver/chomp/v2/</code></td>
+<td>v0 and v2. They are not used live.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="32-interface">3.2 Interface</h2>
+<pre><code class="language-js">const CH = require('./solver/chomp/v1/chomp1.js').create({ release })   // or { API }
+const r  = CH.solve({ mine, theirs }, { deadline, series: { oppLast } })
+const op = CH.sample(r, u)                                               // u in [0, 1)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Input</th>
 <th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>name</code></td>
-<td>The format name.</td>
+<td><code>mine</code>, <code>theirs</code></td>
+<td>The two sheets, as arrays of six sets.</td>
 </tr>
 <tr>
-<td><code>pikalyticsSlug</code></td>
-<td>The slug for the usage data.</td>
+<td><code>deadline</code></td>
+<td>Optional. A time limit for the scoring.</td>
 </tr>
 <tr>
-<td><code>level</code></td>
-<td>The Pokémon level.</td>
-</tr>
-<tr>
-<td><code>sp.budget</code>, <code>sp.cap</code>, <code>sp.autoIV</code></td>
-<td>The SP rules.</td>
-</tr>
-<tr>
-<td><code>megasAllowed</code>, <code>oneMegaPerBattle</code>, <code>teraAllowed</code></td>
-<td>The format switches.</td>
-</tr>
-<tr>
-<td><code>bannedItems</code></td>
-<td>The items that the format does not allow.</td>
-</tr>
-<tr>
-<td><code>legalChoiceItems</code></td>
-<td>The Choice items that the format allows.</td>
-</tr>
-<tr>
-<td><code>bannedMons</code></td>
-<td>The Pokémon that the format does not allow.</td>
+<td><code>series.oppLast</code></td>
+<td>Optional. Games 2 and 3 only: <code>{ brought, leads, won }</code> for the opponent's previous game.</td>
 </tr>
 </tbody>
 </table>
-<h2 id="36-engine-functions">3.6 Engine functions</h2>
 <table>
 <thead>
 <tr>
-<th>Function</th>
-<th>Purpose</th>
+<th>Output field</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>parsePaste(text)</code></td>
-<td>Reads a pokepaste. Gives a list of sets.</td>
+<td><code>options</code></td>
+<td>The 90 options.</td>
 </tr>
 <tr>
-<td><code>buildMon(set)</code></td>
-<td>Makes a battle-ready Pokémon. Calculates the stats. Removes banned items.</td>
+<td><code>mix</code>, <code>oppMix</code></td>
+<td>My equilibrium mix and the opponent equilibrium mix.</td>
 </tr>
 <tr>
-<td><code>moveDamage(att, def, move, ctx)</code></td>
-<td>Gives the damage percentage and the pKO for one move.</td>
+<td><code>value</code></td>
+<td>The value of the game for me.</td>
 </tr>
 <tr>
-<td><code>bestDamage(att, def, ctx)</code></td>
-<td>Gives the best move by pKO, then by damage.</td>
+<td><code>win[i]</code></td>
+<td>For option i: the win chance against their mix, against a uniform opponent, and in the worst case.</td>
 </tr>
 <tr>
-<td><code>monVsFoe(me, foe, ctx)</code></td>
-<td>Gives a score for one Pokémon against one opponent.</td>
+<td><code>support</code></td>
+<td>The options with weight, with labels.</td>
 </tr>
 <tr>
-<td><code>teamVs(my4, foe6, opts)</code></td>
-<td>Gives a score for one bring against the opponent team.</td>
+<td><code>bo3</code></td>
+<td>The best-of-three adjustment. It is <code>null</code> in game 1.</td>
 </tr>
 <tr>
-<td><code>bring4(my6, foe6, opts)</code></td>
-<td>Gives the best four and the best two.</td>
-</tr>
-<tr>
-<td><code>resolveWeather(my, foe)</code></td>
-<td>Gives the weather and tells you if the weather is contested.</td>
+<td><code>counters</code>, <code>ms</code>, <code>engine</code>, <code>model</code></td>
+<td>The receipt.</td>
 </tr>
 </tbody>
 </table>
-<h2 id="37-modelled-mechanics">3.7 Modelled mechanics</h2>
-<p>The engine models these mechanics:
-- Weather: rain, sun, sandstorm, snow, heavy rain, harsh sun, strong winds. Sandstorm chip damage.
-- Terrain: Electric, Grassy, Psychic, Misty. Grassy Terrain halves Earthquake. Misty Terrain halves Dragon.
-- Screens: Reflect, Light Screen, Aurora Veil. The engine uses the doubles value.
-- Rooms: Wonder Room.
-- Immunities from abilities: Levitate, Volt Absorb, Water Absorb, Flash Fire, Sap Sipper.
-- Offensive abilities: Adaptability, Mega Launcher, Protean, Technician, Tough Claws, Iron Fist,
-  Sharpness, Water Bubble, Transistor, Tinted Lens, Sand Force, and others.
-- Defensive abilities: Multiscale, Filter, Solid Rock, Thick Fat, Ice Scales, Fur Coat, Fluffy, Heatproof.
-- Intimidate.
-- Items: Life Orb, Expert Belt, type items, Wise Glasses, Muscle Band, Punching Glove.
-- Support abilities for doubles: Helping Hand, Battery, Power Spot, Friend Guard, Flower Gift, Steely Spirit.
-- Burn.
-- Speed changes: Choice Scarf, Tailwind, Swift Swim, Sand Rush, Chlorophyll, Speed Boost.</p>
-<h2 id="38-data-sources">3.8 Data sources</h2>
+<h2 id="33-settings">3.3 Settings</h2>
 <table>
 <thead>
 <tr>
-<th>Source</th>
-<th>Use</th>
-<th>Authority</th>
+<th>Setting</th>
+<th>Value</th>
+<th>Where</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Showdown damage calculator (Champions)</td>
-<td>Stat and damage formulas</td>
-<td>Highest.</td>
+<td>Best-of-three weight λ</td>
+<td>0.5</td>
+<td><code>LAMBDA</code> in <code>solver/chomp/v1/chomp1.js</code> (pre-registered)</td>
 </tr>
 <tr>
-<td>HoopaDex Champions learnsets</td>
-<td>Move legality</td>
-<td>Highest for legality.</td>
+<td>Repeat rates of human players</td>
+<td>read at run time</td>
+<td><code>solver/out/meta/bo3.json</code></td>
 </tr>
 <tr>
-<td>Pikalytics Reg M-B</td>
-<td>Opponent set priors</td>
-<td>A prior. Not certain.</td>
+<td>Model version</td>
+<td>v1</td>
+<td><code>CHOMP_VERSION</code> environment variable (<code>v0</code> selects v0)</td>
 </tr>
 <tr>
-<td>Showdown replay API</td>
-<td>Game data</td>
-<td>Highest for results.</td>
+<td>Preview in an arm</td>
+<td><code>"preview": "chomp"</code></td>
+<td>the arms file</td>
 </tr>
 </tbody>
 </table>
+<h2 id="34-data">3.4 Data</h2>
+<ul>
+<li>The simulator: MEDICHAM, frozen release <code>eaa5becc54eb</code>.</li>
+<li>The team pool: <code>data/team-pool-frozen-regmc</code>.</li>
+<li>The format: <code>gen9championsvgc2026regmc</code>, read from the Reg M-C Showdown checkout.</li>
+</ul>
 <hr />
 <h1 id="part-4-explanation">PART 4 — EXPLANATION</h1>
-<p><em>Why the design is like this.</em></p>
-<h2 id="41-why-the-engine-looks-at-one-turn-only">4.1 Why the engine looks at one turn only</h2>
-<p>The engine calculates the matchup at team preview. It does not simulate the battle. A one-turn
-model is fast and easy to understand. Every recommendation has a number that you can check.</p>
-<p>The cost is real. The engine cannot see multi-turn effects. It does not model recoil, flinch,
-status damage over time, or redirection.</p>
-<h2 id="42-why-the-engine-uses-pko-and-not-a-single-roll">4.2 Why the engine uses pKO and not a single roll</h2>
-<p>Damage has 16 possible rolls. An earlier version used the maximum roll only. That version called a
-hit a "knockout" when only one roll in 16 gave a knockout. The engine now counts the rolls that
-give a knockout. This number is honest.</p>
-<h2 id="43-why-a-contested-weather-war-scores-as-neutral">4.3 Why a contested weather war scores as neutral</h2>
-<p>Both players can set weather. If the engine gives the weather to the opponent, it makes bad
-recommendations. In one game the engine removed a water attacker against a sun team. The player
-won that game because he changed the weather to rain.</p>
-<p>The engine now treats the weather as neutral when both sides can set it. Sandstorm is different.
-Sand Stream sets the sandstorm again after each switch. Therefore the engine keeps a penalty for
-Pokémon that take sandstorm damage.</p>
-<h2 id="44-why-the-lead-uses-knockout-pressure">4.4 Why the lead uses knockout pressure</h2>
-<p>An earlier version chose the lead with the best average matchup. Support Pokémon win that test,
-because they lose no matchups. The lead was too passive. The engine now chooses the two Pokémon
-that threaten the most immediate knockouts.</p>
-<h2 id="45-known-limitations">4.5 Known limitations</h2>
-<ul>
-<li>The engine looks at one turn. It is not a battle AI.</li>
-<li>The engine does not model recoil, flinch, status over time, PP, or redirection.</li>
-<li>The opponent sets are estimates. The engine does not check them against the learnsets.</li>
-<li>The engine gives one answer. It does not use a mixed strategy. A skilled opponent can learn it.</li>
-<li>The score is relative. It is not calibrated against a win rate.</li>
-<li>The engine combines some damage modifiers into one multiplier. The result can differ by 1 HP.</li>
-</ul>
-<h2 id="46-roadmap">4.6 Roadmap</h2>
+<h2 id="41-why-chomp-gives-a-mix-and-not-one-answer">4.1 Why CHOMP gives a mix and not one answer</h2>
+<p>Both players choose at the same time. If CHOMP always gives the same answer, an opponent can learn it and beat it.
+The equilibrium mix has a value that the opponent cannot make lower.</p>
+<h2 id="42-why-the-scorer-is-antisymmetric">4.2 Why the scorer is antisymmetric</h2>
+<p>The two players are in the same game. If I win a cell with probability p, the opponent wins the mirror cell with
+probability 1 − p. The model has this property by construction, so a mirror match scores exactly 1/2.</p>
+<h2 id="43-why-the-solve-is-exact">4.3 Why the solve is exact</h2>
+<p>The table has only 90 × 90 cells. A linear program solves a table of this size exactly in milliseconds, so CHOMP does
+not use an approximate method.</p>
+<h2 id="44-why-the-gates-use-a-frozen-release">4.4 Why the gates use a frozen release</h2>
+<p>The simulator changes over time. If the simulator changes during a test, the two halves of the test measure different
+things. A frozen release keeps the simulator the same for the full test.</p>
+<h2 id="45-limits">4.5 Limits</h2>
+<p>Read the white paper, §6.</p>
+<hr />
+<h1 id="part-5-retired-the-browser-userscript-reg-m-b">PART 5 — RETIRED: THE BROWSER USERSCRIPT (REG M-B)</h1>
+<p><strong>Status: retired in 3.0.0. Do not use it for Reg M-C.</strong> It targets Reg M-B, and its species data is old. The code
+stays in this repository as history.</p>
+<h2 id="51-what-it-was">5.1 What it was</h2>
+<p>A Tampermonkey userscript for Pokémon Showdown. At team preview it showed one recommended bring and lead, from a
+single-ply damage calculation. It also had a replay analyzer and a damage calculator.</p>
+<h2 id="52-files">5.2 Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app/plugin/chomp-bring4.user.js</code></td>
+<td>The userscript. It contains a copy of the engine.</td>
+</tr>
+<tr>
+<td><code>engine/champ-model.js</code></td>
+<td>The old damage and matchup engine. The <code>FORMAT</code> block is at the top.</td>
+</tr>
+<tr>
+<td><code>app/chomp-replay-app.html</code></td>
+<td>The replay analyzer.</td>
+</tr>
+<tr>
+<td><code>build/build_v2_userscript.py</code>, <code>build/build_replay_app.py</code></td>
+<td>The builders. They copy the engine into the userscript and the analyzer.</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>The old engine tests. CI runs them.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="53-how-to-rebuild-it">5.3 How to rebuild it</h2>
 <ol>
-<li><strong>Turn simulator.</strong> This gives recoil, flinch, status, redirection, and switch logic.</li>
-<li><strong>Usage-weighted opponent sets.</strong> This uses the full Pikalytics distribution. It also removes
-   illegal moves from the estimated sets.</li>
-<li><strong>Mixed-strategy leads.</strong> This makes the recommendation harder to predict.</li>
-<li><strong>Synergy in the team builder.</strong> This scores cores, not single matchups.</li>
+<li>Change <code>engine/champ-model.js</code>.</li>
+<li>Run <code>python3 build/build_v2_userscript.py</code>.</li>
+<li>Run <code>python3 build/build_replay_app.py</code>.</li>
 </ol>
+<p><strong>Caution:</strong> If you do not rebuild, the userscript keeps the old engine.</p>
+<h2 id="54-its-validation">5.4 Its validation</h2>
+<p>Read the white paper, §9, and <code>docs/VALIDATION-REPORT.md</code>. All of its figures are Reg M-B.</p>
 <hr />
 <h2 id="references">References</h2>
-<ol>
-<li>ASD-STE100 Simplified Technical English. ASD. https://www.asd-ste100.org/</li>
-<li>Procida, D. <em>Diátaxis: A systematic framework for technical documentation.</em> https://diataxis.fr/</li>
-<li>Pokémon Showdown damage calculator (Champions mode). https://calc.pokemonshowdown.com/champions.html</li>
-<li>Pokémon Showdown replay API. https://replay.pokemonshowdown.com/</li>
-</ol></main></body></html>
+<ul>
+<li>The white paper: <a href="CHOMP-whitepaper.md"><code>docs/CHOMP-whitepaper.md</code></a>.</li>
+<li>ASD-STE100 Simplified Technical English, Issue 8, ASD, 2021.</li>
+<li>D. Procida. <em>Diátaxis: a systematic framework for technical documentation.</em> diataxis.fr.</li>
+</ul></main></body></html>

@@ -28,202 +28,325 @@ ul,ol{padding-left:22px}li{margin:.32em 0}
 strong{color:var(--white)}
 </style></head><body>
 <div class="bar"><div class="w"><a href="../../index.html">← Portfolio</a><span>CHOMP</span></div></div>
-<main><h1 id="chomp-the-champions-head-to-head-optimizer-for-matchup-prediction">CHOMP: The Champions Head-to-head Optimizer for Matchup Prediction</h1>
-<h3 id="a-fast-interpretable-damage-calculus-algorithm-for-team-preview-decisions-in-pokemon-champions-vgc-reg-m-b">A fast, interpretable damage-calculus algorithm for team-preview decisions in Pokémon Champions VGC (Reg M-B)</h3>
-<p><strong>Author:</strong> Will (willhoop) · Operation Ladder project
-<strong>Version:</strong> 1.0 · July 2026</p>
+<main><h1 id="chomp-a-team-preview-solver-for-champions-vgc-reg-m-c">CHOMP: a team-preview solver for Champions VGC Reg M-C</h1>
+<h3 id="both-open-team-sheets-in-a-mixed-strategy-over-the-90-bring-and-lead-options-out">Both open team sheets in, a mixed strategy over the 90 bring-and-lead options out</h3>
+<p><strong>Author:</strong> Will Hooper (willhoop)
+<strong>Version:</strong> 3.0.0 · 2026-10-13
+<strong>Status:</strong> CHOMP v1 is the team-preview solver inside ABRA. It plays on the Pokémon Showdown ladder through ABRA's
+live client, ROTOM. The browser userscript that carried the CHOMP name until 2.5.1 is retired (§9).</p>
+<p>This paper is the one home for every CHOMP figure. Every figure below names the ABRA artifact it was read from. ABRA is
+public: <a href="https://github.com/willhoop/abra">https://github.com/willhoop/abra</a>.</p>
 <hr />
 <h2 id="abstract">Abstract</h2>
-<p>Competitive Pokémon Video Game Championships (VGC) is a simultaneous-move, imperfect-information game with an astronomically large strategy space (~10^139 legal team configurations — larger than Chess, Go, Poker, StarCraft, or Dota combined) [2]. Most published work attacks the <em>full-battle policy</em> with heavy machinery: minimax language agents (PokéChamp [1]), root-parallelized Monte-Carlo Tree Search (Foul Play [4]), and multi-agent reinforcement learning with game-theoretic solvers (VGC-Bench [2], Metamon [3]). These systems are powerful but require a battle simulator, training compute, and seconds-to-minutes of search per decision.</p>
-<p>This paper isolates a smaller, higher-leverage sub-problem that a human ladder player actually faces under a clock: <strong>at team preview, given both six-Pokémon rosters, which four do I bring and which two do I lead?</strong> We present <strong>CHOMP</strong>, the Champions Head-to-head Optimizer for Matchup Prediction — a single-ply, fully deterministic algorithm that (1) reads the player's own exact sets from the client and infers the opponent's from usage priors, (2) computes an exact game-accurate damage matrix using the validated Gen-9 Champions damage formula, (3) layers in the mechanics that actually decide games (weather boosts + chip, items, abilities, speed control, priority), (4) selects the best four via exhaustive subset search, and (5) selects the lead pair by turn-one knockout pressure rather than risk-averse averaging. CHOMP runs in milliseconds in the browser, is fully interpretable (every recommendation is backed by a concrete KO percentage), and was tuned and validated against real ranked ladder games.</p>
+<p>At team preview in VGC doubles each player sees both six-Pokémon sheets and secretly chooses four to bring and two of
+those four to lead. Under open team sheets the sheets are fully known, so the choice is a simultaneous-move,
+two-player, zero-sum game with 90 options per side. CHOMP scores all 90 × 90 = 8,100 option pairs with a learned
+estimate of the chance to win, solves the resulting matrix game exactly by linear programming, and plays a sample from
+the equilibrium mix. In games 2 and 3 of a best-of-three it shifts half its weight towards a best response against
+what the opponent brought before.</p>
+<p>CHOMP v1 was trained on 25,008 targeted simulated games plus self-play and human games, all on ABRA's simulator
+MEDICHAM at release <code>eaa5becc54eb</code>. It passed three pre-registered gates. Against the most common human bring for each
+team it won <strong>0.561 [0.518, 0.603]</strong> of games (SPRT accepted H1 at 524 games). Against the bring the human actually
+chose for that exact matchup it scored <strong>0.470 [0.422, 0.519]</strong> over 400 games: <strong>no clear edge over a human who has
+seen the opponent.</strong> That second figure is the honest ceiling on this release.</p>
 <hr />
-<h2 id="1-problem-statement">1. Problem statement</h2>
-<h3 id="11-the-decision">1.1 The decision</h3>
-<p>In VGC doubles, both players build a team of six but bring only four to each game, revealed simultaneously at <em>team preview</em>. The player must choose:
-- a <strong>bring set</strong> B ⊂ Roster, |B| = 4, and
-- a <strong>lead pair</strong> L ⊂ B, |L| = 2 (the two sent out on turn one),</p>
-<p>using only the two rosters of species (moves, items, EVs, and abilities of the opponent are hidden).</p>
-<h3 id="12-why-it-is-hard">1.2 Why it is hard</h3>
-<ul>
-<li><strong>Combinatorics.</strong> For a fixed roster there are C(6,4) = 15 brings and, per bring, C(4,2) = 6 leads — small on its own, but the <em>quality</em> of each depends on a 4×6 (bring × opponent) interaction lattice whose entries are themselves damage computations under contextual modifiers.</li>
-<li><strong>Imperfect information.</strong> The opponent's sets are unknown. VGC-Bench frames team preview as two joint switch-in actions and approaches it with double-oracle / fictitious-play Nash approximations; we instead resolve the uncertainty with a <em>usage prior</em> over sets.</li>
-<li><strong>Simultaneous moves.</strong> There is no "correct" deterministic answer; the true solution is a mixed (Nash) strategy. We adopt a deterministic best-response as a pragmatic, interpretable approximation and document the exploitability trade-off (§6).</li>
-<li><strong>Time budget.</strong> A human has ~30–90 seconds at preview. This rules out deep search and favors a fast evaluator.</li>
-</ul>
-<h3 id="13-design-goals">1.3 Design goals</h3>
-<ol>
-<li><strong>Real-time</strong> (&lt; 50 ms, runs client-side).</li>
-<li><strong>Interpretable</strong> — every call is justified by an explicit KO number a player can verify.</li>
-<li><strong>Game-accurate</strong> — exact damage math, not learned or hand-waved effectiveness.</li>
-<li><strong>Self-improving offline</strong> — able to refine a whole team against the metagame, not just react.</li>
-</ol>
+<h2 id="1-the-decision">1. The decision</h2>
+<p>Each sheet holds six Pokémon. A player brings four (C(6,4) = 15 ways) and leads two of the four (C(4,2) = 6 ways), so
+each side has <strong>15 × 6 = 90 options</strong>. The order of the two leads and the order of the two back members are not
+separate options: in doubles both lead slots face both foes, and the back order is an in-battle switch decision
+(<code>solver/chomp/options.js</code>).</p>
+<p>Both players choose at once. The format is Champions VGC 2026 Reg M-C with open team sheets
+(<code>gen9championsvgc2026regmcbo3</code> on Showdown), so species, items, abilities and moves are visible on both sides. Stat
+spreads stay hidden.</p>
+<p>Because the choices are simultaneous there is in general no single best option. The right object is a <strong>mixed
+strategy</strong>: a probability over the 90 options that an opponent cannot exploit by knowing it.</p>
 <hr />
-<h2 id="2-related-work">2. Related work</h2>
+<h2 id="2-method">2. Method</h2>
+<h3 id="21-the-cell-scorer">2.1 The cell scorer</h3>
+<p>For my option <em>a</em> and their option <em>b</em>, the scorer estimates P(I win | a, b, both sheets). Its inputs are engine facts
+computed by MEDICHAM for every pair of Pokémon across the two sheets, both ways: the damage range times the hit
+chance, the KO chance at the maximum and minimum roll, a sure two-hit KO, the speed order, and a priority KO
+(<code>solver/chomp/v1/features.js</code>). These are aggregated into 22 cell features over the brought four, the leads and the
+whole sheet.</p>
+<p>The model is antisymmetric by construction:</p>
+<pre><code>logit P(win | a, b) = τ_src · ( s(x_a, y_b) − s(y_b, x_a) + bring and lead values of the species )
+</code></pre>
+<p>so a mirror match scores exactly 1/2 and swapping the chairs gives the complement. τ_src is a learned temperature per
+data source. Two arms were fitted, a linear <code>lin</code> and a small <code>mlp</code>; selection was on the validation set and <code>lin</code>
+won (validation log-loss 0.6533 against 0.6550) (<code>solver/chomp/v1/model/chomp1.metrics.json</code>).</p>
+<h3 id="22-training-data">2.2 Training data</h3>
 <table>
 <thead>
 <tr>
-<th>System</th>
-<th>Approach</th>
-<th>Scope</th>
-<th>Compute</th>
+<th>source</th>
+<th>train</th>
+<th>val</th>
+<th>test</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>PokéChamp</strong> (Karten et al., 2025)</td>
-<td>Minimax with an LLM proposing/pruning moves and modeling the opponent</td>
-<td>Full battle</td>
-<td>LLM inference per node</td>
+<td>targeted simulated games: one option per side, half uniform over the 90, half from the human prior</td>
+<td>20,000</td>
+<td>2,240</td>
+<td>2,768</td>
 </tr>
 <tr>
-<td><strong>Foul Play</strong> (pmariglia)</td>
-<td>Root-parallelized MCTS over a custom engine, guided by a hand-built evaluation</td>
-<td>Full battle</td>
-<td>Many rollouts/turn</td>
+<td>ABRA's gen5 self-play corpus (human brings)</td>
+<td>2,892</td>
+<td>360</td>
+<td>351</td>
 </tr>
 <tr>
-<td><strong>VGC-Bench</strong> (Aristidou et al., 2025)</td>
-<td>Self-play, fictitious play, and double-oracle over PPO actor-critics; 700k-log human dataset</td>
-<td>Full battle + team design</td>
-<td>GPU training</td>
-</tr>
-<tr>
-<td><strong>Metamon</strong> (2025)</td>
-<td>Offline RL with transformers on human replays</td>
-<td>Full battle</td>
-<td>GPU training</td>
-</tr>
-<tr>
-<td><strong>LSA lead prediction</strong> (J. Geek Studies, 2025)</td>
-<td>Latent Semantic Analysis over 5,000 logs to predict lead pairs</td>
-<td>Team preview leads</td>
-<td>Light</td>
-</tr>
-<tr>
-<td><strong>Championship regression</strong> (Dilworth, MSU)</td>
-<td>Multiple linear regression on base-stat totals and coverage</td>
-<td>Team building</td>
-<td>Light</td>
-</tr>
-<tr>
-<td><strong>CHOMP (this work)</strong></td>
-<td>Deterministic damage-calculus matchup evaluator + exhaustive bring search + KO-pressure lead</td>
-<td>Team preview only</td>
-<td>Milliseconds, client-side</td>
+<td>human open-sheet bo3 games with both options known</td>
+<td>12,074</td>
+<td>153</td>
+<td>188</td>
 </tr>
 </tbody>
 </table>
-<p>CHOMP's niche is the <strong>light, interpretable, real-time preview solver</strong>. It borrows the <em>evaluation-function</em> idea from Foul Play (but computes exact damage rather than heuristics), the <em>usage-prior</em> idea implicit in human play and in LSA lead work, and the <em>best-response-over-a-team-pool</em> idea from double-oracle (but as an offline hill-climb rather than a full Nash solve).</p>
+<p>The targeted set is 25,008 games with 0 errors. Source: <code>docs/_reports/2026-09-27-chomp-v1.md</code> §2.</p>
+<h3 id="23-the-solve">2.3 The solve</h3>
+<p>The scored table <em>A</em> (90 × 90) defines a zero-sum game. CHOMP solves</p>
+<pre><code>x* = argmax_x  min_y  xᵀ A y      subject to  x ≥ 0, Σx = 1
+</code></pre>
+<p>exactly as a linear program with SLOWKING, ABRA's matrix-game solver (<code>solver/slowking/matrix.js</code>, <code>solveLP</code>), and
+samples its pick from x*. The minimax theorem guarantees that this mix has a value no opponent mix can push lower
+[1, 2].</p>
+<h3 id="24-games-2-and-3-of-a-best-of-three">2.4 Games 2 and 3 of a best-of-three</h3>
+<p>After game 1 the opponent's previous four is known. Humans repeat their four at a rate that depends on whether they won
+the previous game; CHOMP reads those rates from ABRA's meta store at run time. It builds an opponent model <em>q</em> that
+puts that repeat probability on the previous four and the rest on the opponent's equilibrium mix, and plays</p>
+<pre><code>mix = (1 − λ) · x* + λ · BR(q),     λ = 0.5 (pre-registered)
+</code></pre>
+<p>The adjustment is small by construction: in the in-table report its gain against <em>q</em> was +0.0064 after an opponent win
+and +0.0030 after a loss (<code>docs/_reports/2026-09-27-chomp-v1.md</code> §4). No best-of-three arena exists, so this is not a
+playing-strength claim.</p>
+<h3 id="25-speed">2.5 Speed</h3>
+<p>On 173 test pairs × 2 chairs, solving the 8,100-cell table took <strong>18 ms on average</strong> (p90 21 ms) once the cells were
+scored, and the equilibrium put weight on <strong>2.0 options on average</strong> (p90 3) (<code>docs/_reports/2026-09-27-chomp-v1.md</code>
+§4). The 18 ms is the solve only; it does not include scoring the cells.</p>
 <hr />
-<h2 id="3-the-algorithm">3. The algorithm</h2>
-<h3 id="31-notation">3.1 Notation</h3>
+<h2 id="3-how-it-was-tested">3. How it was tested</h2>
+<p>Every gate was written into <code>solver/chomp/v1/preregistration.json</code> before the first targeted game was played. All arena
+games used engine release <code>eaa5becc54eb</code>, the frozen Reg M-C team pool <code>data/team-pool-frozen-regmc</code>, honest
+information, and the same in-battle agent (gen5 search at 1 s) on both sides, so only the preview differs
+(<code>docs/_reports/2026-09-29-chomp-v1-landed.md</code> §2).</p>
+<table>
+<thead>
+<tr>
+<th>gate</th>
+<th>question</th>
+<th>result</th>
+<th>source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(a)</td>
+<td>does the scorer predict held-out outcomes better than the same model restricted to the human-modal bring?</td>
+<td>Δlog-loss <strong>−0.0203 [−0.0309, −0.0108]</strong>, n = 3,119 games in 476 clusters: <strong>PASS</strong></td>
+<td><code>solver/chomp/v1/model/chomp1.metrics.json</code></td>
+</tr>
+<tr>
+<td>(b) screen</td>
+<td>does CHOMP beat the most common human bring for its own sheet? 200 games</td>
+<td>125–75, <strong>0.625 [0.556, 0.689]</strong>: <strong>PASS</strong></td>
+<td><code>solver/results/2026-09-27-chomp-v1/screen-vs-hprior.json</code></td>
+</tr>
+<tr>
+<td>(b) SPRT</td>
+<td>the same question, sequential test, elo0 0, elo1 +20, α = β = 0.05</td>
+<td><strong>H1 accepted at 524 games</strong>, 294–230, <strong>0.561 [0.518, 0.603]</strong>, LLR 3.019 against a bound of 2.944</td>
+<td><code>solver/results/2026-09-27-chomp-v1/sprt-chomp1-vs-hprior.json</code></td>
+</tr>
+<tr>
+<td>(c) report-only</td>
+<td>does CHOMP beat the bring the human actually chose for that matchup? 400 games</td>
+<td>188–212, <strong>0.470 [0.422, 0.519]</strong></td>
+<td><code>solver/results/2026-09-27-chomp-v1/gatec-vs-human.json</code></td>
+</tr>
+</tbody>
+</table>
+<p>Intervals are Wilson 95% [5]; gate (a) uses a game-clustered bootstrap. The SPRT [3] interval is read at a
+data-dependent stop and is slightly optimistic.</p>
+<p><strong>Each test was shown able to fail.</strong> Gate (a) with the scorer's labels shuffled reads +0.0156 [+0.0072, +0.0236], a
+FAIL, as it must (<code>docs/_reports/2026-09-27-chomp-v1.md</code> §3). <code>solver/tests/test-chomp1.js</code> passes 32 of 32 clauses
+and goes red on each of its 6 deliberate breaks (<code>docs/_reports/2026-09-29-chomp-v1-landed.md</code> §3).</p>
+<p><strong>The capability ran.</strong> CHOMP made the preview in every arena game: 200 in the screen, 538 in the SPRT (including 14
+played after the stop) and 400 in gate (c), with 0 CHOMP failures (<code>docs/_reports/2026-09-29-chomp-v1-landed.md</code> §2).</p>
+<h3 id="31-what-the-gates-say">3.1 What the gates say</h3>
 <ul>
-<li>A <strong>set</strong> s = (species, item, ability, nature, SP-spread, moves).</li>
-<li><code>build(s)</code> → a battle mon with computed stats using the validated Champions stat formula:</li>
-<li><code>statL50(base, sp, nat) = ⌊(⌊(2·base+31)·50/100⌋ + 5 + sp)·nat⌋</code></li>
-<li><code>hpL50(base, sp) = ⌊(2·base+31)·50/100⌋ + 60 + sp</code></li>
-<li>nature multiplier ∈ {0.9, 1.0, 1.1} applied <strong>after</strong> the SP addition (validated against in-game screenshots).</li>
-</ul>
-<h3 id="32-damage-model-the-core-primitive">3.2 Damage model (the core primitive)</h3>
-<p>For attacker A, defender D, move m, and context ctx, <code>dmg(A,D,m,ctx)</code> returns the max-roll damage as a percentage of D's HP, using the exact Gen-9 pipeline:</p>
-<pre><code>base = ⌊⌊22·bp·Aeff/Deff⌋/50⌋ + 2
-apply spread (×0.75), weather (×1.5 / ×0.5), then per-roll:
-  x = ⌊base·roll/100⌋ ; ×STAB (pokéRound) ; ×typeEff (floor) ; ×item ; ×choice
-</code></pre>
-<p>with <code>pokéRound(x) = ⌈x⌉ if frac(x) &gt; 0.5 else ⌊x⌋</code>. Modifiers layered in:
-- <strong>STAB</strong> ×1.5, or ×2 with Adaptability; Protean grants STAB on any move.
-- <strong>Weather</strong> — Rain: Water ×1.5, Fire ×0.5. Sun: Fire ×1.5, Water ×0.5.
-- <strong>Abilities</strong> — Mega Launcher (+50% pulse/aura), Technician, Multiscale (½ at full HP), Thick Fat, Intimidate (−1 foe Atk).
-- <strong>Items</strong> — Life Orb (×5324/4096), Expert Belt (×1.2 on super-effective), type gems (×1.2), Wise Glasses / Muscle Band (×1.1), Choice Specs (×1.5).</p>
-<p>This primitive is validated exactly against the community damage calculator.</p>
-<h3 id="33-opponent-inference-handling-imperfect-information">3.3 Opponent inference (handling imperfect information)</h3>
-<ul>
-<li><strong>Own side:</strong> exact. CHOMP reads the player's real saved team from the Showdown client's local storage and matches it to the six at preview — so <em>every</em> team the player owns is scored with its true moves/items/EVs.</li>
-<li><strong>Opponent side:</strong> a <strong>usage prior</strong>. Where a common set is known (Pikalytics Reg M-B usage), it is used; otherwise a <em>generic best-response set</em> is synthesized — the highest-base-power STAB move of each of the mon's types, a coverage move, and the offensively-correct nature/EVs. This is a deliberately pessimistic-but-plausible estimate, not a claim of certainty.</li>
-</ul>
-<h3 id="34-pairwise-matchup-score">3.4 Pairwise matchup score</h3>
-<p>For each of my mons <code>me</code> versus each foe <code>foe</code>:</p>
-<pre><code>s = 0
-myKO  = bestDamage(me → foe)        // % of foe HP, max roll
-foeKO = bestDamage(foe → me)
-if myKO ≥ 100:  s += 3     elif ≥ 50: s += 1.2   elif ≥ 33: s += 0.4   else s −= 0.5
-if foeKO ≥ 100: s −= (fasterThanFoe ? 1.0 : 2.2)  elif ≥ 50: s −= 0.6
-if myKO ≥ 100 and fasterThanFoe: s += 1.0        // clean, faster KO
-</code></pre>
-<p>Speed uses modifiers: Choice Scarf ×1.5, Tailwind ×2, weather-speed abilities (Swift Swim/Sand Rush/Chlorophyll ×2), Speed Boost.</p>
-<h3 id="35-team-bring-objective">3.5 Team (bring) objective</h3>
-<p>For a candidate bring B (|B|=4) versus the opponent six F:</p>
-<pre><code>score(B,F) = Σ_{foe∈F} max_{me∈B} pair(me,foe)      // best answer to each threat
-           − liabilities(B,F)
-</code></pre>
-<p>Liabilities encode the mechanics that lose games:
-- <strong>Weather chip.</strong> If the opponent sets sand and my mon is not Rock/Ground/Steel, penalize per exposed mon. <em>Contested</em> if my bring also has a weather setter (halved, because I can flip it) — but sand is treated as sticky (re-sets on switch), so the penalty remains meaningful and correctly favors sand-immune Steels.
-- <strong>Contested weather war.</strong> If both sides can set weather, damage boosts are neutralized for scoring (you can flip it) rather than handing the opponent their weather unconditionally — this fixed a real mis-call (§5).
-- <strong>Speed control.</strong> Penalize a bring with no Tailwind / Prankster / Trick Room presence.</p>
-<p>The best bring is <code>argmax_B score(B,F)</code> over all 15 subsets — an exhaustive search, tractable because the space is tiny.</p>
-<h3 id="36-lead-selection">3.6 Lead selection</h3>
-<p>The lead is <strong>not</strong> the two safest mons (which biases toward passive support). It is the pair maximizing <strong>turn-one pressure</strong>:</p>
-<pre><code>pressure(me) = Σ_{foe∈F} [ myKO(me,foe) ≥ 100 ? (faster ? 2 : 1.2) : (myKO ≥ 50 ? 0.4 : 0) ]
-lead = top-2 of B by pressure
-</code></pre>
-<p>This is a deterministic proxy for the joint team-preview action that LSA-based lead predictors approximate statistically.</p>
-<h3 id="37-offline-team-optimization-self-iteration">3.7 Offline team optimization (self-iteration)</h3>
-<p>Beyond reacting, CHOMP can <strong>improve a team</strong>. Given a starting six and a candidate set-library, it hill-climbs:</p>
-<pre><code>repeat until no improvement:
-  for each roster slot i, for each candidate c not on the team:
-     if gauntletScore(team with slot i → c) &gt; current + ε:  accept swap
-</code></pre>
-<p>where <code>gauntletScore</code> is the mean bring-score against a fixed gauntlet of representative meta archetypes (Sun, Rain, Sand, Trick Room, Fairy, Goodstuff, Snow, Fast Offense, …). This is a lightweight, greedy analogue of double-oracle best-response.</p>
-<hr />
-<h2 id="4-complexity-and-runtime">4. Complexity and runtime</h2>
-<ul>
-<li>Damage matrix: 4 × 6 × (moves) evaluations, each O(1). </li>
-<li>Bring search: 15 subsets × matrix ≈ a few thousand O(1) ops.</li>
-<li>Total: <strong>sub-millisecond to low-millisecond</strong>, entirely client-side, no network, no training.</li>
+<li><strong>CHOMP beats an opponent-blind bring.</strong> The human-modal bring is the most common four and lead for that sheet,
+  whoever the opponent is. CHOMP beats it.</li>
+<li><strong>CHOMP does not clearly beat a human who has seen the opponent.</strong> Gate (c)'s point estimate is below 1/2 and its
+  interval contains 1/2. It was pre-registered as report-only, so it did not block promotion, but it is the ceiling.</li>
+<li><strong>The human set carries little bring signal for this scorer.</strong> On human test games the scorer did not beat the
+  baseline: Δlog-loss +0.0022 [−0.0101, +0.0147], n = 188 (<code>docs/_reports/2026-09-27-chomp-v1.md</code> §3). The gain is on
+  simulated play.</li>
 </ul>
 <hr />
-<h2 id="5-iteration-log-empirical-tuning">5. Iteration log (empirical tuning)</h2>
-<p>CHOMP was refined against real ranked games, not in a vacuum:</p>
+<h2 id="4-versions-that-did-not-ship">4. Versions that did not ship</h2>
+<table>
+<thead>
+<tr>
+<th>version</th>
+<th>change</th>
+<th>result</th>
+<th>source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v0</td>
+<td>cells scored by PORYGON2 v0 on the turn-1 position, solved by SLOWKING</td>
+<td>against the humans' own bring <strong>0.430 (0.363–0.499)</strong>, SPRT accepted <strong>H0</strong>; kept only as a baseline</td>
+<td><code>docs/_reports/2026-09-25-chomp-v0.md</code> §0</td>
+</tr>
+<tr>
+<td>v2</td>
+<td>v1 plus per-set stat spreads and an 18-feature field block (weather, terrain, the speed-inverting room, the side speed doubler)</td>
+<td>gate (a) against v1: Δlog-loss <strong>−0.0004 [−0.0032, +0.0024]</strong>, n = 3,119: <strong>FAIL</strong>; not promoted</td>
+<td><code>CHANGELOG-REGMC.md</code> 1.45.0; <code>docs/_reports/2026-09-30-chomp-v2.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>v1 against v0 was never played head to head (<code>docs/_reports/2026-09-29-chomp-v1-landed.md</code> §4).</p>
+<hr />
+<h2 id="5-where-it-runs">5. Where it runs</h2>
+<ul>
+<li><strong>Code:</strong> <code>solver/chomp/</code> in ABRA, with the v1 model at <code>solver/chomp/v1/model/chomp1.json</code>.</li>
+<li><strong>Live:</strong> ROTOM, ABRA's Showdown client, asks CHOMP for the preview when its arms file says <code>"preview": "chomp"</code>. The
+  ladder arm <code>solver/rotom/arms/gen5-chomp-top.json</code> plays CHOMP v1 at preview with gen5 search in battle, on a
+  rotation of top-rated meta teams. If CHOMP throws or returns an illegal answer, the preview falls back to the team's
+  own recorded bring and the fallback is counted (<code>chomp:threw</code>, <code>chomp:illegal</code>).</li>
+<li><strong>Proof that the choice is sent:</strong> <code>solver/tests/test-rotom-chomp-live.js</code> plays the real client against a scripted
+  local server; CHOMP's choice is sent to the battle room and is legal (13 of 13; <code>CHANGELOG-REGMC.md</code> 1.30.0).</li>
+</ul>
+<h3 id="51-the-ladder-so-far">5.1 The ladder, so far</h3>
+<p>Three early runs of the pipeline with CHOMP at preview, rated series only, counting only the opponent forfeits that
+were earned (<code>docs/_reports/2026-10-01-earned-forfeits.md</code>):</p>
+<table>
+<thead>
+<tr>
+<th>run</th>
+<th>series W–L</th>
+<th>mean residual S − E ± SD per series</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chomp1</td>
+<td>9–10</td>
+<td>−0.015 ± 0.486</td>
+<td>19</td>
+</tr>
+<tr>
+<td>chomptop</td>
+<td>7–8</td>
+<td>−0.014 ± 0.474</td>
+<td>15</td>
+</tr>
+<tr>
+<td>chomptopfix</td>
+<td>12–8</td>
+<td>+0.101 ± 0.477</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<p><strong>These do not measure CHOMP.</strong> They measure the whole agent (preview and in-battle search) and every run is under the
+100-series bar that ABRA sets for a ladder headline (<code>solver/PLAN.md</code> §3, N0). With an SD near 0.48 per series, 20
+series cannot separate a residual of +0.1 from 0. No ladder rating is published here, and none will be until that bar
+is met. ABRA's rule is a settled rating over the last N ≥ 100 series, never the peak.</p>
+<hr />
+<h2 id="6-limitations">6. Limitations</h2>
+<ul>
+<li><strong>No clear edge over human bring choice</strong> (gate (c), §3).</li>
+<li><strong>The scorer learned from simulated play on MEDICHAM.</strong> Where MEDICHAM and the real game differ, so can CHOMP.</li>
+<li><strong>Stat spreads are not modelled in v1.</strong> v1 scores with a flat spread; the v2 attempt to add them did not help (§4).</li>
+<li><strong>No best-of-three arena.</strong> The game-2 and game-3 adjustment is tested only inside its own table.</li>
+<li><strong>Not tested:</strong> v1 against v0, and CHOMP alone on the ladder (an A/B with and without CHOMP).</li>
+</ul>
+<hr />
+<h2 id="7-related-work">7. Related work</h2>
+<table>
+<thead>
+<tr>
+<th>system</th>
+<th>approach</th>
+<th>scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PokéChamp [6]</td>
+<td>minimax with an LLM proposing and pruning moves</td>
+<td>full battle</td>
+</tr>
+<tr>
+<td>Foul Play [7]</td>
+<td>root-parallel MCTS over a custom engine</td>
+<td>full battle</td>
+</tr>
+<tr>
+<td>VGC-Bench [8]</td>
+<td>self-play, fictitious play and double oracle over PPO agents</td>
+<td>full battle and team design</td>
+</tr>
+<tr>
+<td>Metamon [9]</td>
+<td>offline RL with transformers on human replays</td>
+<td>full battle</td>
+</tr>
+<tr>
+<td>LSA lead prediction [10]</td>
+<td>latent semantic analysis over 5,000 logs</td>
+<td>lead pairs</td>
+</tr>
+<tr>
+<td><strong>CHOMP v1 (this work)</strong></td>
+<td>learned cell scorer + exact LP equilibrium over 90 × 90 options</td>
+<td>team preview, open sheets</td>
+</tr>
+</tbody>
+</table>
+<p>VGC-Bench also treats preview as a game to be solved approximately. CHOMP's difference is scope: open sheets make the
+preview a small, fully specified matrix game, so it can be solved exactly every time.</p>
+<hr />
+<h2 id="8-reproduce">8. Reproduce</h2>
+<p>Commands are in <code>docs/_reports/2026-09-27-chomp-v1.md</code> §6 and <code>docs/_reports/2026-09-29-chomp-v1-landed.md</code> (OWED, NOT
+RUN). How to install and run is in <code>docs/CHOMP-technical-docs.md</code>.</p>
+<hr />
+<h2 id="9-retired-the-chomp-browser-userscript-reg-m-b-versions-10-to-251">9. Retired: the CHOMP browser userscript (Reg M-B), versions 1.0 to 2.5.1</h2>
+<p>Until 2.5.1 this repository's CHOMP was a Tampermonkey userscript for <strong>Reg M-B</strong> on Pokémon Showdown. It scored brings
+by a hand-weighted, single-ply damage calculation (pairwise KO points, a weather penalty, exhaustive search over the 15
+brings, leads by turn-one KO pressure) and returned one deterministic answer. Its opponent sets were inferred from
+usage priors, and its species data came from stale mainline tables.</p>
+<p>Its one validation, <strong>Reg M-B</strong>, 50 of the author's own ranked games: the author's win rate was 57% when his bring
+matched CHOMP's and 46% when it did not, <strong>not statistically significant</strong> at that sample (<code>docs/VALIDATION-REPORT.md</code>).
+ABRA judged its bring choices to test at coin level and rebuilt CHOMP from scratch (<code>solver/PLAN.md</code> §2.1).</p>
+<p><strong>Withdrawn in 3.0.0.</strong> The old deck showed three figures that did not measure the tool: ~~1323 "highest ranking
+reached"~~ (the peak Reg M-B ladder rating of the author's account, not a ranking and not a CHOMP measurement), ~~154% "damage it calculates
+exactly"~~ (one example damage readout) and ~~0.05 s "to answer"~~ (a design goal; this repository holds no recorded timing). They are
+withdrawn, not restated.</p>
+<p>The userscript code stays in <code>app/</code> and <code>engine/</code> as history. It is not maintained and targets a retired regulation.</p>
+<hr />
+<h2 id="references">References</h2>
 <ol>
-<li><strong>v0 — type/flag heuristic.</strong> Scored matchups by type effectiveness, speed tiers, and ~two-dozen ability flags. Fast but blind to real damage, items, and weather chip.</li>
-<li><strong>v1 — damage-calculus core.</strong> Replaced heuristics with the exact damage primitive (§3.2). Recommendations became KO-grounded.</li>
-<li><strong>Weather chip + immunity.</strong> Added after two losses to Tyranitar sand teams in which the frail rain core was chipped to death while two sand-immune Steel mons sat on the bench. CHOMP now flags the chip and recommends the Steels.</li>
-<li><strong>Contested weather war.</strong> Backtesting exposed a mis-call: CHOMP handed the opponent's Charizard-Y sun unconditionally and <em>benched the player's Blastoise</em> (Water halved in sun) — yet that was a game the player <strong>won</strong> by flipping sun→rain with his own Drizzle. Fix: when both sides can set weather, treat boosts as neutral (contestable). Re-validated: CHOMP now correctly keeps the rain setter and values the water attacker.</li>
-<li><strong>Sand-chip calibration.</strong> The contested rule initially over-corrected, letting CHOMP "just contest" Tyranitar sand and re-bench the Steels. Because Sand Stream re-applies on every switch, the sand penalty was re-tuned (0.6 contested / 0.75 uncontested per exposed mon) so the model still prefers Steels against sand — matching the lesson from the actual losses.</li>
-<li><strong>KO-pressure leads.</strong> Replaced risk-averse "safe average" lead selection (which over-picked double-support leads) with turn-one KO pressure.</li>
-</ol>
-<hr />
-<h2 id="6-evaluation">6. Evaluation</h2>
-<p>Backtested on recent ranked ladder games (peak 1323):
-- <strong>Wins reproduced.</strong> On a Charizard-Y sun game, CHOMP's contested-weather logic keeps Pelipper (to flip rain) and values the water core — the line that won.
-- <strong>Losses diagnosed.</strong> On both Tyranitar sand losses, CHOMP recommends the sand-immune Steels (Archaludon + Kingambit) and explicitly flags the frail mons as chipped — the exact correction the player needed.
-- <strong>Interpretability.</strong> Each recommendation ships with concrete numbers (e.g., "Blastoise → Tyranitar 154%", "2 mons chipped by their sand").</p>
-<hr />
-<h2 id="7-limitations-honest">7. Limitations (honest)</h2>
-<ul>
-<li><strong>Single-ply.</strong> CHOMP evaluates the preview matchup, not multi-turn lines. It is not a battle policy; MCTS/RL systems remain superior <em>in-battle</em>.</li>
-<li><strong>Deterministic (exploitable).</strong> A true solution is a mixed strategy; CHOMP's argmax can in principle be exploited by an opponent who knows it. It is a strong human-decision aid, not a Nash agent.</li>
-<li><strong>Opponent inference is a prior.</strong> Hidden sets are estimated, not known; surprise sets (unusual items/abilities) can beat the estimate.</li>
-<li><strong>Ability/item coverage is partial.</strong> High-impact mechanics are modeled; the long tail of ~300 abilities is not yet complete.</li>
-</ul>
-<hr />
-<h2 id="8-future-work">8. Future work</h2>
-<ol>
-<li><strong>Two-ply lead lookahead</strong> (protect/switch/double-target) toward an MCTS-lite.</li>
-<li><strong>Usage-weighted opponent belief</strong> (full Pikalytics set distributions, not just the modal set).</li>
-<li><strong>Mixed-strategy leads</strong> (regret-matching over the top-k brings) to reduce exploitability.</li>
-<li><strong>Synergy-aware team optimizer</strong> (score cores, not just individual matchups) so self-iteration refines a team's identity instead of drifting to generic goodstuff.</li>
-<li><strong>Broaden ability/field coverage</strong> (terrains, hazards, Last Respects scaling, status turns).</li>
-</ol>
-<hr />
-<h2 id="9-references">9. References</h2>
-<ol>
+<li>J. von Neumann. <em>Zur Theorie der Gesellschaftsspiele.</em> Mathematische Annalen 100, 1928.</li>
+<li>G. B. Dantzig. <em>A proof of the equivalence of the programming problem and the game problem.</em> In <em>Activity Analysis
+   of Production and Allocation</em>, Cowles Commission Monograph 13, 1951.</li>
+<li>A. Wald. <em>Sequential tests of statistical hypotheses.</em> Annals of Mathematical Statistics 16(2), 1945.</li>
+<li>B. Efron, R. Tibshirani. <em>An Introduction to the Bootstrap.</em> Chapman &amp; Hall, 1993.</li>
+<li>E. B. Wilson. <em>Probable inference, the law of succession, and statistical inference.</em> JASA 22(158), 1927.</li>
 <li>S. Karten et al. <em>PokéChamp: an Expert-level Minimax Language Agent.</em> arXiv:2503.04094, 2025.</li>
-<li>C. Aristidou et al. <em>VGC-Bench: Towards Mastering Diverse Team Strategies in Competitive Pokémon.</em> arXiv:2506.10326, 2025.</li>
-<li><em>Human-Level Competitive Pokémon via Scalable Offline Reinforcement Learning with Transformers</em> (Metamon). arXiv:2504.04395, 2025.</li>
 <li>pmariglia. <em>Foul Play: A Competitive Pokémon Showdown Battle Bot.</em> pmariglia.github.io.</li>
+<li>C. Aristidou et al. <em>VGC-Bench: Towards Mastering Diverse Team Strategies in Competitive Pokémon.</em>
+   arXiv:2506.10326, 2025.</li>
+<li><em>Human-Level Competitive Pokémon via Scalable Offline Reinforcement Learning with Transformers</em> (Metamon).
+   arXiv:2504.04395, 2025.</li>
 <li><em>Predicting competitive Pokémon VGC leads using Latent Semantic Analysis.</em> Journal of Geek Studies, 2025.</li>
-<li>R. Dilworth. <em>Competitive Conquest: Charting the Climb to Pokémon Supremacy.</em> Mississippi State University.</li>
-<li><em>Nash equilibrium estimation in competitive Pokémon.</em> Radboud University thesis.</li>
-<li><em>Implementing Monte Carlo Tree Search in a Pokémon battle based environment.</em> Tilburg University.</li>
-</ol></main></body></html>
+</ol>
+<p>ABRA artifacts are cited by path in the ABRA repository, <a href="https://github.com/willhoop/abra">https://github.com/willhoop/abra</a>, at commit <code>06f8a881</code>.</p></main></body></html>
