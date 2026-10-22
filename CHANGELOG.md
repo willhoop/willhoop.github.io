@@ -10,6 +10,27 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.11.0] — 2026-10-22
+
+### Changed
+- **Web fonts 160 → 88 KB.** Newsreader is requested without its optical-size axis, which the page never sets.
+  *Why:* the axis nearly doubled the font download (163 against 90 KB for the Latin files, measured on the
+  Google Fonts files). Headings look the same; the intro wraps one word earlier at desktop width.
+- **Posters load as they near the screen**, except the first two cards'. *Why:* every poster (141 KB) loaded at
+  once, on a phone that shows one card.
+
+### Fixed
+- **1.10.0's font saving was not real.** Its entry says the unused italic is "no longer requested" as a page-weight
+  fix. Measured on the live site after 1.10.0, fonts were still 160 KB: browsers never download a face the page
+  does not use, so removing it saved nothing. The 1.10.0 white paper row that called it a fix is corrected.
+
+### Record
+- **Measured.** Fonts 160 → 88 KB; whole page with every clip, 556 → 514 KB, at 375 px with an empty cache
+  (Chrome DevTools encoded bytes; white paper section 6.3).
+- **Basis.** unchanged
+- **Supersedes.** ~~Italic dropped (as a page-weight fix)~~ retracted: it saved nothing. Fonts ~~160 KB~~ → 88 KB.
+- **Owed to the next major.** Nothing. The white paper and technical documentation are updated in this pass.
+
 ## [1.10.0] — 2026-10-22
 
 ### Added

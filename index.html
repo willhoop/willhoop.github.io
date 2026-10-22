@@ -274,7 +274,7 @@
 <!-- AGENT:JSONLD:END -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#f2efe8; --panel:#f8f6f0;
@@ -461,7 +461,7 @@
   </article>
   <article class="row">
     <div class="idx">03</div>
-    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" poster="assets/previews/event-desks.jpg" aria-label="The Event Desks site listing priced prediction markets"><source src="assets/previews/event-desks.webm" type="video/webm"><source src="assets/previews/event-desks.mp4" type="video/mp4"></video></figure>
+    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" data-poster="assets/previews/event-desks.jpg" aria-label="The Event Desks site listing priced prediction markets"><source src="assets/previews/event-desks.webm" type="video/webm"><source src="assets/previews/event-desks.mp4" type="video/mp4"></video></figure>
     <div>
       <div class="head">
         <h3 class="name"><a href="https://elitefourcapital.com" target="_blank" rel="noopener">Event Desks</a></h3>
@@ -473,7 +473,7 @@
   </article>
   <article class="row">
     <div class="idx">04</div>
-    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" poster="assets/previews/hoopadex.jpg" aria-label="HoopaDex narrowing the Pokédex to Dark types with Prankster that learn Rain Dance"><source src="assets/previews/hoopadex.webm" type="video/webm"><source src="assets/previews/hoopadex.mp4" type="video/mp4"></video></figure>
+    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" data-poster="assets/previews/hoopadex.jpg" aria-label="HoopaDex narrowing the Pokédex to Dark types with Prankster that learn Rain Dance"><source src="assets/previews/hoopadex.webm" type="video/webm"><source src="assets/previews/hoopadex.mp4" type="video/mp4"></video></figure>
     <div>
       <div class="head">
         <h3 class="name"><a href="https://willhoop.github.io/hoopadex/app/" target="_blank" rel="noopener">HoopaDex</a></h3>
@@ -485,7 +485,7 @@
   </article>
   <article class="row">
     <div class="idx">05</div>
-    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" poster="assets/previews/guardian-chess.jpg" aria-label="A Guardian Chess game on the wide board, pieces moving"><source src="assets/previews/guardian-chess.webm" type="video/webm"><source src="assets/previews/guardian-chess.mp4" type="video/mp4"></video></figure>
+    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" data-poster="assets/previews/guardian-chess.jpg" aria-label="A Guardian Chess game on the wide board, pieces moving"><source src="assets/previews/guardian-chess.webm" type="video/webm"><source src="assets/previews/guardian-chess.mp4" type="video/mp4"></video></figure>
     <div>
       <div class="head">
         <h3 class="name"><a href="https://guardian-chess.onrender.com" target="_blank" rel="noopener">Guardian Chess</a></h3>
@@ -497,7 +497,7 @@
   </article>
   <article class="row">
     <div class="idx">06</div>
-    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" poster="assets/previews/jeopardy-wagering.jpg" aria-label="The Jeopardy trainer computing a Final Jeopardy wager"><source src="assets/previews/jeopardy-wagering.webm" type="video/webm"><source src="assets/previews/jeopardy-wagering.mp4" type="video/mp4"></video></figure>
+    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" data-poster="assets/previews/jeopardy-wagering.jpg" aria-label="The Jeopardy trainer computing a Final Jeopardy wager"><source src="assets/previews/jeopardy-wagering.webm" type="video/webm"><source src="assets/previews/jeopardy-wagering.mp4" type="video/mp4"></video></figure>
     <div>
       <div class="head">
         <h3 class="name"><a href="https://willhoop.github.io/jeopardy-wagering/app/" target="_blank" rel="noopener">Jeopardy Wagering</a></h3>
@@ -509,7 +509,7 @@
   </article>
   <article class="row">
     <div class="idx">07</div>
-    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" poster="assets/previews/fourth-down.jpg" aria-label="The Fourth Down Engine ranking go for it, kick and punt"><source src="assets/previews/fourth-down.webm" type="video/webm"><source src="assets/previews/fourth-down.mp4" type="video/mp4"></video></figure>
+    <figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" data-poster="assets/previews/fourth-down.jpg" aria-label="The Fourth Down Engine ranking go for it, kick and punt"><source src="assets/previews/fourth-down.webm" type="video/webm"><source src="assets/previews/fourth-down.mp4" type="video/mp4"></video></figure>
     <div>
       <div class="head">
         <h3 class="name"><a href="https://willhoop.github.io/fourth-down/" target="_blank" rel="noopener">Fourth Down Engine</a></h3>
@@ -684,12 +684,15 @@ const PROJECTS = [
 const UPDATED = "2026-10-22";
 
 const PV = "assets/previews/";
-const preview = (p) => `<figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" poster="${PV + p.preview.slug}.jpg" aria-label="${p.preview.alt}"><source src="${PV + p.preview.slug}.webm" type="video/webm"><source src="${PV + p.preview.slug}.mp4" type="video/mp4"></video></figure>`;
+/* The first EAGER cards load their poster at once; the rest set it as they near the screen,
+   so a phone does not fetch seven posters to show one card. */
+const EAGER = 2;
+const preview = (p, i) => `<figure class="pv"><video muted loop playsinline preload="none" disablepictureinpicture width="528" height="330" ${i < EAGER ? '' : 'data-'}poster="${PV + p.preview.slug}.jpg" aria-label="${p.preview.alt}"><source src="${PV + p.preview.slug}.webm" type="video/webm"><source src="${PV + p.preview.slug}.mp4" type="video/mp4"></video></figure>`;
 
 const renderRows = (list) => list.map((p, i) => `
   <article class="row">
     <div class="idx">${String(i + 1).padStart(2, '0')}</div>
-    ${preview(p)}
+    ${preview(p, i)}
     <div>
       <div class="head">
         <h3 class="name"><a href="${p.docs.open}" target="_blank" rel="noopener">${p.name}</a></h3>
@@ -720,6 +723,10 @@ if (typeof IntersectionObserver === 'function') {
     else v.pause();
   }), { threshold: 0.4 });
   document.querySelectorAll('.pv video').forEach(v => io.observe(v));
+  const near = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting && e.target.dataset.poster) { e.target.poster = e.target.dataset.poster; near.unobserve(e.target); }
+  }), { rootMargin: '600px 0px' });
+  document.querySelectorAll('.pv video[data-poster]').forEach(v => near.observe(v));
 }
 </script>
 </body>

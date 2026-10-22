@@ -1,6 +1,6 @@
 # Deployment — Portfolio
 
-**Version 1.10 · Last updated 2026-10-22**
+**Version 1.11 · Last updated 2026-10-22**
 Written in ASD-STE100 Simplified Technical English.
 
 ## 1. What this site is

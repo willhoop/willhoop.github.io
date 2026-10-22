@@ -117,7 +117,7 @@ const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e =>
 const broken = [];
 for (const f of walk(ROOT).filter(f => f.endsWith('.html'))) {
   const html = fs.readFileSync(f, 'utf8').replace(/<script[\s\S]*?<\/script>/g, '');
-  for (const m of html.matchAll(/(?:href|src|poster)="([^"#?]+)/g)) {
+  for (const m of html.matchAll(/(?:href|src|poster|data-poster)="([^"#?]+)/g)) {
     const u = m[1];
     if (/^(?:[a-z]+:|\/\/)/i.test(u)) continue;
     if (!fs.existsSync(path.resolve(path.dirname(f), decodeURIComponent(u))))
@@ -170,10 +170,14 @@ chk(clipBytes <= 2.5 * 1024 * 1024, `all clips together are 2.5 MB or less (${(c
 chk((H.html.match(/<video muted loop playsinline preload="none"/g) || []).length === H.PROJECTS.length,
     'every preview is muted, loops, plays inline and loads nothing until on screen');
 chk(/prefers-reduced-motion: reduce/.test(src) && /!still/.test(src), 'previews do not play for reduced-motion visitors');
+// Page weight: all seven posters (141 KB) loaded on a phone that shows one card.
+const eager = (H.html.match(/ poster="/g) || []).length, lazy = (H.html.match(/ data-poster="/g) || []).length;
+chk(eager === 2 && eager + lazy === H.PROJECTS.length, `two posters load at once, the rest as they near the screen (${eager} eager, ${lazy} lazy)`);
+chk(!/opsz/.test(src), 'the font request carries no optical-size axis (it doubled the font download)');
 chk(fs.existsSync(path.join(ROOT, 'build', 'record_previews.js')) && fs.existsSync(path.join(ROOT, 'build', 'preview_scenes.js')),
     'previews are recorded by build/record_previews.js from scripted scenes');
 
-// Page weight: web fonts were 160 of about 170 KB. No italic is drawn, so none is fetched.
+// No italic is drawn, so none is requested. (This alone saved nothing: browsers skip unused faces.)
 chk(!/ital/.test((src.match(/fonts\.googleapis\.com\/css2\?([^"]+)"/) || [])[1] || 'ital') && !/italic|font-style/.test(src.replace(/<script[\s\S]*?<\/script>/g, '')),
     'no italic font is requested, and none is used');
 

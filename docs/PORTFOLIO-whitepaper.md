@@ -2,7 +2,7 @@
 
 ### Design and verification of the project index
 
-**Version 1.10 · Last updated 2026-10-22**
+**Version 1.11 · Last updated 2026-10-22**
 **Will Hooper**
 
 > Living document. Updated in the same pass as any change to the site.
@@ -142,7 +142,19 @@ Sizes in KB (1 KB = 1,024 bytes), read from `assets/previews/manifest.json`. Eac
 | hoopadex | 1× | 30 | 28 | 6 | 2026-10-22 |
 | **All seven** | | **242** | **233** | **140** | |
 
-A browser downloads one of the two video formats, not both. A visitor who scrolls past every card therefore adds about 381 KB (WebM and posters) to the page; one who never scrolls adds only the posters of the cards on screen. The test limits are 400 KB per clip and 2.5 MB for all seven together. The page itself, before this release, measured 175 KB at 375 px with an empty cache, 160 KB of it web fonts (section 8). <!--AFTER-->
+A browser downloads one of the two video formats, not both. A visitor who scrolls past every card therefore adds about 381 KB (WebM and posters) to the page; one who never scrolls adds only the posters of the cards on screen. The test limits are 400 KB per clip and 2.5 MB for all seven together. Measured in Chrome with an empty cache at 375 px, as encoded bytes (DevTools network events):
+
+| Version | First view | Every card scrolled into view | Of which fonts |
+|---|---|---|---|
+| 1.9.9, before previews | 175 KB | 169 KB | 160 KB |
+| 1.10.0 | 151 KB (fonts not yet loaded) | 556 KB | 160 KB |
+| 1.11.0 | 263 KB | 514 KB | 88 KB |
+
+The 1.11.0 row was measured on a local static server, whose HTML is not compressed (40 KB
+against 9 KB from GitHub Pages), so the live figures are about 31 KB lower. "First view" counts
+what loads before the network is idle, so it includes the clips that start playing on screen and
+varies with timing; the scrolled figure is the stable one. The previews add about 345 KB to a
+visit that scrolls past every card.
 
 ## 7. Verification
 
@@ -189,7 +201,7 @@ first column says otherwise, and each fix has a test.
 | A repeated changelog version | Two releases published as 1.9.7 | Kept as published; a test refuses any other repeat |
 | Phone layout at 375 px | No element wider than the viewport | No change needed |
 | Keyboard | Tab order follows reading order; every link shows a focus ring | Document links gained an explicit focus ring |
-| Page weight | 175 KB at 375 px with an empty cache; web fonts 160 KB of it, including an italic the page never draws | Italic dropped; section 6.3 |
+| Page weight | 175 KB at 375 px with an empty cache; web fonts 160 KB of it | Fonts 88 KB without the optical-size axis (1.11.0). Removing the unused italic (1.10.0) saved nothing: browsers skip unused faces. Section 6.3 |
 | Not fixed: Event Desks | Its white paper is stamped 1.6.0 against its changelog 1.8.0 | Outside this repository; the checker still fails on it |
 | Not fixed: four `apps/` demos | Served, working, linked from nowhere | Left as they are |
 

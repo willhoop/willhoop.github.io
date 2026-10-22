@@ -1,6 +1,6 @@
 # The portfolio — the deck
 
-**Version 1.10 · Last updated 2026-10-22**
+**Version 1.11 · Last updated 2026-10-22**
 
 > Plain words. The detail is in the [white paper](PORTFOLIO-whitepaper.md).
 

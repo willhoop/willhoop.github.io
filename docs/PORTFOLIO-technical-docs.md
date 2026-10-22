@@ -1,6 +1,6 @@
 # Portfolio — Technical Documentation
 
-**Version 1.10 · Last updated 2026-10-22**
+**Version 1.11 · Last updated 2026-10-22**
 
 *Written in ASD-STE100 Simplified Technical English. Sentences are short. The voice is
 active. Organised by the Diátaxis model. For results and figures, see the
@@ -194,6 +194,7 @@ of each page parse, and every `tests/test-*.js` file passes. Nothing calls it at
 | Files | VP9 `.webm` first, H.264 `.mp4` for Safari, `.jpg` poster |
 | Sound | None. The files have no audio track. |
 | Playback | Muted, inline, looped. It loads nothing until the card is on the screen. It does not play when the visitor asks for reduced motion. |
+| Poster | The first two cards (`EAGER` in `index.html`) load it at once. The others load it 600 px before they reach the screen. |
 
 The size and time limits are in `CLIP` at the top of `build/record_previews.js`. The test limits
 are in `tests/test-projects.js`.
