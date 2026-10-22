@@ -1,0 +1,15 @@
+{
+ "what": "One CHOMP v1 solve, drawn by build/scenes/chomp.html for the CHOMP card preview.",
+ "command": "ABRA_REGULATION=regmc node -e (the Part 1.2 command of CHOMP-technical-docs.md), teams '0' vs '1' of solver/rotom/teams/regmc-pool.json",
+ "abra_commit": "b8de8517",
+ "release": "eaa5becc54eb",
+ "solved": "2026-10-22",
+ "mine": ["Froslass","Basculegion","Kingambit","Sneasler","Lycanroc-Dusk","Rillaboom"],
+ "theirs": ["Indeedee-F","Gardevoir","Sneasler","Basculegion","Pelipper","Archaludon"],
+ "value": 0.48348104309782924,
+ "support": [
+  {"p":0.5191743269485568,"label":"Froslass + Sneasler / Kingambit + Lycanroc-Dusk"},
+  {"p":0.383298285737927,"label":"Froslass + Kingambit / Basculegion + Sneasler"},
+  {"p":0.09752738731351622,"label":"Froslass + Kingambit / Sneasler + Lycanroc-Dusk"}
+ ]
+}

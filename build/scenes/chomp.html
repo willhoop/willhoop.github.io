@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- The CHOMP card preview. CHOMP has no page of its own: it runs inside ABRA at team
+     preview. This page only DRAWS one real solve, data/chomp-preview-solve.json, which
+     build/preview_scenes.js passes to draw(). It authors no number. -->
+<html lang="en"><head><meta charset="utf-8"><title>CHOMP preview</title>
+<style>
+  :root{--bg:#f2efe8;--ink:#211e18;--ink2:#433d33;--mute:#5e584d;--rule:#ddd6c8;--accent:#9c3d2b;--live:#40734f}
+  *{box-sizing:border-box}
+  body{margin:0;width:1280px;height:800px;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,"Segoe UI",system-ui,sans-serif;padding:56px 80px;overflow:hidden}
+  .eyebrow{font:500 15px/1 Consolas,monospace;letter-spacing:.3em;text-transform:uppercase;color:var(--accent)}
+  h1{margin:14px 0 30px;font:500 52px/1.05 Georgia,serif;letter-spacing:-.01em}
+  .sides{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+  .side h2{margin:0 0 10px;font:500 14px/1 Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+  .mons{display:flex;gap:6px}
+  .mons img{width:80px;height:80px;image-rendering:pixelated;background:#f8f6f0;border:1px solid var(--rule)}
+  .mix{margin-top:42px}
+  .mix h2{margin:0 0 16px;font:500 14px/1 Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+  .opt{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center;margin:0 0 16px}
+  .pct{font:500 44px/1 Georgia,serif;text-align:right}
+  .bar{height:58px;background:#e8e3d8;position:relative}
+  .fill{position:absolute;inset:0 auto 0 0;width:0;background:#cdc4b2;transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+  .opt:first-child .fill{background:#e3b9ab}
+  .lab{position:absolute;left:18px;top:50%;transform:translateY(-50%);font:500 21px/1 Georgia,serif;color:var(--ink);
+       white-space:nowrap;opacity:0;transition:opacity .4s .5s}
+  .lab span{color:var(--ink2)}
+  .foot{margin-top:24px;font:15px/1.4 Consolas,monospace;color:var(--mute);opacity:0;transition:opacity .4s 1.2s}
+  .go .lab,.go .foot{opacity:1}
+</style></head><body>
+<div class="eyebrow">CHOMP · team preview</div>
+<h1>Which four to bring, which two to lead</h1>
+<div class="sides">
+  <div class="side"><h2>Your sheet</h2><div class="mons" id="mine"></div></div>
+  <div class="side"><h2>Their sheet</h2><div class="mons" id="theirs"></div></div>
+</div>
+<div class="mix"><h2>The mixed strategy, out of 90 options</h2><div id="opts"></div></div>
+<div class="foot" id="foot"></div>
+<script>
+const sprite = n => 'https://play.pokemonshowdown.com/sprites/gen5/' + n.toLowerCase().replace(/[^a-z0-9-]/g, '') + '.png';
+function draw(d) {
+  for (const side of ['mine', 'theirs'])
+    document.getElementById(side).innerHTML = d[side].map(n => `<img src="${sprite(n)}" alt="${n}">`).join('');
+  document.getElementById('opts').innerHTML = d.support.map(s => {
+    const [lead, back] = s.label.split(' / ');
+    return `<div class="opt"><div class="pct">${Math.round(s.p * 100)}%</div><div class="bar">
+      <div class="fill" data-w="${(s.p * 100).toFixed(1)}"></div>
+      <div class="lab">Lead ${lead} <span>· back ${back}</span></div></div></div>`;
+  }).join('');
+  document.getElementById('foot').textContent =
+    `Game value for you: ${(d.value * 100).toFixed(1)}% to win · solved exactly, CHOMP v1 in ABRA`;
+}
+function play() {
+  document.body.classList.add('go');
+  // the longest bar fills the track; the rest keep their proportion to it
+  const fills = [...document.querySelectorAll('.fill')], max = Math.max(...fills.map(f => +f.dataset.w));
+  fills.forEach(f => f.style.width = (100 * f.dataset.w / max) + '%');
+}
+</script></body></html>

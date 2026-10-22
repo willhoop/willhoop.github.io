@@ -20,7 +20,7 @@ function load(html) {
   const block = html.match(/<script>([\s\S]*?)<\/script>/)[1];
   const store = {};
   const document = { getElementById: id => (store[id] = store[id] || {}) };
-  return vm.runInNewContext(block + ';({PROJECTS,SLOTS,LABEL,renderRows})', { document });
+  return vm.runInNewContext(block + ';({PROJECTS,SLOTS,LABEL,renderRows,UPDATED})', { document });
 }
 
 const abs = u => /^https?:/.test(u) ? u : SITE + u;
@@ -38,7 +38,8 @@ function jsonld(P, S, L) {
         itemListElement: P.map((p, i) => {
           const item = { '@type': 'SoftwareApplication', name: p.name, description: p.desc,
             url: abs(p.docs.open), keywords: p.keywords.join(', '),
-            creator: { '@id': SITE + '#will' } };
+            softwareVersion: p.version, creator: { '@id': SITE + '#will' } };
+          if (p.preview) item.screenshot = SITE + 'assets/previews/' + p.preview.slug + '.jpg';
           if (p.docs.source) item.codeRepository = p.docs.source;
           const rel = slotsOf(p, S).filter(k => k !== 'open' && k !== 'source');
           if (rel.length) item.subjectOf = rel.map(k =>
@@ -58,7 +59,7 @@ function llms(P, S, L) {
     '(results, math, sources), a plain-English deck and technical documentation.', '',
     `Site: ${SITE}`, 'Contact: willjhooper@msn.com', '', '## Projects', ''];
   P.forEach(p => {
-    out.push(`### ${p.name}`, '', p.desc, '', `Status: ${p.status}`,
+    out.push(`### ${p.name}`, '', p.desc, '', `Status: ${p.status} — v${p.version}`,
              `Keywords: ${p.keywords.join(', ')}`, '');
     slotsOf(p, S).forEach(k => out.push(`- [${L[k]}](${abs(p.docs[k])})`));
     out.push('');

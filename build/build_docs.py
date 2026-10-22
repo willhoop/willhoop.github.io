@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Render every project .md into a styled HTML page, and convert decks to PDF,
 so portfolio links open readable documents instead of raw text."""
-import os, re, shutil, subprocess, html
+import os, re, shutil, subprocess, html, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import doc_links
 try:
     import markdown
 except ImportError:
@@ -58,7 +60,6 @@ def main():
     projects = {
         'CHOMP':      os.path.join(ROOT,'Pokemon','CHOMP'),
         'HoopaDex':   os.path.join(ROOT,'Pokemon','HoopaDex'),
-        'KaizoDex':   os.path.join(ROOT,'Pokemon','KaizoDex'),
         'Pokemon':    os.path.join(ROOT,'Pokemon'),
     }
     made = 0
@@ -81,6 +82,15 @@ def main():
             with open(os.path.join(odir, name.replace('.md','.html')),'w',encoding='utf-8') as f:
                 f.write(render(s, name, proj))
             made += 1
+        # The folder is flat, so source links like docs/X.md must be repointed once
+        # every page in it exists. See doc_links.py.
+        repo = doc_links.SOURCES.get(proj, (None, None))[1]
+        for page in os.listdir(odir):
+            if page.endswith('.html'):
+                p = os.path.join(odir, page)
+                text = open(p, encoding='utf-8').read()
+                with open(p, 'w', encoding='utf-8') as f:
+                    f.write(doc_links.fix_html(text, odir, doc_links.source_dir_of(base, page), repo))
         # decks -> pdf so they open in a browser
         for dirpath,_,files in os.walk(base):
             for fn in files:

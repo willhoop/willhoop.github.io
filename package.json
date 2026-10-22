@@ -1,0 +1,15 @@
+{
+  "name": "willhoop-portfolio",
+  "private": true,
+  "description": "Build and test tooling for willhoop.github.io. The site itself has no runtime dependencies.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node tests/test-projects.js",
+    "build": "node build/build_agent_files.js",
+    "previews": "node build/record_previews.js"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "playwright-core": "^1.48.2"
+  }
+}

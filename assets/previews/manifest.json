@@ -1,0 +1,170 @@
+{
+ "chomp": {
+  "url": "file:///C:/Users/willj/Projects/portfolio/build/scenes/chomp.html",
+  "recorded": "2026-10-22",
+  "seconds": 3,
+  "speed": 1,
+  "maxGap": 0.35,
+  "fps": 15,
+  "width": 528,
+  "height": 330,
+  "files": {
+   "webm": {
+    "bytes": 15886,
+    "sha256": "4bdd23293c5234c50e273e0df25ac4bb50be9dbce6db1ebffb86287cec05ebbd"
+   },
+   "mp4": {
+    "bytes": 17656,
+    "sha256": "9c3fa8e81a14e2586059d8785bb1cace870392564fbf0954d1cd6d545361851e"
+   },
+   "jpg": {
+    "bytes": 17193,
+    "sha256": "2cbd9d65cff424ca7abd5411964e041f33ee1a53c69a592588e32e9d3e287cd1"
+   }
+  }
+ },
+ "jeopardy-wagering": {
+  "url": "https://willhoop.github.io/jeopardy-wagering/app/",
+  "recorded": "2026-10-22",
+  "seconds": 3,
+  "speed": 1,
+  "maxGap": 0.35,
+  "fps": 15,
+  "width": 528,
+  "height": 330,
+  "files": {
+   "webm": {
+    "bytes": 34968,
+    "sha256": "85556832ed6d0259a4ea1803535dc60f63c84d6c7a8171d9e146d354a78205f1"
+   },
+   "mp4": {
+    "bytes": 49647,
+    "sha256": "28ed935b0ec6d4d47f74a699e0af25557c625ff02868aedfa202e4ee04a0dccd"
+   },
+   "jpg": {
+    "bytes": 20147,
+    "sha256": "38a179803883d247f653b7a8074dcfce08ae4b30a2c9f3bb4533773232fdfbba"
+   }
+  }
+ },
+ "fourth-down": {
+  "url": "https://willhoop.github.io/fourth-down/",
+  "recorded": "2026-10-22",
+  "seconds": 3,
+  "speed": 1,
+  "maxGap": 0.35,
+  "fps": 15,
+  "width": 528,
+  "height": 330,
+  "files": {
+   "webm": {
+    "bytes": 20509,
+    "sha256": "59efe942691a97a66b22b42fabb6620e077923ce6303eaf34bbc2c05ac9276c5"
+   },
+   "mp4": {
+    "bytes": 21370,
+    "sha256": "7aaade1a08fb8a25fc82e1937f335562031fcf00eab6817e293cebae32f3e480"
+   },
+   "jpg": {
+    "bytes": 15864,
+    "sha256": "a06a323d78a6a87ef548ff9344524513ab2eccc10ad8da8cb865ffee4c828d35"
+   }
+  }
+ },
+ "abra": {
+  "url": "https://willhoop.github.io/abra/app/",
+  "recorded": "2026-10-22",
+  "seconds": 3,
+  "speed": 1.6,
+  "maxGap": 0.35,
+  "fps": 15,
+  "width": 528,
+  "height": 330,
+  "files": {
+   "webm": {
+    "bytes": 83787,
+    "sha256": "647d3f9639fc52f1c8440405c02065179878702f15257e995252b002dbb6c74c"
+   },
+   "mp4": {
+    "bytes": 58274,
+    "sha256": "95012d5c184f2cb46de598e824e95c1b822622f8b63548e1aa73e0b9a74e0b52"
+   },
+   "jpg": {
+    "bytes": 35049,
+    "sha256": "ba1d14fe8db6bf44a58812b11d1db796764ec653c9f3ba815407ae7c5f80d359"
+   }
+  }
+ },
+ "guardian-chess": {
+  "url": "http://127.0.0.1:3917/",
+  "recorded": "2026-10-22",
+  "seconds": 3,
+  "speed": 1,
+  "maxGap": 0.35,
+  "fps": 15,
+  "width": 528,
+  "height": 330,
+  "files": {
+   "webm": {
+    "bytes": 18791,
+    "sha256": "8305b3d1bd9206a0b89192b2bb9a34a3cbad24ddd11335bf6bc9c96dd9306fc6"
+   },
+   "mp4": {
+    "bytes": 21049,
+    "sha256": "935990ab9551402ea3e17610a379722cf9d0f17ef87217aba6f337037f611d55"
+   },
+   "jpg": {
+    "bytes": 23434,
+    "sha256": "a61798aed0e3bc1d04609b4fa441c6d663cdbb3b0afe37c98e1362917e6d90ab"
+   }
+  }
+ },
+ "event-desks": {
+  "url": "https://elitefourcapital.com/",
+  "recorded": "2026-10-22",
+  "seconds": 3,
+  "speed": 1,
+  "maxGap": 0.35,
+  "fps": 15,
+  "width": 528,
+  "height": 330,
+  "files": {
+   "webm": {
+    "bytes": 42800,
+    "sha256": "32fd5bbcb4779c102602550b1a3cb075e3c0e95836b92c755da3e4bdc66957f0"
+   },
+   "mp4": {
+    "bytes": 42012,
+    "sha256": "113ac52352338918eb32b490dbdc6044acf8cdc156b53a84a8128c59c2f8c20e"
+   },
+   "jpg": {
+    "bytes": 24682,
+    "sha256": "7a3569d6a4b3cf5d19a68afa1be49fa85641d07504dd6a4bff2f398eee8d0ad3"
+   }
+  }
+ },
+ "hoopadex": {
+  "url": "https://willhoop.github.io/hoopadex/app/",
+  "recorded": "2026-10-22",
+  "seconds": 3,
+  "speed": 1,
+  "maxGap": 0.35,
+  "fps": 15,
+  "width": 528,
+  "height": 330,
+  "files": {
+   "webm": {
+    "bytes": 30644,
+    "sha256": "63a1713e657eb9038a5c00f82c5babfebec384b0e22bb3355ec32ec762fc3e6c"
+   },
+   "mp4": {
+    "bytes": 28898,
+    "sha256": "0f1ebdcb79d22d13e64123cdabde23014fcb00d182d12c2093737083e23ae368"
+   },
+   "jpg": {
+    "bytes": 6527,
+    "sha256": "873fb5c92effb8cd4e03174dd8f135d078c3a613bd082f577d93a42e825d2c08"
+   }
+  }
+ }
+}

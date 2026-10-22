@@ -1,11 +1,12 @@
 # Deployment — Portfolio
 
-**Version 1.0 · Last updated 2026-07-22**
+**Version 1.10 · Last updated 2026-10-22**
 Written in ASD-STE100 Simplified Technical English.
 
 ## 1. What this site is
-The site is one static HTML file. It has no build step and no dependencies. Any static host can
-serve it.
+The site is one static HTML file with its assets (`assets/`) and rendered documents (`docs/`). It
+has no runtime dependencies. Any static host can serve it. GitHub Pages serves it from
+`willhoop/willhoop.github.io`, branch `main`, root folder.
 
 ## 2. How to publish with GitHub Pages
 1. Create a repository. Use the name `<username>.github.io` for the root domain.
@@ -27,39 +28,18 @@ serve it.
 3. Create the DNS records that the host shows you.
 4. Wait for the certificate. The host issues it automatically.
 
-## 5. Important — document links
-The project cards use relative links such as `../Pokemon/CHOMP/docs/CHOMP-whitepaper.md`. These
-links work on your computer. They do **not** work on a public host unless you publish those files
-too.
+## 5. Document links
+Each card links to published documents only. A project with its own public repository links to
+that repository. CHOMP and HoopaDex link to rendered HTML copies in `docs/`, made by
+`build/build_docs.py`. Event Desks is private: its card links to the live site only
+(`slots: ["open"]`).
 
-Choose one of these options before you publish:
-- **Option A.** Publish each project as its own public repository. Change the links to the
-  repository URLs.
-- **Option B.** Publish everything in one repository. Keep the relative links.
-- **Option C.** Publish the site only. Remove the document links from the cards.
+`build/doc_links.py` repairs the links inside the rendered copies. A link to a page in the same
+folder goes to that page. Another link goes to the file in the project's repository.
+`tests/test-projects.js` fails if any relative link on the site does not resolve.
 
-Do not publish with broken links. Check every link after the first deployment.
-
-### What this site does now
-This site uses **Option A** for any project that has its own repository.
-
-| Project | Documents are served from |
-|---|---|
-| CHOMP | Local rendered HTML in `docs/CHOMP/`. Move to a repository URL when published. |
-| HoopaDex | The published site and repository, `willhoop/hoopadex`. |
-| Event Desks | Not served. The project is private; its card uses **Option C** and links to the live site only. |
-
-To move a project to Option A, put its repository base URL in one constant at the top of the
-script block, then build each document link from that constant. Do not write full URLs into each
-link. One constant keeps a repository move to one edit.
-
-To show only some links on one card, give the project a `slots` list, for example
-`slots: ["open"]`. The other rows are then not drawn at all, instead of drawn dimmed.
-
-## 6. Live demos
-Two files run in the browser with no server:
-- `CHOMP/app/chomp-replay-app.html`
-- `CHOMP/app/calc/champions-damage-lab.html`
-
-Copy them next to `index.html` to serve them as demos. The replay analyzer reads a public API. It
-sends no personal data.
+## 6. Check the live site
+1. Push to `main`. GitHub Pages deploys in about one minute.
+2. Run `python build/check_projects.py`. It requests every published URL and fails on any
+   status that is not 200. It also compares each card on the live page with `index.html`, and
+   reports `NOT DEPLOYED` until the live page matches.

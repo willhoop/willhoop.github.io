@@ -24,7 +24,6 @@ PROJECTS = {
     'CHOMP':          'Pokemon/CHOMP',
     'HoopaDex':       'Pokemon/HoopaDex',
     'Event Desks':    'prediction-market',
-    'KaizoDex':       'Pokemon/KaizoDex',
     'ABRA':           'Pokemon/ABRA',
     'Portfolio':      'portfolio',
     'Jeopardy Wager': 'jeopardy-wagering',
@@ -310,10 +309,167 @@ def version_table():
     return vgaps
 
 
-def main():
+# ---- the portfolio cards ----
+# The cards on willhoop.github.io are the public face of the table above, and they drifted
+# while it passed: on 2026-10-22 ABRA's card said v2.3.0 (no such release; its live line was
+# 1.78.2), HoopaDex's v5.55 (changelog 5.61) and Fourth Down's v1.3.0 (changelog 1.4.0).
+# A card version is now checked against the project's LIVE changelog, the whole string.
+#
+# The cards are read by running the page's own script (build/build_agent_files.js load()),
+# never by pattern-matching the JavaScript, so the checker sees what a visitor sees.
+HERE = os.path.dirname(os.path.abspath(__file__))
+INDEX = os.path.join(HERE, '..', 'index.html')
+SITE = 'https://willhoop.github.io/'
+
+# Card name -> PROJECTS key, only where they differ. A card with no project is a gap.
+CARD_PROJECT = {
+    'Jeopardy Wagering':  'Jeopardy Wager',
+    'Fourth Down Engine': 'Fourth Down',
+}
+
+_LOAD_JS = (
+    "const A=require(process.argv[1]);let s='';process.stdin.on('data',d=>s+=d)"
+    ".on('end',()=>process.stdout.write(JSON.stringify(A.load(s).PROJECTS)))"
+)
+
+def load_cards(html=None):
+    """The PROJECTS array of an index.html (the local one by default), as a list of dicts."""
+    import json, subprocess
+    if html is None:
+        html = io.open(INDEX, encoding='utf-8').read()
+    out = subprocess.run(['node', '-e', _LOAD_JS, os.path.join(HERE, 'build_agent_files.js')],
+                         input=html.encode('utf-8'), capture_output=True, check=True)
+    return json.loads(out.stdout.decode('utf-8'))
+
+def card_table(cards):
+    """Print each card's version against its project's live changelog. Returns the gaps."""
+    print('\nCard versions (index.html against each CHANGELOG)')
+    print('=' * 60)
+    cgaps = []
+    for c in cards:
+        name = c['name']
+        proj = CARD_PROJECT.get(name, name)
+        base = PROJECTS.get(proj)
+        if base is None:
+            print(f'{name.ljust(20)} NO PROJECT — add it to PROJECTS or CARD_PROJECT')
+            cgaps.append((name, 'card has no project in PROJECTS')); continue
+        if not os.path.isdir(os.path.join(ROOT, base)):
+            print(f'{name.ljust(20)} FOLDER NOT FOUND'); cgaps.append((name, 'folder')); continue
+        clog, cv = newest_changelog_version(base)
+        card_v = c.get('version')
+        ok = clog is not None and card_v is not None and card_v == cv
+        print(f'{name.ljust(20)} card={card_v}  {clog or "changelog"}={cv}  {"ok" if ok else "MISMATCH"}')
+        if not ok:
+            cgaps.append((name, f'card {card_v} vs {clog} {cv}'))
+    for p_, m_ in cgaps: print(f'  - {p_}: {m_}')
+    if not cgaps: print('\nEvery card matches its changelog.')
+    return cgaps
+
+
+# ---- live URLs ----
+# Every URL the site publishes must answer 200, after redirects. A card's "Open" link is
+# required only while the card claims the project is live; a card marked live:false is
+# printed with its status but is not a gap, because the page no longer claims it works.
+# Guardian Chess's host stopped answering on 2026-10-22 while its card said "Live".
+UA = 'willhoop-portfolio-check/1.0 (+https://willhoop.github.io/)'
+
+def fetch_status(url, timeout):
+    """HTTP status after redirects, or 0 when the host does not answer."""
+    import urllib.request, urllib.error
+    req = urllib.request.Request(url, headers={'User-Agent': UA})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.status
+    except urllib.error.HTTPError as e:
+        return e.code
+    except Exception:
+        return 0
+
+def site_urls(cards, previews=True):
+    """[(url, required, label)] for every URL the site publishes."""
+    abs_ = lambda u: u if re.match(r'^https?:', u) else SITE + u
+    urls = [(SITE, True, 'site'), (SITE + 'llms.txt', True, 'site'),
+            (SITE + 'sitemap.xml', True, 'site'), (SITE + 'robots.txt', True, 'site')]
+    for c in cards:
+        for slot, u in c['docs'].items():
+            if u:
+                urls.append((abs_(u), slot != 'open' or bool(c.get('live')), f"{c['name']} {slot}"))
+        if previews and c.get('preview'):
+            for ext in ('webm', 'mp4', 'jpg'):
+                urls.append((abs_(f"assets/previews/{c['preview']['slug']}.{ext}"), True,
+                             f"{c['name']} preview .{ext}"))
+    seen, out = set(), []
+    for u in urls:
+        if u[0] not in seen:
+            seen.add(u[0]); out.append(u)
+    return out
+
+def live_table(urls, fetch=fetch_status, timeout=30, retry_timeout=90):
+    """Print every URL with its status. Returns the gaps.
+
+    A failure is retried once with a longer timeout: a free-tier host that sleeps
+    (Render) takes up to a minute to wake, and a sleeping host is not a dead one."""
+    from concurrent.futures import ThreadPoolExecutor
+    print('\nLive URLs (every link the site publishes must return 200)')
+    print('=' * 60)
+    def probe(u):
+        s = fetch(u, timeout)
+        return s if s == 200 else fetch(u, retry_timeout)
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        statuses = list(ex.map(probe, [u for u, _, _ in urls]))
+    lgaps = []
+    for (u, required, label), s in zip(urls, statuses):
+        tag = 'ok' if s == 200 else ('FAIL' if required else 'down (card says not live)')
+        print(f'{str(s or "---").ljust(4)} {tag.ljust(26)} {label.ljust(28)} {u}')
+        if s != 200 and required:
+            lgaps.append((label, f'{u} returned {s or "no answer"}'))
+    for p_, m_ in lgaps: print(f'  - {p_}: {m_}')
+    if not lgaps: print('\nEvery published URL returns 200.')
+    return lgaps
+
+def deployed_table(local_cards, fetch_text=None):
+    """Compare the cards on the live page with the local ones. Returns the gaps.
+    The local files and the live site must agree; this is the check that they do."""
+    import urllib.request
+    print('\nLive site against local files')
+    print('=' * 60)
+    if fetch_text is None:
+        def fetch_text(u):
+            req = urllib.request.Request(u, headers={'User-Agent': UA, 'Cache-Control': 'no-cache'})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return r.read().decode('utf-8')
+    try:
+        live = {c['name']: c for c in load_cards(fetch_text(SITE))}
+    except Exception as e:
+        print(f'could not read the live page: {e}')
+        return [('live site', f'could not read {SITE}: {e}')]
+    dgaps = []
+    for c in local_cards:
+        lc = live.get(c['name'])
+        got = None if lc is None else (lc.get('version'), lc.get('status'))
+        want = (c.get('version'), c.get('status'))
+        ok = got == want
+        print(f"{c['name'].ljust(20)} local={want}  live={got}  {'ok' if ok else 'NOT DEPLOYED'}")
+        if not ok:
+            dgaps.append((c['name'], f'live {got} vs local {want}'))
+    for n in set(live) - {c['name'] for c in local_cards}:
+        print(f'{n.ljust(20)} on the live page only  NOT DEPLOYED')
+        dgaps.append((n, 'card is live but not in the local index.html'))
+    return dgaps
+
+
+def main(argv=None):
+    """--offline skips every network check (the artefact, version and card tables still run)."""
+    argv = sys.argv[1:] if argv is None else argv
     gaps = artefact_table()
     vgaps = version_table()
-    return 1 if gaps or vgaps else 0
+    cards = load_cards()
+    cgaps = card_table(cards)
+    lgaps = dgaps = []
+    if '--offline' not in argv:
+        lgaps = live_table(site_urls(cards))
+        dgaps = deployed_table(cards)
+    return 1 if gaps or vgaps or cgaps or lgaps or dgaps else 0
 
 
 if __name__ == '__main__':

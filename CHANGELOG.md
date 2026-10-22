@@ -10,6 +10,72 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.10.0] — 2026-10-22
+
+### Added
+- **A 3-second silent preview on every card.** Each clip shows the app doing the one thing that explains it:
+  ABRA's win meter after a 400-game playout, CHOMP's mixed strategy, Event Desks' market tape, HoopaDex stacking
+  three filters, a Guardian Chess Guardian leap, Jeopardy's two Final Jeopardy wagers, Fourth Down's call.
+  *Why:* a visitor should know what a project is before reading a word. Muted, looped, inline; nothing loads
+  until the card is on screen; a still poster for visitors who ask for reduced motion.
+- **`build/record_previews.js` and `build/preview_scenes.js`** record the clips from scripted scenes in Chrome
+  (DevTools screencast, then ffmpeg: VP9 `.webm`, H.264 `.mp4`, `.jpg` poster) and write
+  `assets/previews/manifest.json`. *Why:* clips made by hand go stale; these re-record with one command.
+  Two disclosed rules: a gap with no painted frame counts at most 0.35 s (Jeopardy's solve freezes the page),
+  and ABRA's clip plays at 1.6x because its real playout takes about 4 s.
+- **CHOMP's preview draws one real solve** (`data/chomp-preview-solve.json`: the CHOMP technical docs' Part 1.2
+  command on ABRA `b8de8517`, release `eaa5becc54eb`). *Why:* CHOMP runs inside ABRA and has no page of its own.
+- **`build/check_projects.py`: card versions, live URLs, deployed site.** Every card's `version` must equal its
+  project's live CHANGELOG; every URL the site publishes must return 200 (a card marked `live: false` is
+  exempt for its Open link only); the cards on the live page must equal `index.html`. `--offline` skips the
+  network. *Why:* the three drifted cards below passed every existing check.
+- **`tests/test_check_cards.py`** (24 cases, fake folders and a local HTTP server, hand-set expectations), in CI.
+- **`build/doc_links.py`**, called by `build/build_docs.py` on every render, repairs links in rendered documents.
+- Favicon, Open Graph image (`assets/og-image.png`, composed from the posters), `twitter:card`, `<main>`.
+- `package.json` with the two recording tools as dev dependencies. The site has no runtime dependency.
+
+### Changed
+- **Cards show status and version** (`Live · v5.61`). Both were in the data and never drawn. `version` is now
+  its own field; `status` carries no version.
+- **Guardian Chess: "Offline", `live: false`.** Its Render host returned nothing to three requests of up to
+  150 s on 2026-10-22, so the card no longer claims it works. Its preview is recorded from the app run locally.
+- Contrast: `--faint` #9a9283 → #6f695c, `--mute` #726c60 → #5e584d, so every text colour passes WCAG AA.
+- Web fonts: the italic Newsreader is no longer requested; the page never draws italic. Fonts were 160 of the
+  page's 175 KB.
+- Meta description shortened to fit search results. "Updated" shows the release date, not the visitor's year.
+- Row layout gains a preview column; on a phone the preview sits above the title.
+- `README.md` gains a component table; `docs/DEPLOYMENT.md` sections 5 and 6 rewritten (they described relative
+  links and demos the site no longer has).
+
+### Fixed
+- **Card versions that disagreed with their CHANGELOG:** ABRA v2.3.0 (no such release on its live Reg M-C line,
+  which is at 1.78.2), HoopaDex v5.55 (5.61), Fourth Down v1.3.0 (1.4.0). Jeopardy's "v2.2" is now the full
+  version. Four projects released during this pass; their cards were set to the pushed releases (HoopaDex 5.62,
+  Guardian Chess 1.0.1, Jeopardy 2.2.1, Fourth Down 1.4.1), which the new card check caught before publishing.
+- **26 broken relative links** in the rendered documents under `docs/` (links to `.md` sources never published).
+- Favicon request returned 404 on every page view.
+
+### Removed
+- **KaizoDex**, retired 2026-10-22 and merged into HoopaDex: `docs/KaizoDex/`, and its entries in
+  `check_projects.py`, `build_docs.py` and the `agent_dashboard.js` comment. It had no card.
+
+### Notes
+- Two releases were published as 1.9.7 on 2026-10-13 (CHOMP, then Jeopardy). Both headings stay as published;
+  `tests/test-projects.js` now allows that one repeat and fails on any other.
+- The technical documentation folds in what 1.9.8 and 1.9.9 owed: the publish gate and the tier marker.
+- Not fixed here, outside this repository: Event Desks' white paper is stamped 1.6.0 against its CHANGELOG
+  1.8.0, so `check_projects.py` still fails on it; the four `apps/` demos are unlinked from the page.
+
+### Record
+- **Measured.** Live projects 7 → 6 (Guardian Chess offline; `check_projects.py` live table). Card versions
+  ABRA 1.78.2, HoopaDex 5.62, Guardian Chess 1.0.1, Jeopardy 2.2.1, Fourth Down 1.4.1 (each project's live
+  CHANGELOG, each pushed). Preview sizes:
+  `assets/previews/manifest.json`. Contrast, link and SEO figures: white paper section 8.
+- **Basis.** unchanged
+- **Supersedes.** ~~7 live~~ → 6. ~~ABRA v2.3.0~~ retracted. ~~HoopaDex v5.55~~ → 5.62. ~~Guardian Chess v1.0.0~~ →
+  1.0.1. ~~Jeopardy v2.2~~ → 2.2.1. ~~Fourth Down v1.3.0~~ → 1.4.1.
+- **Owed to the next major.** Nothing. The white paper, deck and technical documentation are updated in this pass.
+
 ## [1.9.9] — 2026-10-22
 
 ### Added

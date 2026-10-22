@@ -16,3 +16,5 @@ jobs:
         run: node tests/test-publish-gate.js
       - name: Run project checker tier tests
         run: python3 tests/test_check_projects.py
+      - name: Run card-version and live-URL checker tests
+        run: python3 tests/test_check_cards.py

@@ -8,6 +8,9 @@ Universal rules live in my global Claude Instructions. This file is project-spec
 - Measured numbers and performance claims live in the white paper (backed by that project's validation report), not on the card.
 - Adding a project must stay a one-object edit in the `PROJECTS` array.
 - No emoji, no stock imagery, no filler copy.
+- A card's `version` is the newest release in that project's live CHANGELOG, the whole string. `build/check_projects.py` fails when they differ. Never type it from memory.
+- A card's preview is recorded by `build/record_previews.js` from its scene in `build/preview_scenes.js`. Never edit a clip by hand; the tests hash it against the manifest.
+- A project whose app does not answer is marked `status: "Offline", live: false` until it does.
 
 ## Rule: three places must agree
 
@@ -34,10 +37,10 @@ when it exists only on disk. "Written locally, not yet pushed" is the correct wo
 Repository map:
 | Project | Repository | Live at |
 |---|---|---|
-| Portfolio | not yet created | not yet published |
+| Portfolio | `willhoop/willhoop.github.io` | `willhoop.github.io` |
 | HoopaDex | `willhoop/hoopadex` | `willhoop.github.io/hoopadex` |
 | Event Desks | private | `elitefourcapital.com` |
-| CHOMP | not yet created | runs locally in the browser |
+| CHOMP | `willhoop/chomp` (documents); code in `willhoop/abra` | runs inside ABRA; no page of its own |
 
 Event Desks is private. Its card links to https://elitefourcapital.com and nothing else. Do not
 publish its documents, source, or repository names here.

@@ -19,7 +19,7 @@
  *
  * WHY IT LIVES IN portfolio/ AND NOT IN ABRA
  * ------------------------------------------
- * Because the machine is not ABRA's. Agents run in HoopaDex, CHOMP, KaizoDex, the portfolio itself
+ * Because the machine is not ABRA's. Agents run in HoopaDex, CHOMP, the portfolio itself
  * and anywhere else, and they contend for ONE pool of RAM. A monitor that can only see one project
  * reports "all clear" while a different project is eating the box — which is the same blindness one
  * level up. `portfolio/build/` is already where cross-project tooling lives (`check_projects.py`),

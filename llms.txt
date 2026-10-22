@@ -11,7 +11,7 @@ Contact: willjhooper@msn.com
 
 An AI for competitive Pokémon, trained on real ladder battles. It calculates damage, reads what the opponent is likely hiding, and estimates who is winning mid-battle.
 
-Status: In development — v2.3.0
+Status: In development — v1.78.2
 Keywords: Pokémon, competitive Pokémon, VGC, Pokémon Showdown, game AI, machine learning, damage calculator, win probability, metagame analysis
 
 - [Open](https://willhoop.github.io/abra/app/)
@@ -37,7 +37,7 @@ Keywords: Pokémon, VGC, Champions VGC, Reg M-C, open team sheets, Pokémon Show
 
 A live site that prices prediction markets against polls and the news, one desk per trade.
 
-Status: Live at elitefourcapital.com
+Status: Live — v1.8.0
 Keywords: prediction markets, forecasting, polling, event contracts, probability
 
 - [Open](https://elitefourcapital.com)
@@ -46,7 +46,7 @@ Keywords: prediction markets, forecasting, polling, event contracts, probability
 
 A Pokédex that shows types, stats and evolutions exactly as they were in the game you pick — every generation, Pokémon Champions, and six ROM hacks such as Renegade Platinum.
 
-Status: Live — v5.55
+Status: Live — v5.62
 Keywords: Pokémon, Pokédex, type chart, base stats, evolution, generations, Pokémon Champions, ROM hacks, Renegade Platinum, Emerald Kaizo, nuzlocke
 
 - [Open](https://willhoop.github.io/hoopadex/app/)
@@ -59,7 +59,7 @@ Keywords: Pokémon, Pokédex, type chart, base stats, evolution, generations, Po
 
 A chess variant invented by my brother Alex: a wider board and a new piece, the Guardian, that leaps exactly two squares. Play a friend online, the computer, or pass one device back and forth.
 
-Status: Live — v1.0.0
+Status: Offline — v1.0.1
 Keywords: chess, chess variant, fairy chess, Dabbaba, Capablanca chess, online multiplayer, Elo rating, chess engine
 
 - [Open](https://guardian-chess.onrender.com)
@@ -72,7 +72,7 @@ Keywords: chess, chess variant, fairy chess, Dabbaba, Capablanca chess, online m
 
 A trainer for Jeopardy!'s two betting decisions, the Daily Double and Final Jeopardy. It shows the safe bet and the best bet, then quizzes you on both.
 
-Status: Live — v2.2
+Status: Live — v2.2.1
 Keywords: Jeopardy!, Final Jeopardy, Daily Double, wagering strategy, game theory, Monte Carlo simulation, simulated opponents, quiz
 
 - [Open](https://willhoop.github.io/jeopardy-wagering/app/)
@@ -85,7 +85,7 @@ Keywords: Jeopardy!, Final Jeopardy, Daily Double, wagering strategy, game theor
 
 Go for it, kick or punt? It scores every NFL fourth-down option by the chance to win, on your phone during the game, and grades every head coach and kicker.
 
-Status: Live — v1.3.0
+Status: Live — v1.4.1
 Keywords: NFL, American football, fourth down, win probability, sports analytics, coaching decisions, kicker ratings, go for it
 
 - [Open](https://willhoop.github.io/fourth-down/)
