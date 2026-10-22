@@ -46,7 +46,7 @@ Keywords: prediction markets, forecasting, polling, event contracts, probability
 
 A Pokédex that shows types, stats and evolutions exactly as they were in the game you pick — every generation, Pokémon Champions, and six ROM hacks such as Renegade Platinum.
 
-Status: Live — v5.62
+Status: Live — v5.63
 Keywords: Pokémon, Pokédex, type chart, base stats, evolution, generations, Pokémon Champions, ROM hacks, Renegade Platinum, Emerald Kaizo, nuzlocke
 
 - [Open](https://willhoop.github.io/hoopadex/app/)

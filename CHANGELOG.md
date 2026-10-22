@@ -10,6 +10,18 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.11.1] — 2026-10-22
+
+### Changed
+- **HoopaDex card: v5.63.** *Why:* HoopaDex 5.63 is pushed and live (a docs-path fix); `check_projects.py`
+  reported the card's 5.62 as a mismatch.
+
+### Record
+- **Measured.** No portfolio figure changed. The card mirrors HoopaDex's CHANGELOG.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Nothing.
+
 ## [1.11.0] — 2026-10-22
 
 ### Changed
