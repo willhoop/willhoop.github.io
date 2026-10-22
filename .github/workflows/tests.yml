@@ -14,3 +14,5 @@ jobs:
         run: node tests/test-projects.js
       - name: Run publish gate tests
         run: node tests/test-publish-gate.js
+      - name: Run project checker tier tests
+        run: python3 tests/test_check_projects.py

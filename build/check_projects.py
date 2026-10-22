@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Audit every project against the standard. Run before publishing.
 
-The rule: every project gets the same treatment. White paper, plain-English
-deck, technical documentation, README, changelog, agent notes, tests.
+The rule: every project of a tier gets the same treatment. A full project ships
+a white paper, a plain-English deck, technical documentation, README, changelog,
+agent notes, tests. A joke project declares itself (see TIERS) and ships a
+one-page explainer in place of the white paper, deck and technical docs.
 
 Exits non-zero when anything is missing, so it can gate a publish step.
 """
@@ -31,6 +33,7 @@ PROJECTS = {
     'Fourth Down':    'fourth-down',
     'Every Last Grain': 'every-last-grain',
     'NFL data':       'nfl-data',
+    'Monger Compass': 'monger-compass',
 }
 
 def has(base, *patterns):
@@ -54,35 +57,74 @@ CHECKS = [
     ('CI',          lambda b: has(b, '.github/workflows/*.yml', '.github/workflows/*.yaml')),
 ]
 
-names = [c[0] for c in CHECKS]
-w = max(len(p) for p in PROJECTS) + 2
-print('\nProject standard audit\n' + '=' * (w + len(names) * 13))
-print(' ' * w + ''.join(n.ljust(13) for n in names))
+# ---- tiers ----
+# A joke project needs no in-depth white paper. It declares itself in its OWN
+# CLAUDE.md with a marker on its own line, `<!-- TIER: joke -->`, within the first
+# 25 lines. No marker means full. Never decided by name here, same rule as the LINE
+# marker below. An unknown tier is a gap, not a silent default.
+TIER_RE = re.compile(r'^[ \t]*<!--\s*TIER:\s*([A-Za-z-]+)\s*-->[ \t]*$', re.M)
+TIER_HEAD = 25
 
-gaps = []
-for proj, base in PROJECTS.items():
-    if not os.path.isdir(os.path.join(ROOT, base)):
-        print(proj.ljust(w) + 'FOLDER NOT FOUND'); gaps.append((proj, 'folder')); continue
-    row = proj.ljust(w)
-    for label, fn in CHECKS:
-        ok = fn(base)
-        row += ('yes' if ok else 'MISSING').ljust(13)
-        if not ok:
-            gaps.append((proj, label))
-    print(row)
+EXPLAINER = ('explainer', lambda b: has(b, 'docs/*explainer*'))
+JOKE_KEEPS = ('README', 'CHANGELOG', 'CLAUDE.md', 'tests', 'LICENSE', '.gitignore', 'CI')
+TIERS = {
+    'full': CHECKS,
+    'joke': [EXPLAINER] + [c for c in CHECKS if c[0] in JOKE_KEEPS],
+}
+COLUMNS = [c[0] for c in CHECKS] + [EXPLAINER[0]]
 
-print()
-if gaps:
-    print(f'{len(gaps)} gap(s):')
-    for proj, label in gaps:
-        print(f'  - {proj}: no {label}')
-    # NOT sys.exit HERE. Until 2026-09-06 this exited immediately, so the whole
-    # version-consistency section below was UNREACHABLE whenever any project was
-    # missing a LICENSE or a SECURITY.md. A check that only runs when everything
-    # else already passes is unchecked, not verified. Both sections now always
-    # run and the process still exits non-zero at the end if either failed.
-else:
-    print('All projects meet the standard.')
+def project_tier(base):
+    """The tier a project declares in its CLAUDE.md, lower-cased; 'full' when it has none."""
+    f = os.path.join(ROOT, base, 'CLAUDE.md')
+    if not os.path.exists(f):
+        return 'full'
+    head = ''.join(io.open(f, encoding='utf-8', errors='ignore').readlines()[:TIER_HEAD])
+    m = TIER_RE.search(head)
+    return m.group(1).lower() if m else 'full'
+
+def artefact_gaps(base):
+    """(tier, {column: True/False/None}). None means the tier does not require that
+    column. The dict itself is None when the tier is unknown."""
+    tier = project_tier(base)
+    checks = TIERS.get(tier)
+    if checks is None:
+        return tier, None
+    req = dict(checks)
+    return tier, {col: (req[col](base) if col in req else None) for col in COLUMNS}
+
+def artefact_table():
+    """Print every project against every artefact column. Returns the gaps."""
+    w = max(len(p) for p in PROJECTS) + 2
+    print('\nProject standard audit\n' + '=' * (w + 6 + len(COLUMNS) * 13))
+    print(' ' * w + 'tier  ' + ''.join(n.ljust(13) for n in COLUMNS))
+    gaps = []
+    for proj, base in PROJECTS.items():
+        if not os.path.isdir(os.path.join(ROOT, base)):
+            print(proj.ljust(w) + 'FOLDER NOT FOUND'); gaps.append((proj, 'folder')); continue
+        tier, cols = artefact_gaps(base)
+        if cols is None:
+            print(proj.ljust(w) + 'UNKNOWN TIER %r (allowed: %s)' % (tier, ', '.join(TIERS)))
+            gaps.append((proj, 'unknown tier %s' % tier)); continue
+        row = proj.ljust(w) + tier.ljust(6)
+        for col in COLUMNS:
+            ok = cols[col]
+            row += ('n/a' if ok is None else 'yes' if ok else 'MISSING').ljust(13)
+            if ok is False:
+                gaps.append((proj, col))
+        print(row)
+    print()
+    if gaps:
+        print(f'{len(gaps)} gap(s):')
+        for proj, label in gaps:
+            print(f'  - {proj}: no {label}')
+        # NOT AN EARLY EXIT. Until 2026-09-06 this exited immediately, so the whole
+        # version-consistency section below was UNREACHABLE whenever any project was
+        # missing a LICENSE or a SECURITY.md. A check that only runs when everything
+        # else already passes is unchecked, not verified. Both sections now always
+        # run and main() still exits non-zero if either failed.
+    else:
+        print('All projects meet the standard.')
+    return gaps
 
 
 # ---- changelog / version consistency ----
@@ -193,6 +235,8 @@ def masthead_version(path):
 def find_stamp(base):
     """(relpath, version) for the project's own white paper, or (None, reason).
 
+    A joke-tier project has no white paper; its explainer carries the masthead.
+
     A project can hold several white papers — ABRA/docs has ABRA-whitepaper.md
     alongside MEW-whitepaper.md and SLOWKING-whitepaper.md, which carry their own
     component version schemes. Picking the first glob hit would compare the project
@@ -200,64 +244,77 @@ def find_stamp(base):
     is chosen by NAME AGAINST THE PROJECT FOLDER, and an ambiguous set is reported
     as ambiguous rather than guessed at.
     """
+    doc = 'explainer' if project_tier(base) == 'joke' else 'white paper'
+    pats = (('docs/*explainer*.md',) if doc == 'explainer'
+            else ('docs/*whitepaper*.md', 'docs/*white-paper*.md'))
     cands = []
-    for pat in ('docs/*whitepaper*.md', 'docs/*white-paper*.md'):
+    for pat in pats:
         cands += sorted(glob.glob(os.path.join(ROOT, base, pat)))
     cands = [c for c in cands if masthead_version(c)]
     if not cands:
-        return None, 'no white paper carries a masthead version'
+        return None, 'no %s carries a masthead version' % doc
     proj = _slug(os.path.basename(base.rstrip('/\\')))
     named = [c for c in cands if _slug(os.path.basename(c)).startswith(proj)]
-    # a single generically named white paper is unambiguous on its own
-    generic = [c for c in cands if re.fullmatch(r'white-?paper\.md', os.path.basename(c), re.I)]
+    # a single generically named document is unambiguous on its own
+    generic = [c for c in cands if re.fullmatch(r'(white-?paper|explainer)\.md', os.path.basename(c), re.I)]
     pick = named or generic or (cands if len(cands) == 1 else [])
     if not pick:
-        return None, 'AMBIGUOUS — %d white papers, none named for the project' % len(cands)
+        return None, 'AMBIGUOUS — %d %ss, none named for the project' % (len(cands), doc)
     p = pick[0]
     return os.path.relpath(p, os.path.join(ROOT, base)).replace(os.sep, '/'), masthead_version(p)
 
 def norm(v, parts=2): return None if v is None else '.'.join(v.split('.')[:parts])  # default major.minor
 
-print('\nVersion consistency')
-print('=' * 60)
-vgaps = []
-for proj, base in PROJECTS.items():
-    if not os.path.isdir(os.path.join(ROOT, base)):
-        print(f'{proj.ljust(14)} FOLDER NOT FOUND'); vgaps.append((proj, 'folder')); continue
-    clog, cv = newest_changelog_version(base)
-    if clog is None:
-        # cv carries the reason: no CHANGELOG.md, or no live line to compare
-        print(f'{proj.ljust(14)} UNCHECKED — {cv}')
-        vgaps.append((proj, f'no live changelog ({cv})')); continue
-    # name the file only when it is not the default, so a non-default line is visible
-    cl = 'changelog' if clog == 'CHANGELOG.md' else clog
-    docs = line_params(os.path.join(ROOT, base, clog)).get('docs')
-    if docs not in DOCS_GRAIN:
-        print(f'{proj.ljust(14)} {cl}={cv}  UNCHECKED — unknown docs={docs} in LINE marker')
-        vgaps.append((proj, f'unknown docs={docs} in {clog} LINE marker (allowed: major)')); continue
-    grain = DOCS_GRAIN[docs]
-    if base in STAMPS:
-        rel, pat = STAMPS[base]
-        sv = stamped_version(base, rel, pat)
-        src = rel + ' (override)'
+def version_table():
+    """Print each live changelog against its stamped artifact. Returns the gaps."""
+    print('\nVersion consistency')
+    print('=' * 60)
+    vgaps = []
+    for proj, base in PROJECTS.items():
+        if not os.path.isdir(os.path.join(ROOT, base)):
+            print(f'{proj.ljust(14)} FOLDER NOT FOUND'); vgaps.append((proj, 'folder')); continue
+        clog, cv = newest_changelog_version(base)
+        if clog is None:
+            # cv carries the reason: no CHANGELOG.md, or no live line to compare
+            print(f'{proj.ljust(14)} UNCHECKED — {cv}')
+            vgaps.append((proj, f'no live changelog ({cv})')); continue
+        # name the file only when it is not the default, so a non-default line is visible
+        cl = 'changelog' if clog == 'CHANGELOG.md' else clog
+        docs = line_params(os.path.join(ROOT, base, clog)).get('docs')
+        if docs not in DOCS_GRAIN:
+            print(f'{proj.ljust(14)} {cl}={cv}  UNCHECKED — unknown docs={docs} in LINE marker')
+            vgaps.append((proj, f'unknown docs={docs} in {clog} LINE marker (allowed: major)')); continue
+        grain = DOCS_GRAIN[docs]
+        if base in STAMPS:
+            rel, pat = STAMPS[base]
+            sv = stamped_version(base, rel, pat)
+            src = rel + ' (override)'
+        else:
+            rel, sv = find_stamp(base)
+            if rel is None:
+                # sv carries the reason. UNCHECKED IS ITS OWN ROW, and it is a gap:
+                # printing "nothing to compare" and moving on is what left ABRA
+                # unverified while the table looked complete.
+                print(f'{proj.ljust(14)} {cl}={cv}  UNCHECKED — {sv}')
+                vgaps.append((proj, f'no version stamp found ({sv})'))
+                continue
+            src = rel + ' (derived)'
+        ok = norm(cv, grain) == norm(sv, grain) and cv is not None
+        if docs: src += f'; docs={docs}, major compared'
+        print(f'{proj.ljust(14)} {cl}={cv}  file={sv}  {"ok" if ok else "MISMATCH"}  <- {src}')
+        if not ok: vgaps.append((proj, f'{clog} {cv} vs {rel} {sv}'))
+    if vgaps:
+        for p_, m_ in vgaps: print(f'  - {p_}: {m_}')
     else:
-        rel, sv = find_stamp(base)
-        if rel is None:
-            # sv carries the reason. UNCHECKED IS ITS OWN ROW, and it is a gap:
-            # printing "nothing to compare" and moving on is what left ABRA
-            # unverified while the table looked complete.
-            print(f'{proj.ljust(14)} {cl}={cv}  UNCHECKED — {sv}')
-            vgaps.append((proj, f'no version stamp found ({sv})'))
-            continue
-        src = rel + ' (derived)'
-    ok = norm(cv, grain) == norm(sv, grain) and cv is not None
-    if docs: src += f'; docs={docs}, major compared'
-    print(f'{proj.ljust(14)} {cl}={cv}  file={sv}  {"ok" if ok else "MISMATCH"}  <- {src}')
-    if not ok: vgaps.append((proj, f'{clog} {cv} vs {rel} {sv}'))
-if vgaps:
-    for p_, m_ in vgaps: print(f'  - {p_}: {m_}')
-else:
-    print('\nAll versions consistent.')
+        print('\nAll versions consistent.')
+    return vgaps
 
-if gaps or vgaps:
-    sys.exit(1)
+
+def main():
+    gaps = artefact_table()
+    vgaps = version_table()
+    return 1 if gaps or vgaps else 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

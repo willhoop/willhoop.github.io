@@ -45,7 +45,11 @@ publish its documents, source, or repository names here.
 
 ## Rule: identical treatment, enforced by a check
 
-Every project gets the same seven artefacts. No exceptions, no "this one is small".
+Every project of a tier gets the same artefacts. No exceptions inside a tier, no "this one is small".
+A **joke** project puts `<!-- TIER: joke -->` on its own line near the top of its own CLAUDE.md and
+ships a one-page `docs/explainer.md` in place of the white paper, deck and technical documentation
+(the explainer carries the version stamp). Everything else is a **full** project and ships the
+seven below. The tier is read from the project's file, never set by name in the checker.
 
 | Artefact | Path |
 |---|---|

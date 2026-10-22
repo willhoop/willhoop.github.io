@@ -10,6 +10,29 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.9] — 2026-10-22
+
+### Added
+- **Project tiers in `build/check_projects.py`.** A project that puts `<!-- TIER: joke -->` in its own
+  CLAUDE.md is checked for a one-page `docs/explainer.md` in place of the white paper, deck, technical docs,
+  SECURITY and CONTRIBUTING, and its version stamp is read from the explainer. No marker means full; an unknown
+  tier is a gap. *Why:* joke projects do not need an in-depth white paper, and a rule the checker does not
+  know about would fail them forever or be ignored.
+- **Monger Compass** added to the checked projects, as the first joke-tier project.
+- **`tests/test_check_projects.py`**, 12 cases with hand-set expectations against fake project folders, run in
+  CI. *Why:* the checker gates every publish and had no tests.
+
+### Changed
+- The checker's two sections now live in `artefact_table()` and `version_table()` behind `main()`, so the test
+  can import it without running the audit. Output is unchanged except for the new tier column and explainer
+  column.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Technical documentation: document the tier marker and the explainer artefact.
+
 ## [1.9.8] — 2026-10-22
 
 ### Added
