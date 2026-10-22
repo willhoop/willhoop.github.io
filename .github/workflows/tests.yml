@@ -12,3 +12,5 @@ jobs:
           node-version: '20'
       - name: Run test suite
         run: node tests/test-projects.js
+      - name: Run publish gate tests
+        run: node tests/test-publish-gate.js

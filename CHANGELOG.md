@@ -10,6 +10,27 @@ silently rewritten; what changed and why is stated.
 
 ---
 
+## [1.9.8] — 2026-10-22
+
+### Added
+- **`build/publish-gate.js`**, moved here from the loose `Projects/publish-gate.js`. It decides whether a repo is
+  safe to auto-publish: inline page scripts must parse and every `tests/test-*.js` must pass. *Why:* it sat at the
+  top of `Projects/` with no home and no tests; portfolio already holds the cross-project tools.
+- **`tests/test-publish-gate.js`**, 10 cases with hand-set expected exit codes, run in CI. *Why:* untested-in-CI
+  code is untested.
+
+### Notes
+- Nothing calls the gate today: its caller, `auto-publish.bat`, no longer exists. It is kept for any future
+  auto-publish job.
+
+### Record
+- **Measured.** No portfolio figure changed.
+- **Basis.** unchanged
+- **Supersedes.** Nothing.
+- **Owed to the next major.** Technical documentation: add a reference entry for `build/publish-gate.js`.
+
+---
+
 ## [1.9.7] — 2026-10-13
 
 ### Changed
